@@ -72,10 +72,4 @@ PR 제목은 다음 형식을 따릅니다: `[타입] 작업 내용 요약`
 
 ---
 
-## ✅ 참고
-
-- [Conventional Commits 공식 문서](https://www.conventionalcommits.org/)
-
----
-
 > 이 규칙은 팀원 간의 협업 효율성과 가독성을 높이기 위함입니다. 규칙을 잘 지켜주세요! 😊

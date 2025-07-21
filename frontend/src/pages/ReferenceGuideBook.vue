@@ -4,5 +4,5 @@ import Header from '../components/Header.vue'
 
 <template>
 
-  <h1>용어 해설집</h1>
+  <h1>참고 가이드북 페이지</h1>
 </template>

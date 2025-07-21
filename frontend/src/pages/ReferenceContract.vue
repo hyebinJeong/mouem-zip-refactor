@@ -4,5 +4,5 @@ import Header from '../components/Header.vue'
 
 <template>
 
-  <h1>계약 가이드 페이지</h1>
+  <h1>참고 계약서 페이지</h1>
 </template>

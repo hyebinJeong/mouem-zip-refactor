@@ -81,6 +81,9 @@ CREATE TABLE register_analysis_result (
                                           FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+ALTER TABLE register_analysis_result
+    ADD UNIQUE KEY unique_address (road_address, detail_address);
+
 CREATE TABLE property_address (
                                   road_address VARCHAR(255),
                                   detail_address VARCHAR(255),

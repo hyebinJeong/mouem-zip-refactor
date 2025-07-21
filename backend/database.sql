@@ -82,6 +82,7 @@ CREATE TABLE register_analysis_result (
 );
 
 ALTER TABLE register_analysis_result
+    ADD UNIQUE KEY unique_combination (register_id, register_score, jeonse_ratio_score),
     ADD UNIQUE KEY unique_address (road_address, detail_address);
 
 CREATE TABLE property_address (
@@ -101,6 +102,9 @@ CREATE TABLE check_list (
                             FOREIGN KEY (user_id) REFERENCES users(user_id),
                             FOREIGN KEY (register_id) REFERENCES registry_record(register_id)
 );
+
+ALTER TABLE check_list
+    ADD UNIQUE (check_list_score);
 
 CREATE TABLE final_report (
                               report_id INT PRIMARY KEY AUTO_INCREMENT,

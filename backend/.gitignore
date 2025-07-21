@@ -45,4 +45,4 @@ bin/
 application.properties
 
 # Vite build output
-/backend/src/main/webapp/resources/
+src/main/webapp/resources/

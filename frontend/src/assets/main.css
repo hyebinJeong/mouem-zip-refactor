@@ -1,0 +1,15 @@
+/* 모든 요소가 부모의 전체 너비를 쓸 수 있도록 */
+html, body, #app {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* 어떤 컨테이너든 최대 너비 제한 없애기 */
+.container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 auto;
+    padding: 0;
+}
+

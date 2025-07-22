@@ -1,6 +1,8 @@
 package org.scoula.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.scoula.domain.dto.MortgageInfo;
+import org.scoula.service.MortgageInfoService;
 import org.scoula.service.TabulaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.List;
 public class TabulaController {
 
     private final TabulaService tabulaService;
+    private final MortgageInfoService mortgageInfoService;
 
     @PostMapping
     @ResponseBody
@@ -25,6 +28,19 @@ public class TabulaController {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
             return ResponseEntity.ok(table); // JSON 형태로 표 데이터 반환
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/mortgages")
+    @ResponseBody
+    public ResponseEntity<List<MortgageInfo>> extractMortgages(@RequestParam("file") MultipartFile file) {
+        try {
+            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
+            List<MortgageInfo> mortgageInfos = mortgageInfoService.extractMortgageInfos(table);
+            return ResponseEntity.ok(mortgageInfos);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

@@ -1,6 +1,7 @@
 package org.scoula.service;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.scoula.domain.dto.MortgageInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import technology.tabula.*;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 public class TabulaService {
+    // 등기부등본 내 표 추출 메서드
     public List<List<String>> extractTable(InputStream inputStream) throws Exception {
         List<List<String>> extractedData = new ArrayList<>();
 

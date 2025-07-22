@@ -2,24 +2,25 @@ package org.scoula.service;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import technology.tabula.*;
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class TabulaService {
-    public List<List<String>> extractTableFromPdf(File pdfFile) throws Exception {
-        List<List<String>> result = new ArrayList<>();
+    public List<List<String>> extractTable(InputStream inputStream) throws Exception {
+        List<List<String>> extractedData = new ArrayList<>();
 
-        try (FileInputStream fis = new FileInputStream(pdfFile);
-             PDDocument document = PDDocument.load(fis)) {
-
+        try (PDDocument document = PDDocument.load(inputStream)) {
+            ObjectExtractor extractor = new ObjectExtractor(document);
             SpreadsheetExtractionAlgorithm sea = new SpreadsheetExtractionAlgorithm();
-            PageIterator pi = new ObjectExtractor(document).extract();
+            PageIterator pi = extractor.extract();
 
             while (pi.hasNext()) {
                 Page page = pi.next();
@@ -29,16 +30,16 @@ public class TabulaService {
                     List<List<RectangularTextContainer>> rows = table.getRows();
 
                     for (List<RectangularTextContainer> cells : rows) {
-                        List<String> row = new ArrayList<>();
+                        List<String> rowData = new ArrayList<>();
                         for (RectangularTextContainer cell : cells) {
-                            row.add(cell.getText().replace("\r", " "));
+                            rowData.add(cell.getText().replace("\r", " ").trim());
                         }
-                        result.add(row);
+                        extractedData.add(rowData);
                     }
                 }
             }
         }
 
-        return result;
+        return extractedData;
     }
 }

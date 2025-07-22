@@ -1,43 +1,33 @@
 package org.scoula.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.scoula.service.TabulaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/pdf")
+@Controller
+@RequiredArgsConstructor
+@RequestMapping("/safety-check")
 public class TabulaController {
 
-    @Autowired
-    private TabulaService tabulaService;
+    private final TabulaService tabulaService;
 
-    @PostMapping("/extract-table")
-    public ResponseEntity<List<List<String>>> extractTable(@RequestParam("file") MultipartFile file) {
+    @PostMapping
+    @ResponseBody
+    public ResponseEntity<List<List<String>>> extractTableFromPdf(@RequestParam("file") MultipartFile file) {
         try {
-            // 임시파일로 변환
-            File tempFile = File.createTempFile("upload-", ".pdf");
-            file.transferTo(tempFile);
-
-            List<List<String>> tableData = tabulaService.extractTableFromPdf(tempFile);
-
-            // 임시파일 삭제
-            tempFile.delete();
-
-            return ResponseEntity.ok(tableData);
-
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(null);
+            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
+            return ResponseEntity.ok(table); // JSON 형태로 표 데이터 반환
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.scoula.domain.dto;
+package org.scoula.register.domain.dto;
 
 public class MortgageInfo {
     private String rank;

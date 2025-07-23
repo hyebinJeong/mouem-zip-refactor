@@ -1,17 +1,14 @@
-package org.scoula.controller;
+package org.scoula.register.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.scoula.domain.dto.MortgageInfo;
-import org.scoula.service.MortgageInfoService;
-import org.scoula.service.TabulaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.scoula.register.domain.dto.MortgageInfo;
+import org.scoula.register.service.MortgageInfoService;
+import org.scoula.register.service.TabulaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 @Controller

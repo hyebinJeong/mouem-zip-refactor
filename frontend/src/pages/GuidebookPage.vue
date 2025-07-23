@@ -92,13 +92,14 @@ const onContractDayItems = [
 </template>
 
 <style scoped>
-/* .GuidebookPage {
-} */
+.GuidebookPage {
+  overflow: hidden;
+}
 
 .guidebook-box {
   width: 95%;
   max-width: 900px;
-  height: 90vh;
+  height: calc(100dvh - 130px);
 }
 
 .background-main {

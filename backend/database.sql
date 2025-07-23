@@ -94,7 +94,7 @@ CREATE TABLE property_address (
 );
 
 CREATE TABLE check_list (
-                            register_id INT PRIMARY KEY AUTO_INCREMENT,
+                            register_id INT PRIMARY KEY,
                             user_id INT,
                             check_list_number INT,
                             check_list_score INT,

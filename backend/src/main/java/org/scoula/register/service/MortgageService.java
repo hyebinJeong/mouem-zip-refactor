@@ -1,17 +1,17 @@
 package org.scoula.register.service;
 
-import org.scoula.register.domain.dto.MortgageInfo;
+import org.scoula.register.domain.dto.MortgageDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class MortgageInfoService {
+public class MortgageService {
 
     // 등기 데이터 중 근저당권 정보만 추출
-    public List<MortgageInfo> extractMortgageInfos(List<List<String>> tableData) {
-        List<MortgageInfo> mortgageInfos = new ArrayList<>();
+    public List<MortgageDTO> extractMortgageInfos(List<List<String>> tableData) {
+        List<MortgageDTO> mortgageDTOS = new ArrayList<>();
         List<String> canceledRanks = new ArrayList<>();
 
         // 말소된 등기 찾기
@@ -48,21 +48,21 @@ public class MortgageInfoService {
                 String maxClaimAmount = extractNumberOnly(maxClaimAmountRaw);
                 String mortgageHolder = extractAfterKeyword(etc, "근저당권자");
 
-                MortgageInfo info = new MortgageInfo();
+                MortgageDTO info = new MortgageDTO();
                 info.setRank(rank);
                 info.setRegistrationPurpose(registrationPurpose);
                 info.setRegistrationCause(registrationCause);
                 info.setMaxClaimAmount(maxClaimAmount);
                 info.setMortgageHolder(mortgageHolder);
 
-                mortgageInfos.add(info);
+                mortgageDTOS.add(info);
 //                System.out.println("현재 등기 순위: '" + rank + "'");
 //                System.out.println("말소 목록: " + canceledRanks);
 //                System.out.println("필터링 통과 여부: " + !canceledRanks.contains(rank));
             }
         }
 
-        return mortgageInfos;
+        return mortgageDTOS;
     }
 
     private String normalizeText(String text) {

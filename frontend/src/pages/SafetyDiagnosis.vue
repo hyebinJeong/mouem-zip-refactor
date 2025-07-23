@@ -139,7 +139,7 @@ async function uploadFile() {
           <td class="border px-2 py-1">{{ item.rank }}</td>
           <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
           <td class="border px-2 py-1">{{ item.registrationCause }}</td>
-          <td class="border px-2 py-1">{{ item.seizureHolder }}</td>
+          <td class="border px-2 py-1">{{ item.rightHolder }}</td>
         </tr>
       </tbody>
     </table>

@@ -49,13 +49,13 @@ public class SeizureServiceImpl implements SeizureService {
                 String registrationCause = trimAfterParenthesis(row.get(3));  // 등기 원인
                 String etc = row.get(4);                // 권리자 및 기타사항
                 
-                String seizureHolder = extractAfterKeyword(etc, "권리자");
+                String rightHolder = extractAfterKeyword(etc, "권리자");
 
                 SeizureDTO info = new SeizureDTO();
                 info.setRank(rank);
                 info.setRegistrationPurpose(registrationPurpose);
                 info.setRegistrationCause(registrationCause);
-                info.setSeizureHolder(seizureHolder);
+                info.setRightHolder(rightHolder);
 
                 seizures.add(info);
 //                System.out.println("현재 등기 순위: '" + rank + "'");

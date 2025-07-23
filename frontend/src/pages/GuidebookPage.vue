@@ -1,5 +1,12 @@
 <script setup>
 import GuidebookSection from '@/components/GuidebookSection.vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const goToHome = () => {
+  router.push('/');
+};
 
 // 계약 전 항목
 const beforeContractItems = [
@@ -10,11 +17,11 @@ const beforeContractItems = [
   },
   {
     main: '무허가 또는 불법 건축물인지 꼭 확인해보세요.',
-    note: '세움터(cloud.eais.go.kr)를 통해 확인이 가능해요.',
+    note: '<a href="https://www.eais.go.kr" target="_blank" rel="noopener noreferrer" style="color: #007c06;">세움터</a>를 통해 확인이 가능해요.',
   },
   {
     main: '임대인의 사기 피해 이력이 있는지 확인해보세요.',
-    note: '더치트(thecheat.co.kr)사기 피해 공유 사이트에 임대인 이름, 전화번호, 계좌번호로 검색해보면 사기 피해 이력 확인이 가능해요.',
+    note: '<a href="https://www.thecheat.co.kr" target="_blank" rel="noopener noreferrer" style="color: #007c06;">더치트</a> 사기 피해 공유 사이트에 임대인 이름, 전화번호, 계좌번호로 검색해보면 사기 피해 이력 확인이 가능해요.',
   },
   {
     main: '보증보험 가입이 가능한 매물인지 미리 확인해보세요.',
@@ -36,7 +43,7 @@ const beforeContractItems = [
 const onContractDayItems = [
   {
     main: '임대인 본인 신분증을 직접 확인하세요.',
-    note: '대리인과 계약할 경우에는 위임장, 인감증명서, 인감도장, 그리고 임대인과의 전화 인증이 모두 필요해요.',
+    note: '만약 대리인과 계약할 경우에는 위임장, 인감증명서, 인감도장, 그리고 임대인과의 전화 인증이 모두 필요해요.',
   },
   {
     main: '계좌 송금 시 꼭 소유자 이름을 확인하세요.',
@@ -56,13 +63,31 @@ const onContractDayItems = [
 </script>
 
 <template>
-  <div class="GuidebookPage container py-5">
-    <h1 class="fw-bold mb-4">
-      계약서에 안 나오는 부분까지, 안전하게 확인해보세요.
-    </h1>
-
-    <GuidebookSection title="계약 전" :items="beforeContractItems" />
-    <GuidebookSection title="계약 당일" :items="onContractDayItems" />
+  <div
+    class="GuidebookPage d-flex justify-content-center align-items-center vh-100 bg-light"
+  >
+    <div
+      class="guidebook-box bg-white rounded-4 shadow-sm p-4 d-flex flex-column"
+    >
+      <h1 class="fs-4 fw-bold text-center mb-3 my-2">
+        계약서에 안 나오는 부분까지,
+        <!-- 모바일에서만 줄 바꿈 -->
+        <br class="d-block d-md-none" />
+        안전하게 확인해보세요.
+      </h1>
+      <div class="guidebook-content flex-grow-1 overflow-auto pe-2 py-4">
+        <GuidebookSection title="계약 전" :items="beforeContractItems" />
+        <GuidebookSection title="계약 당일" :items="onContractDayItems" />
+      </div>
+      <div class="guidebook-btn text-center mt-3">
+        <button
+          class="btn btn-primary px-4 py-2 rounded-pill background-main"
+          @click="goToHome"
+        >
+          확인완료
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -70,8 +95,26 @@ const onContractDayItems = [
 /* .GuidebookPage {
 } */
 
+.guidebook-box {
+  width: 95%;
+  max-width: 900px;
+  height: 90vh;
+}
+
 .background-main {
   background: #1a80e5;
   color: #fff;
+}
+
+.text-green {
+  color: #007c06;
+}
+
+@media (max-width: 576px) {
+  .guidebook-box {
+    width: 100%;
+    height: 95vh;
+    border-radius: 0;
+  }
 }
 </style>

@@ -2,7 +2,9 @@ package org.scoula.register.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.scoula.register.domain.dto.MortgageDTO;
-import org.scoula.register.service.MortgageService;
+import org.scoula.register.domain.dto.SeizureDTO;
+import org.scoula.register.service.MortgageServiceImpl;
+import org.scoula.register.service.SeizureServiceImpl;
 import org.scoula.register.service.TabulaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,7 +19,8 @@ import java.util.List;
 public class TabulaController {
 
     private final TabulaService tabulaService;
-    private final MortgageService mortgageService;
+    private final MortgageServiceImpl mortgageServiceImpl;
+    private final SeizureServiceImpl seizureServiceImpl;
 
     @PostMapping
     @ResponseBody
@@ -36,8 +39,21 @@ public class TabulaController {
     public ResponseEntity<List<MortgageDTO>> extractMortgages(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<MortgageDTO> mortgageDTOS = mortgageService.extractMortgageInfos(table);
-            return ResponseEntity.ok(mortgageDTOS);
+            List<MortgageDTO> mortgages = mortgageServiceImpl.extractMortgageInfos(table);
+            return ResponseEntity.ok(mortgages);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/seizures")
+    @ResponseBody
+    public ResponseEntity<List<SeizureDTO>> extractSeizures(@RequestParam("file") MultipartFile file) {
+        try {
+            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
+            List<SeizureDTO> seizures = seizureServiceImpl.extractSeizureInfos(table);
+            return ResponseEntity.ok(seizures);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

@@ -11,5 +11,5 @@ public class SeizureDTO {
     private String rank;
     private String registrationPurpose;
     private String registrationCause;
-    private String rightHolder;
+    private String seizureHolder;
 }

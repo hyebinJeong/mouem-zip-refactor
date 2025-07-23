@@ -81,7 +81,7 @@ const onContractDayItems = [
       </div>
       <div class="guidebook-btn text-center mt-3">
         <button
-          class="btn btn-primary px-4 py-2 rounded-pill background-main"
+          class="btn btn-primary px-4 py-2 rounded-3 background-main"
           @click="goToHome"
         >
           확인완료
@@ -94,6 +94,7 @@ const onContractDayItems = [
 <style scoped>
 .GuidebookPage {
   overflow: hidden;
+  height: calc(100dvh - 130px);
 }
 
 .guidebook-box {

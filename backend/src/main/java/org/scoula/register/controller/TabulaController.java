@@ -21,6 +21,7 @@ public class TabulaController {
     private final ProvisionalSeizureServiceImpl provisionalSeizureServiceImpl;
     private final AuctionServiceImpl auctionServiceImpl;
     private final ProvisionalRegistrationServiceImpl provisionalRegistrationServiceImpl;
+    private final InjunctionServiceImpl injunctionServiceImpl;
 
     @PostMapping
     @ResponseBody
@@ -93,6 +94,19 @@ public class TabulaController {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
             List<ProvisionalRegistrationDTO> provisionalRegistration = provisionalRegistrationServiceImpl.extractProvisionalRegistrationInfos(table);
             return ResponseEntity.ok(provisionalRegistration);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/injunction")
+    @ResponseBody
+    public ResponseEntity<List<InjunctionDTO>> extractInjunctions(@RequestParam("file") MultipartFile file) {
+        try {
+            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
+            List<InjunctionDTO> injunction = injunctionServiceImpl.extractInjunctions(table);
+            return ResponseEntity.ok(injunction);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

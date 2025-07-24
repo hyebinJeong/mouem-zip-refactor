@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Log4j2
 @Service
@@ -25,11 +27,9 @@ public class InjunctionServiceImpl implements InjunctionService {
             String registrationPurpose = normalizeText(row.get(1));
 
             if (registrationPurpose != null && registrationPurpose.contains("가처분") && registrationPurpose.contains("말소")) {
-                System.out.println("읽어온 문장: " + registrationPurpose);
-                String canceledRank = extractCanceledRank(registrationPurpose).trim();  // 말소된 번호
-                if (canceledRank != null) {
-                    canceledRanks.add(canceledRank);
-                }
+//                System.out.println("읽어온 문장: " + registrationPurpose);
+                List<String> canceled = extractCanceledRanks(registrationPurpose);
+                canceledRanks.addAll(canceled);
             }
         }
 
@@ -38,7 +38,7 @@ public class InjunctionServiceImpl implements InjunctionService {
             if (row.size() < 5) continue;
 
             String rank = row.get(0).trim();    // 순위번호
-            String registrationPurpose = row.get(1);    // 등기목적
+            String registrationPurpose = normalizeText(row.get(1));    // 등기목적
 
             if (registrationPurpose != null &&
                     registrationPurpose.contains("가처분") &&
@@ -48,7 +48,7 @@ public class InjunctionServiceImpl implements InjunctionService {
                 String registrationCause = trimAfterParenthesis(row.get(3));  // 등기 원인
                 String etc = row.get(4);                // 권리자 및 기타사항
 
-                String creditor = extractCreditor(etc);
+                String creditor = extractCreditorOrRightHolder(etc);
 
                 InjunctionDTO info = new InjunctionDTO();
                 info.setRank(rank);
@@ -111,6 +111,20 @@ public class InjunctionServiceImpl implements InjunctionService {
         return result;
     }
 
+    private List<String> extractCanceledRanks(String registrationPurpose) {
+        List<String> ranks = new ArrayList<>();
+
+        // "5-1번", "5-2번", "7번" 등 패턴 찾기
+        Pattern pattern = Pattern.compile("(\\d+(?:-\\d+)?)[ ]?번");
+        Matcher matcher = pattern.matcher(registrationPurpose);
+
+        while (matcher.find()) {
+            ranks.add(matcher.group(1).trim()); // "5-1", "5-2" 등
+        }
+
+        return ranks;
+    }
+
     // 괄호 앞 자르기
     private String trimAfterParenthesis(String text) {
         if (text == null) return null;
@@ -131,42 +145,38 @@ public class InjunctionServiceImpl implements InjunctionService {
         return text.substring(0, idx).trim();
     }
 
-    // 텍스트에서 특정 키워드 뒤에 오는 정보를 추출
-    private String extractAfterKeyword(String text, String keyword) {
-        if (text == null) return null;
-
-        int idx = text.indexOf(keyword);
-        if (idx == -1) return null;
-
-        int start = idx + keyword.length();
-        String after = text.substring(start).trim();
-
-        // 공백, 쉼표, 줄바꿈 등을 기준으로 끊기
-        int end = after.indexOf(" ");
-        if (end == -1) end = after.length();
-
-        return after.substring(0, end);
-    }
-
-    private String extractCreditor(String text) {
-        if (text == null || !text.contains("채권자")) return null;
-
-        String after = text.substring(text.indexOf("채권자") + 4).trim();
-
-        // 주민/사업자번호 패턴 (ex. 403004-1345223 or 200111-0503114)
-        String[] splitById = after.split("\\d{6}-[\\d*]{7}");
-        if (splitById.length > 0) {
-            return splitById[0].trim();
+    private String extractCreditorOrRightHolder(String text) {
+        if (text == null || !(text.contains("채권자") || text.contains("권리자"))) {
+            return null;
         }
 
-        // 주소 시작 패턴이 나오는 경우로 자를 수도 있음 (선택)
-        String[] addressTriggers = {"시", "도", "구", "동", "로", "길"};
-        for (String trigger : addressTriggers) {
-            int idx = after.indexOf(trigger);
-            if (idx != -1 && idx > 0) {
-                String part = after.substring(0, idx + 1); // 시까지 포함
-                if (part.length() < 30) return part.trim(); // 주소 말고 이름일 경우만
-            }
+        // 채권자/권리자 중 먼저 등장하는 쪽을 찾기
+        int creditorIdx = text.indexOf("채권자");
+        int holderIdx = text.indexOf("권리자");
+
+        int targetIdx;
+        String keyword;
+        if (creditorIdx != -1 && (holderIdx == -1 || creditorIdx < holderIdx)) {
+            targetIdx = creditorIdx;
+            keyword = "채권자";
+        } else {
+            targetIdx = holderIdx;
+            keyword = "권리자";
+        }
+
+        String after = text.substring(targetIdx + keyword.length()).trim();
+
+        // 사업자번호 또는 주민번호 기준으로 자르기 (이게 이름 뒤에 바로 나옴)
+        Pattern pattern = Pattern.compile("^(.*?)\\d{3}-\\d{2}-\\d{5}");
+        Matcher matcher = pattern.matcher(after);
+        if (matcher.find()) {
+            return matcher.group(1).trim(); // 이름 부분만 반환
+        }
+
+        // 위 패턴이 없을 경우: 띄어쓰기 기준 첫 단어만 (예외 처리)
+        String[] tokens = after.split("\\s+");
+        if (tokens.length > 0) {
+            return tokens[0].trim();
         }
 
         return after;

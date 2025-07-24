@@ -2,7 +2,7 @@ package org.scoula.register.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.scoula.register.domain.dto.MortgageDTO;
+import org.scoula.register.domain.dto.InjunctionDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,22 +11,21 @@ import java.util.List;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class MortgageServiceImpl implements MortgageService {
-
-    // 등기 데이터 중 근저당권 정보만 추출
+public class InjunctionServiceImpl implements InjunctionService {
     @Override
-    public List<MortgageDTO> extractMortgageInfos(List<List<String>> tableData) {
-        List<MortgageDTO> mortgages = new ArrayList<>();
+    public List<InjunctionDTO> extractInjunctions(List<List<String>> tableData) {
+        List<InjunctionDTO> injunctions = new ArrayList<>();
         List<String> canceledRanks = new ArrayList<>();
         List<List<String>> mergedTable = mergeRowsWithCanceled(tableData);
+
         // 말소된 등기 찾기
         for (List<String> row : mergedTable) {
             if (row.size() < 2) continue;
 
             String registrationPurpose = normalizeText(row.get(1));
 
-            if (registrationPurpose != null && registrationPurpose.contains("근저당권") && registrationPurpose.contains("말소")) {
-//                System.out.println("읽어온 문장: " + registrationPurpose);
+            if (registrationPurpose != null && registrationPurpose.contains("가처분") && registrationPurpose.contains("말소")) {
+                System.out.println("읽어온 문장: " + registrationPurpose);
                 String canceledRank = extractCanceledRank(registrationPurpose).trim();  // 말소된 번호
                 if (canceledRank != null) {
                     canceledRanks.add(canceledRank);
@@ -42,32 +41,31 @@ public class MortgageServiceImpl implements MortgageService {
             String registrationPurpose = row.get(1);    // 등기목적
 
             if (registrationPurpose != null &&
-                    registrationPurpose.contains("근저당권") &&
+                    registrationPurpose.contains("가처분") &&
                     !registrationPurpose.contains("말소") &&
                     !canceledRanks.contains(rank)) {
 
-                String registrationCause = row.get(3);  // 등기 원인
+                String registrationCause = trimAfterParenthesis(row.get(3));  // 등기 원인
                 String etc = row.get(4);                // 권리자 및 기타사항
 
-                String maxClaimAmountRaw = extractAfterKeyword(etc, "채권최고액");
-                String maxClaimAmount = extractNumberOnly(maxClaimAmountRaw);
-                String mortgageHolder = extractAfterKeyword(etc, "근저당권자");
+                String creditor = extractCreditor(etc);
 
-                MortgageDTO info = new MortgageDTO();
+                InjunctionDTO info = new InjunctionDTO();
                 info.setRank(rank);
                 info.setRegistrationPurpose(registrationPurpose);
                 info.setRegistrationCause(registrationCause);
-                info.setMaxClaimAmount(maxClaimAmount);
-                info.setMortgageHolder(mortgageHolder);
+                info.setCreditor(creditor);
 
-                mortgages.add(info);
+                injunctions.add(info);
+                System.out.println(info);
 //                System.out.println("현재 등기 순위: '" + rank + "'");
 //                System.out.println("말소 목록: " + canceledRanks);
 //                System.out.println("필터링 통과 여부: " + !canceledRanks.contains(rank));
+//                System.out.println("청구금액: " + maxClaimAmount + " 채권자: " + creditor);
             }
         }
 
-        return mortgages;
+        return injunctions;
     }
 
     // 다음 장으로 넘어간 셀 정보 합치기
@@ -113,6 +111,13 @@ public class MortgageServiceImpl implements MortgageService {
         return result;
     }
 
+    // 괄호 앞 자르기
+    private String trimAfterParenthesis(String text) {
+        if (text == null) return null;
+        int idx = text.indexOf('(');
+        return (idx != -1) ? text.substring(0, idx).trim() : text.trim();
+    }
+
     private String normalizeText(String text) {
         if (text == null) return null;
         return text.replaceAll("\\s+", ""); // 모든 공백 제거
@@ -142,14 +147,28 @@ public class MortgageServiceImpl implements MortgageService {
 
         return after.substring(0, end);
     }
-    
-    // 금액 부분 숫자만 남김
-    private String extractNumberOnly(String text) {
-        if (text == null) return null;
-        // 숫자와 쉼표만 남기고 모두 제거
-        String cleaned = text.replaceAll("[^0-9,]", "");
-        // 쉼표 제거
-        cleaned = cleaned.replaceAll(",", "");
-        return cleaned;
+
+    private String extractCreditor(String text) {
+        if (text == null || !text.contains("채권자")) return null;
+
+        String after = text.substring(text.indexOf("채권자") + 4).trim();
+
+        // 주민/사업자번호 패턴 (ex. 403004-1345223 or 200111-0503114)
+        String[] splitById = after.split("\\d{6}-[\\d*]{7}");
+        if (splitById.length > 0) {
+            return splitById[0].trim();
+        }
+
+        // 주소 시작 패턴이 나오는 경우로 자를 수도 있음 (선택)
+        String[] addressTriggers = {"시", "도", "구", "동", "로", "길"};
+        for (String trigger : addressTriggers) {
+            int idx = after.indexOf(trigger);
+            if (idx != -1 && idx > 0) {
+                String part = after.substring(0, idx + 1); // 시까지 포함
+                if (part.length() < 30) return part.trim(); // 주소 말고 이름일 경우만
+            }
+        }
+
+        return after;
     }
 }

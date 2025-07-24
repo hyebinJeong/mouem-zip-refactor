@@ -23,6 +23,7 @@ public class TabulaController {
     private final ProvisionalRegistrationServiceImpl provisionalRegistrationServiceImpl;
     private final InjunctionServiceImpl injunctionServiceImpl;
     private final JeonseRightServiceImpl jeonseRightServiceImpl;
+    private final TrustServiceImpl trustServiceImpl;
 
     @PostMapping
     @ResponseBody
@@ -121,6 +122,19 @@ public class TabulaController {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
             List<JeonseRightDTO> jeonseRight = jeonseRightServiceImpl.extractJeonseRightInfos(table);
             return ResponseEntity.ok(jeonseRight);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/trust")
+    @ResponseBody
+    public ResponseEntity<List<TrustDTO>> extractTrusts(@RequestParam("file") MultipartFile file) {
+        try {
+            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
+            List<TrustDTO> trust = trustServiceImpl.extractTrustInfos(table);
+            return ResponseEntity.ok(trust);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

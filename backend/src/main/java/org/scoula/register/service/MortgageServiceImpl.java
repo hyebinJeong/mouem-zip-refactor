@@ -60,12 +60,7 @@ public class MortgageServiceImpl implements MortgageService {
                 info.setMaxClaimAmount(maxClaimAmount);
                 info.setMortgageHolder(mortgageHolder);
 
-
-                boolean isCanceled = registrationPurpose.contains("말소");
-                info.setCanceled(isCanceled);
-
                 mortgages.add(info);
-                System.out.println(info);
 //                System.out.println("현재 등기 순위: '" + rank + "'");
 //                System.out.println("말소 목록: " + canceledRanks);
 //                System.out.println("필터링 통과 여부: " + !canceledRanks.contains(rank));

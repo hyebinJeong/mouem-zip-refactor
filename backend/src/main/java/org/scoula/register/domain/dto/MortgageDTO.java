@@ -13,5 +13,4 @@ public class MortgageDTO {
     private String registrationCause;
     private String maxClaimAmount;
     private String mortgageHolder;
-    private boolean isCanceled;
 }

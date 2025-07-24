@@ -1,17 +1,16 @@
 // router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
-
 import HomePage from '@/pages/HomePage.vue';
 import SafetyDiagnosis from '@/pages/SafetyDiagnosis.vue';
 import Preview from '@/pages/checklist/Preview.vue';
 import ReferenceContract from '@/pages/ReferenceContract.vue';
-import ReferenceGuidebook from '@/pages/ReferenceGuideBook.vue';
+import ReferenceGuidebook from '@/pages/ReferenceGuideBook.vue'; 
 import GlossaryBook from '@/pages/GlossaryBook.vue';
 import MyPage from '@/pages/MyPage.vue';
 import NonDiagnosis from '@/pages/checklist/ForNoneDiagnosis.vue';
 import CheckList from '@/pages/checklist/Checklist.vue';
 
-// 카테고리 및 용어 
+// 카테고리 및 용어 관련 추가
 import CategoryAll from '@/pages/category/CategoryAll.vue';
 import CategoryManager from '@/pages/category/CategoryManager.vue';
 import CategoryAdd from '@/pages/category/CategoryAdd.vue';

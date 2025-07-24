@@ -113,7 +113,7 @@ public class ProvisionalSeizureServiceImpl implements ProvisionalSeizureService 
         String after = text.substring(text.indexOf("채권자") + 4).trim();
 
         // 주민/사업자번호 패턴 (ex. 403004-1345223 or 200111-0503114)
-        String[] splitById = after.split("\\d{6}-\\d{7}");
+        String[] splitById = after.split("\\d{6}-[\\d*]{7}");
         if (splitById.length > 0) {
             return splitById[0].trim();
         }

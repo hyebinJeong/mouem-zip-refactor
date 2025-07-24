@@ -3,11 +3,11 @@ import HomePage from '@/pages/HomePage.vue';
 import SafetyDiagnosis from '@/pages/SafetyDiagnosis.vue';
 import Preview from '@/pages/checklist/Preview.vue';
 import ReferenceContract from '@/pages/ReferenceContract.vue';
-import ReferenceGuidebook from '@/pages/ReferenceGuideBook.vue';
 import GlossaryBook from '@/pages/GlossaryBook.vue';
+import GuidebookPage from '@/pages/GuidebookPage.vue';
 import MyPage from '@/pages/MyPage.vue';
-import NonDiagnosis from '@/pages/checklist/ForNoneDiagnosis.vue'
-import CheckList from '@/pages/checklist/Checklist.vue'
+import NonDiagnosis from '@/pages/checklist/ForNoneDiagnosis.vue';
+import CheckList from '@/pages/checklist/Checklist.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
@@ -21,12 +21,16 @@ const routes = [
   {
     path: '/reference-guidebook',
     name: 'reference-guidebook',
-    component: ReferenceGuidebook,
+    component: GuidebookPage,
   },
   { path: '/glossary', name: 'glossary', component: GlossaryBook },
   { path: '/my', name: 'my', component: MyPage },
-  { path: '/checklist/nondiagnosis', name: 'nondiagnosis', component:NonDiagnosis},
-  { path: '/checklist/checeklist', name: 'checklist', component:CheckList},
+  {
+    path: '/checklist/nondiagnosis',
+    name: 'nondiagnosis',
+    component: NonDiagnosis,
+  },
+  { path: '/checklist/checeklist', name: 'checklist', component: CheckList },
 ];
 
 const router = createRouter({

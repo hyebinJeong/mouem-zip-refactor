@@ -26,7 +26,7 @@ const routes = [
   { path: '/glossary', name: 'glossary', component: GlossaryBook },
   { path: '/my', name: 'my', component: MyPage },
   { path: '/checklist/nondiagnosis', name: 'nondiagnosis', component:NonDiagnosis},
-  { path: '/checklist/checeklist', name: 'checklist', component:CheckList},
+  { path: '/checklist/checklist', name: 'checklist', component:CheckList},
 ];
 
 const router = createRouter({

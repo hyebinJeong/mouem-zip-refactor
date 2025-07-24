@@ -115,7 +115,7 @@ function goNext() {
   align-items: center;
   gap: 16px;
   width: 52%;
-  margin-bottom: 60px;
+  margin-bottom: 30px;
 }
 
 .buddy-img {

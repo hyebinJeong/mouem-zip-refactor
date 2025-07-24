@@ -1,13 +1,11 @@
 package org.scoula.register.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.scoula.register.domain.dto.AuctionDTO;
 import org.scoula.register.domain.dto.MortgageDTO;
 import org.scoula.register.domain.dto.ProvisionalSeizureDTO;
 import org.scoula.register.domain.dto.SeizureDTO;
-import org.scoula.register.service.MortgageServiceImpl;
-import org.scoula.register.service.ProvisionalSeizureServiceImpl;
-import org.scoula.register.service.SeizureServiceImpl;
-import org.scoula.register.service.TabulaService;
+import org.scoula.register.service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +22,7 @@ public class TabulaController {
     private final MortgageServiceImpl mortgageServiceImpl;
     private final SeizureServiceImpl seizureServiceImpl;
     private final ProvisionalSeizureServiceImpl provisionalSeizureServiceImpl;
+    private final AuctionServiceImpl auctionServiceImpl;
 
     @PostMapping
     @ResponseBody
@@ -70,6 +69,19 @@ public class TabulaController {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
             List<ProvisionalSeizureDTO> provisionalSeizure = provisionalSeizureServiceImpl.extractProvisionalSeizureInfos(table);
             return ResponseEntity.ok(provisionalSeizure);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/auction")
+    @ResponseBody
+    public ResponseEntity<List<AuctionDTO>> extractAuctions(@RequestParam("file") MultipartFile file) {
+        try {
+            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
+            List<AuctionDTO> auction = auctionServiceImpl.extractAuctionInfos(table);
+            return ResponseEntity.ok(auction);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

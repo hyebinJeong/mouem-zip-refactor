@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProvisionalRegistrationDTO {
     private String rank;
-    private String registrationPurposes;
+    private String registrationPurpose;
     private String registrationCause;
-    private String RegisteredRightHolder;
+    private String registeredRightHolder;
 }

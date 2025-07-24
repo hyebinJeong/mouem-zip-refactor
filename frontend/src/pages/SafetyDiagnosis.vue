@@ -7,6 +7,7 @@ const mortgageInfos = ref([]);
 const seizureInfos = ref([]);
 const provisionalSeizureInfos = ref([]);
 const auctionInfos = ref([]);
+const provisionalRegistrationInfos = ref([]);
 
 function handleFileChange(event) {
   selectedFile.value = event.target.files[0];
@@ -92,6 +93,22 @@ async function uploadFile() {
       auctionInfos.value = await auctionRes.json();
     } else {
       console.error('경매 정보 추출 실패');
+    }
+
+    // 가등기 정보 받아오기
+    const provisionalRegistrationRes = await fetch(
+      'http://localhost:8080/safety-check/registration',
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+
+    if (provisionalRegistrationRes.ok) {
+      provisionalRegistrationInfos.value =
+        await provisionalRegistrationRes.json();
+    } else {
+      console.error('가등기 정보 추출 실패');
     }
   } catch (error) {
     console.error('업로드 중 오류 발생:', error);
@@ -220,6 +237,29 @@ async function uploadFile() {
           <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
           <td class="border px-2 py-1">{{ item.registrationCause }}</td>
           <td class="border px-2 py-1">{{ item.creditor }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 가등기 정보 표 -->
+  <div v-if="provisionalRegistrationInfos.length">
+    <h3 class="text-lg font-semibold mt-6 mb-2">가등기 정보</h3>
+    <table class="border border-gray-300 w-full">
+      <thead>
+        <tr>
+          <th class="border px-2 py-1">순위</th>
+          <th class="border px-2 py-1">등기목적</th>
+          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">가등기권자</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in provisionalRegistrationInfos" :key="index">
+          <td class="border px-2 py-1">{{ item.rank }}</td>
+          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
+          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.registeredRightHolder }}</td>
         </tr>
       </tbody>
     </table>

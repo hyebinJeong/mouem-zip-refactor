@@ -1,10 +1,7 @@
 package org.scoula.register.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.scoula.register.domain.dto.AuctionDTO;
-import org.scoula.register.domain.dto.MortgageDTO;
-import org.scoula.register.domain.dto.ProvisionalSeizureDTO;
-import org.scoula.register.domain.dto.SeizureDTO;
+import org.scoula.register.domain.dto.*;
 import org.scoula.register.service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,6 +20,7 @@ public class TabulaController {
     private final SeizureServiceImpl seizureServiceImpl;
     private final ProvisionalSeizureServiceImpl provisionalSeizureServiceImpl;
     private final AuctionServiceImpl auctionServiceImpl;
+    private final ProvisionalRegistrationServiceImpl provisionalRegistrationServiceImpl;
 
     @PostMapping
     @ResponseBody
@@ -82,6 +80,19 @@ public class TabulaController {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
             List<AuctionDTO> auction = auctionServiceImpl.extractAuctionInfos(table);
             return ResponseEntity.ok(auction);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/registration")
+    @ResponseBody
+    public ResponseEntity<List<ProvisionalRegistrationDTO>> extractProvisionalRegistrations(@RequestParam("file") MultipartFile file) {
+        try {
+            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
+            List<ProvisionalRegistrationDTO> provisionalRegistration = provisionalRegistrationServiceImpl.extractProvisionalRegistrationInfos(table);
+            return ResponseEntity.ok(provisionalRegistration);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

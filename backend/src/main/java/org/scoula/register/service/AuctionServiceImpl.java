@@ -27,10 +27,10 @@ public class AuctionServiceImpl implements AuctionService {
             String registrationPurpose = RegisterUtils.normalizeText(row.get(1));
 
             if (registrationPurpose != null && registrationPurpose.contains("경매") && registrationPurpose.contains("말소")) {
-                System.out.println("읽어온 문장: " + registrationPurpose);
+//                System.out.println("읽어온 문장: " + registrationPurpose);
                 List<String> canceled = RegisterUtils.extractCanceledRanks(registrationPurpose);  // 말소된 번호
                 canceledRanks.addAll(canceled);
-                System.out.println("추출된 말소 순위: " + canceledRanks);
+//                System.out.println("추출된 말소 순위: " + canceledRanks);
             }
         }
 
@@ -55,7 +55,7 @@ public class AuctionServiceImpl implements AuctionService {
                 info.setCreditor(creditor);
 
                 auctions.add(info);
-                System.out.println(info);
+//                System.out.println(info);
             }
         }
 

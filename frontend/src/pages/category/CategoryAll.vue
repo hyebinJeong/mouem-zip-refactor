@@ -29,7 +29,9 @@
             <router-link
               to="/category"
               class="nav-link"
-              :class="{ active: isActive('/category') && !$route.path.includes('/term') }"
+              :class="{
+                active: isActive('/category') && !$route.path.includes('/term'),
+              }"
             >
               카테고리 관리
             </router-link>
@@ -55,10 +57,17 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute } from 'vue-router';
 
-const route = useRoute()
-const isActive = (path) => route.path.startsWith(path)
+const route = useRoute();
+
+const isActive = (path) => {
+  if (path === '/category') {
+    // 정확히 /category 일 때만 true
+    return route.path === '/category';
+  }
+  return route.path.startsWith(path);
+};
 </script>
 
 <style scoped>

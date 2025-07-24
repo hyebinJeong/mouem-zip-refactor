@@ -5,7 +5,7 @@ import HomePage from '@/pages/HomePage.vue';
 import SafetyDiagnosis from '@/pages/SafetyDiagnosis.vue';
 import Preview from '@/pages/checklist/Preview.vue';
 import ReferenceContract from '@/pages/ReferenceContract.vue';
-import ReferenceGuidebook from '@/pages/ReferenceGuideBook.vue'; // ✅ 이름 일치
+import ReferenceGuidebook from '@/pages/ReferenceGuideBook.vue';
 import GlossaryBook from '@/pages/GlossaryBook.vue';
 import MyPage from '@/pages/MyPage.vue';
 import NonDiagnosis from '@/pages/checklist/ForNoneDiagnosis.vue';
@@ -26,7 +26,7 @@ const routes = [
   { path: '/safety-check', name: 'safety-check', component: SafetyDiagnosis },
   { path: '/checklist', name: 'preview', component: Preview },
   { path: '/checklist/nondiagnosis', name: 'nondiagnosis', component: NonDiagnosis },
-  { path: '/checklist/checklist', name: 'checklist', component: CheckList }, // ✅ 오타 수정
+  { path: '/checklist/checklist', name: 'checklist', component: CheckList },
 
   { path: '/reference-contract', name: 'reference-contract', component: ReferenceContract },
   { path: '/reference-guidebook', name: 'reference-guidebook', component: ReferenceGuidebook },

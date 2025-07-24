@@ -17,7 +17,22 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public List<AuctionDTO> extractAuctionInfos(List<List<String>> tableData) {
         List<AuctionDTO> auctions = new ArrayList<>();
+        List<String> canceledRanks = new ArrayList<>();
         List<List<String>> mergedTable = RegisterUtils.mergeRowsWithCanceled(tableData);
+
+        // 말소된 등기 찾기
+        for (List<String> row : mergedTable) {
+            if (row.size() < 2) continue;
+
+            String registrationPurpose = RegisterUtils.normalizeText(row.get(1));
+
+            if (registrationPurpose != null && registrationPurpose.contains("경매") && registrationPurpose.contains("말소")) {
+                System.out.println("읽어온 문장: " + registrationPurpose);
+                List<String> canceled = RegisterUtils.extractCanceledRanks(registrationPurpose);  // 말소된 번호
+                canceledRanks.addAll(canceled);
+                System.out.println("추출된 말소 순위: " + canceledRanks);
+            }
+        }
 
         for (List<String> row : mergedTable) {
             if (row.size() < 5) continue;
@@ -26,7 +41,7 @@ public class AuctionServiceImpl implements AuctionService {
             String registrationPurpose = RegisterUtils.normalizeText(row.get(1));    // 등기목적
 
             if (registrationPurpose != null &&
-                    registrationPurpose.contains("경매")) {
+                    registrationPurpose.contains("경매") && !registrationPurpose.contains("말소") && !canceledRanks.contains(rank)) {
 
                 String registrationCause = RegisterUtils.trimAfterParenthesis(row.get(3));  // 등기 원인
                 String etc = row.get(4);                // 권리자 및 기타사항
@@ -40,6 +55,7 @@ public class AuctionServiceImpl implements AuctionService {
                 info.setCreditor(creditor);
 
                 auctions.add(info);
+                System.out.println(info);
             }
         }
 

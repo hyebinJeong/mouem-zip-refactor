@@ -1,14 +1,10 @@
-package org.scoula.service;
+package org.scoula.register.service;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.scoula.domain.dto.MortgageInfo;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import technology.tabula.*;
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;

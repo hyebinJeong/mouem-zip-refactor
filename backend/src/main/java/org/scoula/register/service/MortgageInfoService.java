@@ -1,6 +1,6 @@
-package org.scoula.service;
+package org.scoula.register.service;
 
-import org.scoula.domain.dto.MortgageInfo;
+import org.scoula.register.domain.dto.MortgageInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

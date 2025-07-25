@@ -6,7 +6,6 @@ import java.util.List;
 
 @Data
 public class RegisterAnalysisResponse {
-    private List<List<String>> tableData;
     private List<MortgageDTO> mortgageInfos;                                // 근저당권
     private List<SeizureDTO> seizureInfos;                                  // 압류
     private List<ProvisionalSeizureDTO> provisionalSeizureInfos;            // 가압류

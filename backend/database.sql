@@ -136,7 +136,7 @@ CREATE TABLE special_clause (
                                 special_clause_id INT PRIMARY KEY AUTO_INCREMENT,  -- 특약번호(pk)
                                 category VARCHAR(50) NOT NULL,                     -- 특약분류
                                 importance VARCHAR(10) NOT NULL,                   -- 중요도
-                                importance_color VARCHAR(7) NOT NULL,              -- 중요도 색상 코드
+                                importance_color VARCHAR(50) NOT NULL,              -- 중요도 색상 코드
                                 description TEXT NOT NULL                          -- 특약 설명
 );
 
@@ -158,7 +158,7 @@ CREATE TABLE category(
                          category_id INT PRIMARY KEY AUTO_INCREMENT,    -- 카테고리 번호(pk)
                          category_name VARCHAR(100) NOT NULL,           -- 카테고리명
                          description VARCHAR(255) NOT NULL,             -- 카테고리 설명
-                         category_color VARCHAR(7) NOT NULL             -- 카테고리 색상
+                         category_color VARCHAR(50) NOT NULL             -- 카테고리 색상
 );
 
 -- ============================================

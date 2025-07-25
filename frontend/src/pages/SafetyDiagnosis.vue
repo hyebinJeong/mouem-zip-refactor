@@ -9,6 +9,7 @@ const provisionalSeizureInfos = ref([]);
 const auctionInfos = ref([]);
 const provisionalRegistrationInfos = ref([]);
 const injunctionInfos = ref([]);
+const jeonseRightInfos = ref([]);
 
 function handleFileChange(event) {
   selectedFile.value = event.target.files[0];
@@ -112,7 +113,7 @@ async function uploadFile() {
       console.error('가등기 정보 추출 실패');
     }
 
-    // 가등기 정보 받아오기
+    // 가처분 정보 받아오기
     const injunctionRes = await fetch(
       'http://localhost:8080/safety-check/injunction',
       {
@@ -125,6 +126,21 @@ async function uploadFile() {
       injunctionInfos.value = await injunctionRes.json();
     } else {
       console.error('가처분 정보 추출 실패');
+    }
+
+    // 전세권설정 정보 받아오기
+    const jeonseRightRes = await fetch(
+      'http://localhost:8080/safety-check/jeonse-right',
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+
+    if (jeonseRightRes.ok) {
+      jeonseRightInfos.value = await jeonseRightRes.json();
+    } else {
+      console.error('전세권설정 정보 추출 실패');
     }
   } catch (error) {
     console.error('업로드 중 오류 발생:', error);
@@ -299,6 +315,31 @@ async function uploadFile() {
           <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
           <td class="border px-2 py-1">{{ item.registrationCause }}</td>
           <td class="border px-2 py-1">{{ item.creditor }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 전세권설정 정보 표 -->
+  <div v-if="jeonseRightInfos.length">
+    <h3 class="text-lg font-semibold mt-6 mb-2">전세권설정 정보</h3>
+    <table class="border border-gray-300 w-full">
+      <thead>
+        <tr>
+          <th class="border px-2 py-1">순위</th>
+          <th class="border px-2 py-1">등기목적</th>
+          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">전세금</th>
+          <th class="border px-2 py-1">전세권자</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in jeonseRightInfos" :key="index">
+          <td class="border px-2 py-1">{{ item.rank }}</td>
+          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
+          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.deposit }}</td>
+          <td class="border px-2 py-1">{{ item.mortgagor }}</td>
         </tr>
       </tbody>
     </table>

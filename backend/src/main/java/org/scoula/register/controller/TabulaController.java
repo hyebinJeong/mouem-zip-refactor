@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.scoula.register.domain.dto.*;
 import org.scoula.register.service.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/safety-check")
 public class TabulaController {
@@ -26,7 +25,6 @@ public class TabulaController {
     private final TrustServiceImpl trustServiceImpl;
 
     @PostMapping
-    @ResponseBody
     public ResponseEntity<List<List<String>>> extractTableFromPdf(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
@@ -38,7 +36,6 @@ public class TabulaController {
     }
 
     @PostMapping("/mortgages")
-    @ResponseBody
     public ResponseEntity<List<MortgageDTO>> extractMortgages(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
@@ -51,7 +48,6 @@ public class TabulaController {
     }
 
     @PostMapping("/seizures")
-    @ResponseBody
     public ResponseEntity<List<SeizureDTO>> extractSeizures(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
@@ -64,7 +60,6 @@ public class TabulaController {
     }
 
     @PostMapping("/provisional")
-    @ResponseBody
     public ResponseEntity<List<ProvisionalSeizureDTO>> extractProvisionalSeizures(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
@@ -77,7 +72,6 @@ public class TabulaController {
     }
 
     @PostMapping("/auction")
-    @ResponseBody
     public ResponseEntity<List<AuctionDTO>> extractAuctions(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
@@ -90,7 +84,6 @@ public class TabulaController {
     }
 
     @PostMapping("/registration")
-    @ResponseBody
     public ResponseEntity<List<ProvisionalRegistrationDTO>> extractProvisionalRegistrations(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
@@ -103,7 +96,6 @@ public class TabulaController {
     }
 
     @PostMapping("/injunction")
-    @ResponseBody
     public ResponseEntity<List<InjunctionDTO>> extractInjunctions(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
@@ -116,7 +108,6 @@ public class TabulaController {
     }
 
     @PostMapping("/jeonse-right")
-    @ResponseBody
     public ResponseEntity<List<JeonseRightDTO>> extractJeonseRights(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
@@ -129,7 +120,6 @@ public class TabulaController {
     }
 
     @PostMapping("/trust")
-    @ResponseBody
     public ResponseEntity<List<TrustDTO>> extractTrusts(@RequestParam("file") MultipartFile file) {
         try {
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());

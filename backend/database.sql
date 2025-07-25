@@ -1,30 +1,30 @@
 # 기존 테이블 삭제 밑에 주석 풀고 진행하시면 됩니다.
-# -- 외래 키 제약 해제
-# SET FOREIGN_KEY_CHECKS = 0;
+#  -- 외래 키 제약 해제
+#  SET FOREIGN_KEY_CHECKS = 0;
 #
-# -- DROP TABLE (역순으로 삭제)
-# DROP TABLE IF EXISTS seizures;
-# DROP TABLE IF EXISTS provisional_seizures;
-# DROP TABLE IF EXISTS auction;
-# DROP TABLE IF EXISTS provisional_registrations;
-# DROP TABLE IF EXISTS trust;
-# DROP TABLE IF EXISTS provisional_disposition;
-# DROP TABLE IF EXISTS jeonse_right;
-# DROP TABLE IF EXISTS mortgages;
-# DROP TABLE IF EXISTS contract;
-# DROP TABLE IF EXISTS register_pdf;
-# DROP TABLE IF EXISTS final_report;
-# DROP TABLE IF EXISTS check_list;
-# DROP TABLE IF EXISTS property_address;
-# DROP TABLE IF EXISTS register_analysis_result;
-# DROP TABLE IF EXISTS registry_record;
-# DROP TABLE IF EXISTS special_contracts;
-# DROP TABLE IF EXISTS term;
-# DROP TABLE IF EXISTS category;
-# DROP TABLE IF EXISTS users;
+#  -- DROP TABLE (역순으로 삭제)
+#  DROP TABLE IF EXISTS seizures;
+#  DROP TABLE IF EXISTS provisional_seizures;
+#  DROP TABLE IF EXISTS auction;
+#  DROP TABLE IF EXISTS provisional_registrations;
+#  DROP TABLE IF EXISTS trust;
+#  DROP TABLE IF EXISTS provisional_disposition;
+#  DROP TABLE IF EXISTS jeonse_right;
+#  DROP TABLE IF EXISTS mortgages;
+#  DROP TABLE IF EXISTS contract;
+#  DROP TABLE IF EXISTS register_pdf;
+#  DROP TABLE IF EXISTS final_report;
+#  DROP TABLE IF EXISTS check_list;
+#  DROP TABLE IF EXISTS property_address;
+#  DROP TABLE IF EXISTS register_analysis_result;
+#  DROP TABLE IF EXISTS registry_record;
+#  DROP TABLE IF EXISTS special_contracts;
+#  DROP TABLE IF EXISTS term;
+#  DROP TABLE IF EXISTS category;
+#  DROP TABLE IF EXISTS users;
 #
-# -- 외래 키 제약 복원
-# SET FOREIGN_KEY_CHECKS = 1;
+#  -- 외래 키 제약 복원
+#  SET FOREIGN_KEY_CHECKS = 1;
 
 -- 수정 후 테이블
 

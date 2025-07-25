@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.scoula.term.mapper.TermMapper">
+
+    <select id="findAll" parameterType="map" resultType="org.scoula.term.domain.dto.TermDTO">
+        SELECT t.term_id AS termId,
+        t.term_name AS termName,
+        t.term_define AS termDefine,
+        t.term_example AS termExample,
+        t.term_caution AS termCaution,
+        c.category_name AS categoryName,
+        c.category_color AS categoryColor
+        FROM term t
+        JOIN category c ON t.category_id = c.category_id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND t.term_name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="categoryId != null">
+                AND t.category_id = #{categoryId}
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" parameterType="int" resultType="org.scoula.term.domain.dto.TermDTO">
+        SELECT t.term_id AS termId,
+        t.term_name AS termName,
+        t.term_define AS termDefine,
+        t.term_example AS termExample,
+        t.term_caution AS termCaution,
+        c.category_name AS categoryName,
+        c.category_color AS categoryColor
+        FROM term t
+        JOIN category c ON t.category_id = c.category_id
+        WHERE t.term_id = #{termId}
+    </select>
+
+</mapper>

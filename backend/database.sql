@@ -57,10 +57,9 @@ CREATE TABLE registry_analysis (
                                    registry_id INT AUTO_INCREMENT PRIMARY KEY,
                                    user_id INT NOT NULL,
                                    address VARCHAR(255) NOT NULL,             -- 주소
-                                   risks_json TEXT NOT NULL,                  -- 위험 요소 전체를 JSON으로 저장
+                                   risks TEXT NOT NULL,                  -- 위험 요소 전체를 JSON으로 저장
                                    registry_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL, -- 등기부등본 등급
-                                   analysis_date DATE NOT NULL,               -- 분석일
-                                   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                   analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
                                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
@@ -86,7 +85,7 @@ CREATE TABLE jeonse_analysis (
 CREATE TABLE checklist (
                            registry_id INT PRIMARY KEY,
                            user_id INT NOT NULL,
-                           checked_json TEXT NOT NULL,               -- 체크 여부 전체 JSON으로 저장
+                           checked TEXT NOT NULL,               -- 체크 여부 전체 JSON으로 저장
                            checklist_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
                            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
                            FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE

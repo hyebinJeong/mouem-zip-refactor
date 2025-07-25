@@ -49,6 +49,19 @@ public class RegisterUtils {
         return result;
     }
 
+    public static String extractDate(String text) {
+        // 정규식 패턴: 4자리 숫자 + '년' + 1~2자리 숫자 + '월' + 1~2자리 숫자 + '일'
+        Pattern pattern = Pattern.compile("\\d{4}년\\d{1,2}월\\d{1,2}일");
+        Matcher matcher = pattern.matcher(text);
+
+        if (matcher.find()) {
+            String date = matcher.group();
+            return date;
+        } else {
+            return null;
+        }
+    }
+
     public static String extractCreditorOrRightHolder(String text) {
         if (text == null) {
             return null;

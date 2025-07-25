@@ -43,19 +43,18 @@ public class TrustServiceImpl implements TrustService {
 
             if (registrationPurpose != null &&
                     registrationPurpose.contains("신탁") &&
-                    !registrationPurpose.contains("말소") &&
-                    !canceledRanks.contains(rank)) {
+                    !registrationPurpose.contains("말소")) {
 
-                String registrationCause = RegisterUtils.trimAfterParenthesis(row.get(3));  // 등기 원인
+                String date = RegisterUtils.extractDate(RegisterUtils.normalizeText(row.get(2)));  // 접수일자
                 String etc = row.get(4);                // 권리자 및 기타사항
 
                 String trustee = RegisterUtils.extractCreditorOrRightHolder(etc);
 
                 TrustDTO info = new TrustDTO();
                 info.setRank(rank);
-                info.setRegistrationPurpose(registrationPurpose);
-                info.setRegistrationCause(registrationCause);
+                info.setDate(date);
                 info.setTrustee(trustee);
+                info.setCanceled(canceledRanks.contains(rank));
 
                 trusts.add(info);
             }

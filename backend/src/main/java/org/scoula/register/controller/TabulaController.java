@@ -24,17 +24,6 @@ public class TabulaController {
     private final JeonseRightServiceImpl jeonseRightServiceImpl;
     private final TrustServiceImpl trustServiceImpl;
 
-//    @PostMapping
-//    public ResponseEntity<List<List<String>>> extractTableFromPdf(@RequestParam("file") MultipartFile file) {
-//        try {
-//            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-//            return ResponseEntity.ok(table); // JSON 형태로 표 데이터 반환
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.internalServerError().build();
-//        }
-//    }
-
     @PostMapping
     public ResponseEntity<RegisterAnalysisResponse> analyzeRegistry(@RequestParam("file") MultipartFile file) {
         try {

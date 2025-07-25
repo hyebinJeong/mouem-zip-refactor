@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TrustDTO {
     private String rank;
-    private String registrationPurpose;
-    private String registrationCause;
+    private String date;
     private String trustee;
+    private boolean canceled;
 }

@@ -10,6 +10,7 @@ const auctionInfos = ref([]);
 const provisionalRegistrationInfos = ref([]);
 const injunctionInfos = ref([]);
 const jeonseRightInfos = ref([]);
+const trustInfos = ref([]);
 
 function handleFileChange(event) {
   selectedFile.value = event.target.files[0];
@@ -141,6 +142,18 @@ async function uploadFile() {
       jeonseRightInfos.value = await jeonseRightRes.json();
     } else {
       console.error('전세권설정 정보 추출 실패');
+    }
+
+    // 신탁등기 정보 받아오기
+    const trustRes = await fetch('http://localhost:8080/safety-check/trust', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (trustRes.ok) {
+      trustInfos.value = await trustRes.json();
+    } else {
+      console.error('신탁등기 정보 추출 실패');
     }
   } catch (error) {
     console.error('업로드 중 오류 발생:', error);
@@ -340,6 +353,29 @@ async function uploadFile() {
           <td class="border px-2 py-1">{{ item.registrationCause }}</td>
           <td class="border px-2 py-1">{{ item.deposit }}</td>
           <td class="border px-2 py-1">{{ item.mortgagor }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 신탁등기 정보 표 -->
+  <div v-if="trustInfos.length">
+    <h3 class="text-lg font-semibold mt-6 mb-2">신탁등기 정보</h3>
+    <table class="border border-gray-300 w-full">
+      <thead>
+        <tr>
+          <th class="border px-2 py-1">순위</th>
+          <th class="border px-2 py-1">등기목적</th>
+          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">수탁자</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in trustInfos" :key="index">
+          <td class="border px-2 py-1">{{ item.rank }}</td>
+          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
+          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.trustee }}</td>
         </tr>
       </tbody>
     </table>

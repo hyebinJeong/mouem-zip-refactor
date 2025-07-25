@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/pages/HomePage.vue';
 import SafetyDiagnosis from '@/pages/SafetyDiagnosis.vue';
 import Preview from '@/pages/checklist/Preview.vue';
-import ReferenceContract from '@/pages/ReferenceContract.vue';
+import ReferenceContract from '@/pages/referencecontracts/ReferenceContract.vue';
 import GlossaryBook from '@/pages/GlossaryBook.vue';
 import GuidebookPage from '@/pages/GuidebookPage.vue';
 import MyPage from '@/pages/MyPage.vue';
@@ -88,6 +88,28 @@ const routes = [
         props: true,
       },
     ],
+  },
+  {
+    path: '/referencecontracts',
+    children: [
+      {
+        path: '',
+        component: () =>
+          import('@/pages/referencecontracts/ReferenceContract.vue'),
+      },
+      {
+        path: '/referencecontracts/success',
+        name: 'ReferenceContractSuccess',
+        component: () =>
+          import('@/pages/referencecontracts/ReferenceContractSuccess.vue'),
+      },
+    ],
+  },
+  {
+    path: '/recommendation',
+    name: 'SpecialContractsRecommendation',
+    component: () =>
+      import('@/pages/special-contracts/SpecialContractsRecommendation.vue'),
   },
 ];
 

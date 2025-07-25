@@ -11,19 +11,9 @@ import org.springframework.web.servlet.view.JstlView;
 
 @EnableWebMvc
 @ComponentScan(basePackages = {
-        "org.scoula",
-        "org.scoula.controller",
-        "org.scoula.exception",
-        "org.scoula.term",
-        "org.scoula.category"
+        "org.scoula"
 })
 public class ServletConfig implements WebMvcConfigurer {
-
-    @Override
-    public void configureViewResolvers(ViewResolverRegistry registry) {
-        // JSP ViewResolver 등록
-        registry.jsp("/WEB-INF/views/", ".jsp");
-    }
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {

@@ -1,6 +1,6 @@
 package org.scoula.term.service;
 
-import org.scoula.term.domain.TermDTO;
+import org.scoula.term.domain.dto.TermDTO;
 import java.util.List;
 
 public interface TermService {

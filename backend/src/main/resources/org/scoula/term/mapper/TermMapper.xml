@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.scoula.term.mapper.TermMapper">
 
-    <select id="findAll" parameterType="map" resultType="org.scoula.term.domain.TermDTO">
+    <select id="findAll" parameterType="map" resultType="org.scoula.term.domain.dto.TermDTO">
         SELECT t.term_id AS termId,
         t.term_name AS termName,
         t.term_define AS termDefine,
@@ -24,7 +24,7 @@
         </where>
     </select>
 
-    <select id="findById" parameterType="int" resultType="org.scoula.term.domain.TermDTO">
+    <select id="findById" parameterType="int" resultType="org.scoula.term.domain.dto.TermDTO">
         SELECT t.term_id AS termId,
         t.term_name AS termName,
         t.term_define AS termDefine,

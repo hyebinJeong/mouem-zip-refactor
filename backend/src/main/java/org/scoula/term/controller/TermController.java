@@ -1,7 +1,7 @@
 package org.scoula.term.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.scoula.term.domain.TermDTO;
+import org.scoula.term.domain.dto.TermDTO;
 import org.scoula.term.service.TermService;
 import org.springframework.web.bind.annotation.*;
 

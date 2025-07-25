@@ -1,6 +1,6 @@
 package org.scoula.category.service;
 
-import org.scoula.category.domain.CategoryVO;
+import org.scoula.category.domain.dto.CategoryDTO;
 import org.scoula.category.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
 
     @Override
-    public List<CategoryVO> findAll() {
+    public List<CategoryDTO> findAll() {
         return categoryMapper.findAll();
     }
 }

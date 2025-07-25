@@ -1,7 +1,7 @@
 package org.scoula.category.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.scoula.category.domain.CategoryVO;
+import org.scoula.category.domain.dto.CategoryDTO;
 import org.scoula.category.service.CategoryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +16,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public List<CategoryVO> getCategories() {
+    public List<CategoryDTO> getCategories() {
         return categoryService.findAll();
     }
 }

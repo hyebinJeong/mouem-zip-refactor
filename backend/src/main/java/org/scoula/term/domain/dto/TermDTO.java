@@ -1,4 +1,4 @@
-package org.scoula.term.domain;
+package org.scoula.term.domain.dto;
 import lombok.Data;
 @Data
 public class TermDTO {

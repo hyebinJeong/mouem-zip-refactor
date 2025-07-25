@@ -9,6 +9,7 @@ import GuidebookPage from '@/pages/GuidebookPage.vue';
 import MyPage from '@/pages/MyPage.vue';
 import NonDiagnosis from '@/pages/checklist/ForNoneDiagnosis.vue';
 import CheckList from '@/pages/checklist/Checklist.vue';
+import FinalReportPage from '@/pages/FinalReportPage.vue';
 
 // 카테고리 및 용어 관련 추가
 import CategoryAll from '@/pages/category/CategoryAll.vue';
@@ -35,7 +36,7 @@ const routes = [
   },
   {
     path: '/reference-guidebook',
-    name: 'reference-guidebook',
+    name: 'guidebookPage',
     component: GuidebookPage,
   },
   { path: '/glossary', name: 'glossary', component: GlossaryBook },
@@ -110,6 +111,11 @@ const routes = [
     name: 'SpecialContractsRecommendation',
     component: () =>
       import('@/pages/special-contracts/SpecialContractsRecommendation.vue'),
+  },
+  {
+    path: '/final-report',
+    name: 'finalReportPage',
+    component: FinalReportPage,
   },
 ];
 

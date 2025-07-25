@@ -77,20 +77,18 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">채권최고액</th>
           <th class="border px-2 py-1">근저당권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in mortgageInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.maxClaimAmount }}</td>
           <td class="border px-2 py-1">{{ item.mortgageHolder }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -102,18 +100,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">권리자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in seizureInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.rightHolder }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -125,20 +121,18 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">청구금액</th>
           <th class="border px-2 py-1">채권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in provisionalSeizureInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.maxClaimAmount }}</td>
           <td class="border px-2 py-1">{{ item.creditor }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -150,18 +144,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">채권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in auctionInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.creditor }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -173,18 +165,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">가등기권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in provisionalRegistrationInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.registeredRightHolder }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -196,18 +186,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">채권자(또는 권리자)</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in injunctionInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.creditor }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -219,20 +207,18 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">전세금</th>
           <th class="border px-2 py-1">전세권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in jeonseRightInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.deposit }}</td>
           <td class="border px-2 py-1">{{ item.mortgagor }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -244,18 +230,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">수탁자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in trustInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.trustee }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>

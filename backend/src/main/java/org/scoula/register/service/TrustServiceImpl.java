@@ -39,7 +39,6 @@ public class TrustServiceImpl implements TrustService {
 
             String rank = row.get(0).trim();    // 순위번호
             String registrationPurpose = RegisterUtils.normalizeText(row.get(1));    // 등기목적
-//            String registrationCause = RegisterUtils.normalizeText(row.get(3));     // 등기원인
 
             if (registrationPurpose != null &&
                     registrationPurpose.contains("신탁") &&

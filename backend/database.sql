@@ -60,24 +60,14 @@ CREATE TABLE registry_analysis (
                                    address VARCHAR(255) NOT NULL,             -- 주소
                                    risks TEXT NOT NULL,                  -- 위험 요소 전체를 JSON으로 저장
                                    registry_name VARCHAR(100) NOT NULL,  -- 등기부등본 이름
-                                   analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
-                                   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-);
-
--- ============================================
--- 3. 등기부등본 분석 등급
--- ============================================
-
-CREATE TABLE registry_analysis_rating (
-                                   registry_id INT,
-                                   user_id INT,
                                    registry_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL, -- 등기부등본 등급
-                                   FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
+                                   analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
+                                   status BOOLEAN NOT NULL,
                                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- ============================================
--- 4. 전세가율 분석
+-- 3. 전세가율 분석
 -- ============================================
 CREATE TABLE jeonse_analysis (
                                  registry_id INT PRIMARY KEY,
@@ -88,12 +78,13 @@ CREATE TABLE jeonse_analysis (
                                  region_avg_jeonse_ratio DECIMAL(5,2) NOT NULL, -- 지역 평균 전세가율
                                  jeonse_ratio_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
                                  analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                 status BOOLEAN NOT NULL,
                                  FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
                                  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- ============================================
--- 5. 체크리스트
+-- 4. 체크리스트
 -- ============================================
 CREATE TABLE checklist (
                            registry_id INT PRIMARY KEY,
@@ -105,19 +96,20 @@ CREATE TABLE checklist (
 );
 
 -- ============================================
--- 6. 최종 리포트 및 요약
+-- 5. 최종 리포트 및 요약
 -- ============================================
 CREATE TABLE final_report (
                               report_id INT AUTO_INCREMENT PRIMARY KEY,
                               user_id INT,
                               registry_id INT,
                               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                              status BOOLEAN NOT NULL,
                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
                               FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE
 );
 
 -- ============================================
--- 7. 계약서 작성 테이블
+-- 6. 계약서 작성 테이블
 -- ============================================
 CREATE TABLE contract (
                           contract_id INT AUTO_INCREMENT PRIMARY KEY, -- 계약서 번호 (PK)
@@ -143,7 +135,7 @@ CREATE TABLE contract (
 );
 
 -- ============================================
--- 8. 특약
+-- 7. 특약
 -- ============================================
 CREATE TABLE special_clause (
                                 special_clause_id INT PRIMARY KEY AUTO_INCREMENT,  -- 특약번호(pk)
@@ -154,7 +146,7 @@ CREATE TABLE special_clause (
 );
 
 -- ============================================
--- 9. 계약서 작성 특약
+-- 8. 계약서 작성 특약
 -- ============================================
 CREATE TABLE contract_special_clause (
                                          contract_id INT,                  -- 계약서 번호
@@ -165,7 +157,7 @@ CREATE TABLE contract_special_clause (
 );
 
 -- ============================================
--- 10. 카테고리
+-- 9. 카테고리
 -- ============================================
 CREATE TABLE category(
                          category_id INT PRIMARY KEY AUTO_INCREMENT,    -- 카테고리 번호(pk)
@@ -175,7 +167,7 @@ CREATE TABLE category(
 );
 
 -- ============================================
--- 11. 용어
+-- 10. 용어
 -- ============================================
 CREATE TABLE term(
                      term_id INT PRIMARY KEY AUTO_INCREMENT,        -- 용어번호(pk)
@@ -188,7 +180,7 @@ CREATE TABLE term(
 );
 
 -- ============================================
--- 12. 등기부등본 PDF 저장
+-- 11. 등기부등본 PDF 저장
 -- ============================================
 CREATE TABLE register_pdf (
                               pdf_id INT PRIMARY KEY AUTO_INCREMENT,        -- pdf번호

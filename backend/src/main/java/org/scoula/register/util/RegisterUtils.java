@@ -50,13 +50,15 @@ public class RegisterUtils {
     }
 
     public static String extractDate(String text) {
-        // 정규식 패턴: 4자리 숫자 + '년' + 1~2자리 숫자 + '월' + 1~2자리 숫자 + '일'
+        // 숫자 사이 한글 제거
+        String cleanedText = text.replaceAll("(?<=\\d)(?!(년|월|일))[가-힣]+(?=\\d)", "");
+
         Pattern pattern = Pattern.compile("\\d{4}년\\d{1,2}월\\d{1,2}일");
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = pattern.matcher(cleanedText);
 
         if (matcher.find()) {
-            String date = matcher.group();
-            return date;
+            String result = matcher.group();
+            return result;
         } else {
             return null;
         }

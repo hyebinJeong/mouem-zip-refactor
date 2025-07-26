@@ -43,7 +43,6 @@ public class ProvisionalSeizureServiceImpl implements ProvisionalSeizureService 
             if (registrationPurpose != null &&
                     registrationPurpose.contains("가압류") &&
                     !registrationPurpose.contains("말소")) {
-                System.out.println(RegisterUtils.normalizeText(row.get(2)));
                 String date = RegisterUtils.extractDate(RegisterUtils.normalizeText(row.get(2)));  // 접수일자
                 String etc = row.get(4);                // 권리자 및 기타사항
 

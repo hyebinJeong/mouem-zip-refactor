@@ -58,7 +58,7 @@ public class ProvisionalSeizureServiceImpl implements ProvisionalSeizureService 
                 info.setCanceled(canceledRanks.contains(rank));
 
                 provisionalSeizures.add(info);
-                System.out.println(info);
+//                System.out.println(info);
             }
         }
 

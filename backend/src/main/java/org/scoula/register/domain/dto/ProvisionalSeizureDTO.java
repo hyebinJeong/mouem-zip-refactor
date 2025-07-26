@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProvisionalSeizureDTO {
     private String rank;
-    private String registrationPurpose;
-    private String registrationCause;
+    private String date;
     private String maxClaimAmount;
     private String creditor;
+    private boolean canceled;
 }

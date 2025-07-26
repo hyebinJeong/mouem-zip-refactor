@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 
 const selectedFile = ref(null);
-const tableData = ref([]);
 const mortgageInfos = ref([]);
 const seizureInfos = ref([]);
 const provisionalSeizureInfos = ref([]);
@@ -27,133 +26,32 @@ async function uploadFile() {
 
   try {
     // 표 데이터 받아오기
-    const tableRes = await fetch('http://localhost:8080/safety-check', {
+    // const tableRes = await fetch('http://localhost:8080/safety-check', {
+    // method: 'POST',
+    // body: formData,
+    // });
+    // if (tableRes.ok) {
+    //   tableData.value = await tableRes.json();
+    // } else {
+    //   console.error('표 추출 실패');
+    // }
+    const analysisResult = await fetch('http://localhost:8080/safety-check', {
       method: 'POST',
       body: formData,
     });
-
-    if (tableRes.ok) {
-      tableData.value = await tableRes.json();
-    } else {
-      console.error('표 추출 실패');
-    }
-
-    // 근저당 정보 받아오기
-    const mortgageRes = await fetch(
-      'http://localhost:8080/safety-check/mortgages',
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
-
-    if (mortgageRes.ok) {
-      mortgageInfos.value = await mortgageRes.json();
-    } else {
-      console.error('근저당 정보 추출 실패');
-    }
-
-    // 압류 정보 받아오기
-    const seizureRes = await fetch(
-      'http://localhost:8080/safety-check/seizures',
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
-
-    if (seizureRes.ok) {
-      seizureInfos.value = await seizureRes.json();
-    } else {
-      console.error('압류 정보 추출 실패');
-    }
-
-    // 가압류 정보 받아오기
-    const provisionalSeizureRes = await fetch(
-      'http://localhost:8080/safety-check/provisional',
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
-
-    if (provisionalSeizureRes.ok) {
-      provisionalSeizureInfos.value = await provisionalSeizureRes.json();
-    } else {
-      console.error('가압류 정보 추출 실패');
-    }
-
-    // 경매 정보 받아오기
-    const auctionRes = await fetch(
-      'http://localhost:8080/safety-check/auction',
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
-
-    if (auctionRes.ok) {
-      auctionInfos.value = await auctionRes.json();
-    } else {
-      console.error('경매 정보 추출 실패');
-    }
-
-    // 가등기 정보 받아오기
-    const provisionalRegistrationRes = await fetch(
-      'http://localhost:8080/safety-check/registration',
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
-
-    if (provisionalRegistrationRes.ok) {
+    if (analysisResult.ok) {
+      const result = await analysisResult.json();
+      mortgageInfos.value = result.mortgageInfos || [];
+      seizureInfos.value = result.seizureInfos || [];
+      provisionalSeizureInfos.value = result.provisionalSeizureInfos || [];
+      auctionInfos.value = result.auctionInfos || [];
       provisionalRegistrationInfos.value =
-        await provisionalRegistrationRes.json();
+        result.provisionalRegistrationInfos || [];
+      injunctionInfos.value = result.injunctionInfos || [];
+      jeonseRightInfos.value = result.jeonseRightInfos || [];
+      trustInfos.value = result.trustInfos || [];
     } else {
-      console.error('가등기 정보 추출 실패');
-    }
-
-    // 가처분 정보 받아오기
-    const injunctionRes = await fetch(
-      'http://localhost:8080/safety-check/injunction',
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
-
-    if (injunctionRes.ok) {
-      injunctionInfos.value = await injunctionRes.json();
-    } else {
-      console.error('가처분 정보 추출 실패');
-    }
-
-    // 전세권설정 정보 받아오기
-    const jeonseRightRes = await fetch(
-      'http://localhost:8080/safety-check/jeonse-right',
-      {
-        method: 'POST',
-        body: formData,
-      }
-    );
-
-    if (jeonseRightRes.ok) {
-      jeonseRightInfos.value = await jeonseRightRes.json();
-    } else {
-      console.error('전세권설정 정보 추출 실패');
-    }
-
-    // 신탁등기 정보 받아오기
-    const trustRes = await fetch('http://localhost:8080/safety-check/trust', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (trustRes.ok) {
-      trustInfos.value = await trustRes.json();
-    } else {
-      console.error('신탁등기 정보 추출 실패');
+      console.error('분석 실패');
     }
   } catch (error) {
     console.error('업로드 중 오류 발생:', error);
@@ -173,44 +71,24 @@ async function uploadFile() {
     </button>
   </div>
 
-  <!-- 표 추출 결과 보기 -->
-  <div v-if="tableData.length > 0" class="mt-6">
-    <h3 class="text-lg font-semibold mb-2">표 추출 결과</h3>
-    <table class="border-collapse border border-gray-400 w-full">
-      <tbody>
-        <tr v-for="(row, rowIndex) in tableData" :key="rowIndex">
-          <td
-            v-for="(cell, cellIndex) in row"
-            :key="cellIndex"
-            class="border border-gray-300 px-2 py-1"
-          >
-            {{ cell }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
   <!-- 근저당 정보 표 -->
   <div v-if="mortgageInfos.length">
     <h3 class="text-lg font-semibold mt-6 mb-2">근저당권 정보</h3>
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">채권최고액</th>
           <th class="border px-2 py-1">근저당권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in mortgageInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.maxClaimAmount }}</td>
           <td class="border px-2 py-1">{{ item.mortgageHolder }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -222,18 +100,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">권리자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in seizureInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.rightHolder }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -245,20 +121,18 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">청구금액</th>
           <th class="border px-2 py-1">채권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in provisionalSeizureInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.maxClaimAmount }}</td>
           <td class="border px-2 py-1">{{ item.creditor }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -270,18 +144,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">채권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in auctionInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.creditor }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -293,18 +165,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">가등기권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in provisionalRegistrationInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.registeredRightHolder }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -316,18 +186,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">채권자(또는 권리자)</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in injunctionInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.creditor }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -339,20 +207,18 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">전세금</th>
           <th class="border px-2 py-1">전세권자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in jeonseRightInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.deposit }}</td>
           <td class="border px-2 py-1">{{ item.mortgagor }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>
@@ -364,18 +230,16 @@ async function uploadFile() {
     <table class="border border-gray-300 w-full">
       <thead>
         <tr>
-          <th class="border px-2 py-1">순위</th>
-          <th class="border px-2 py-1">등기목적</th>
-          <th class="border px-2 py-1">등기원인</th>
+          <th class="border px-2 py-1">접수일자</th>
           <th class="border px-2 py-1">수탁자</th>
+          <th class="border px-2 py-1">말소여부</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in trustInfos" :key="index">
-          <td class="border px-2 py-1">{{ item.rank }}</td>
-          <td class="border px-2 py-1">{{ item.registrationPurpose }}</td>
-          <td class="border px-2 py-1">{{ item.registrationCause }}</td>
+          <td class="border px-2 py-1">{{ item.date }}</td>
           <td class="border px-2 py-1">{{ item.trustee }}</td>
+          <td class="border px-2 py-1">{{ item.canceled }}</td>
         </tr>
       </tbody>
     </table>

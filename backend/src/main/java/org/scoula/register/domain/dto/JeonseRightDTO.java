@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class JeonseRightDTO {
     private String rank;
-    private String registrationPurpose;
-    private String registrationCause;
+    private String date;
     private String deposit;
     private String mortgagor;
+    private boolean canceled;
 }

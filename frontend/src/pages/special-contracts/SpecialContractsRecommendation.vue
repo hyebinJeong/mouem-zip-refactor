@@ -30,18 +30,18 @@
       <div class="scroll-wrapper">
         <div class="grid-box">
           <div
-            v-for="(item, index) in specialItems"
+            v-for="(item, index) in recommendations"
             :key="index"
-            :class="['item', item.color]"
+            :class="['item', item.importanceColor]"
             @click="openModal(item)"
           >
-            <span :class="['dot', item.color + '-dot']"></span>
+            <span :class="['dot', item.importanceColor + '-dot']"></span>
             {{ item.title }}
           </div>
         </div>
       </div>
 
-      <!-- 캐릭터 이미지 (스크롤 관계 없이 content-box 내부 고정) -->
+      <!-- 캐릭터 이미지 -->
       <div class="character-box">
         <img src="@/assets/skybuddy.png" alt="버디 캐릭터" />
       </div>
@@ -57,12 +57,14 @@
         <div class="modal-content">
           <div
             v-for="(clause, idx) in selectedItem.clauses"
-            :key="idx"
+            :key="clause.id"
             class="clause"
           >
             <div class="clause-number">{{ idx + 1 }}</div>
-            <div class="clause-text">{{ clause }}</div>
-            <button class="select-btn">선택하기</button>
+            <div class="clause-text">{{ clause.text }}</div>
+            <button class="select-btn" @click="selectClause(clause)">
+              선택하기
+            </button>
           </div>
         </div>
       </div>
@@ -71,51 +73,70 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'SpecialContractsRecommendation',
   data() {
-    const generateItems = () => {
-      const colors = ['red', 'green', 'yellow', 'white'];
-      const titles = [
-        '안전 장치 조항',
-        '보증금 및 임대료 반환 관련',
-        '하자 보수 및 수리 책임',
-        '중도 퇴거 관련 조건',
-        '시설물 유지 및 원상복구 범위',
-        '관리비 및 공과금 주체 명시',
-        '계약 갱신 거절 통보 조건',
-        '전입신고 및 확정일자 허용',
-        '주택 사용 목적 명시',
-        '소음 방지 및 분쟁방지 조항',
-        '애완동물 관련 사용 조건',
-        '화재 보험 가입 조건',
-        '사고 발생 시 책임 범위',
-        '시설 점검 의무 조항',
-        '위험물 반입 금지 조건',
-        '무단 점유 시 처리 절차',
-        '계약해지 사유 및 방법',
-        '입주 전 청소 상태 확인',
-        '전기·수도·가스 명의 변경 책임',
-        '입주자 대표와의 소통 방식',
-      ];
-      return titles.map((title, i) => ({
-        title,
-        color: colors[i % colors.length],
-        clauses: [`${title}에 대한 조항 예시 1`, `${title}에 대한 조항 예시 2`],
-      }));
-    };
-
     return {
       selectedItem: null,
-      specialItems: generateItems(),
+      recommendations: [],
     };
   },
+  created() {
+    this.fetchRecommendations();
+  },
   methods: {
+    async fetchRecommendations() {
+      try {
+        const response = await axios.get('/api/recommendation');
+        const data = response.data;
+
+        const importanceMap = {
+          높음: 'red',
+          중간: 'yellow',
+          낮음: 'green',
+          기타: 'white',
+        };
+
+        const grouped = {};
+
+        data.forEach((item) => {
+          const key = item.category;
+          if (!grouped[key]) {
+            grouped[key] = {
+              title: key,
+              importanceColor: importanceMap[item.importance] || 'white',
+              clauses: [],
+            };
+          }
+          grouped[key].clauses.push({
+            id: item.special_clause_id,
+            text: item.description,
+          });
+        });
+
+        this.recommendations = Object.values(grouped);
+      } catch (error) {
+        console.error('특약 추천 데이터를 불러오는 중 오류 발생:', error);
+      }
+    },
     openModal(item) {
       this.selectedItem = item;
     },
     closeModal() {
       this.selectedItem = null;
+    },
+    selectClause(clause) {
+      console.log('선택한 조항:', clause);
+
+      const selected = JSON.parse(
+        sessionStorage.getItem('selectedClauses') || '[]'
+      );
+      selected.push(clause);
+      sessionStorage.setItem('selectedClauses', JSON.stringify(selected));
+
+      alert('조항이 선택되었습니다.');
     },
   },
 };
@@ -134,7 +155,7 @@ export default {
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  position: relative; /* 캐릭터 위치 기준 */
+  position: relative;
 }
 
 .header-section {
@@ -194,7 +215,6 @@ export default {
   font-weight: 600;
 }
 
-/* 스크롤 영역 및 항목 리스트 */
 .scroll-wrapper {
   max-height: 460px;
   overflow-y: auto;
@@ -261,7 +281,6 @@ export default {
   background-color: #9ca3af;
 }
 
-/* 캐릭터 - content-box 내부 고정 */
 .character-box {
   position: absolute;
   bottom: 16px;

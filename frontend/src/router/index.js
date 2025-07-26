@@ -6,6 +6,7 @@ import ReferenceContract from '@/pages/ReferenceContract.vue';
 import ReferenceGuidebook from '@/pages/ReferenceGuideBook.vue';
 import GlossaryBook from '@/pages/GlossaryBook.vue';
 import MyPage from '@/pages/MyPage.vue'; // 마이페이지 컴포넌트 추가 (필요하면 만드세요)
+import SafetyDiagnosis2 from '@/pages/SafetyDiagnosis2.vue'; 
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
@@ -23,6 +24,7 @@ const routes = [
   },
   { path: '/glossary', name: 'glossary', component: GlossaryBook },
   { path: '/my', name: 'my', component: MyPage },
+  { path: '/safetyDiagnosis2', name: 'safetyDiagnosis2', component: SafetyDiagnosis2 },
 ];
 
 const router = createRouter({

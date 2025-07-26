@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/recommendation")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SpecialContractRecommendationController {
 
     private final SpecialContractRecommendationService recommendationService;

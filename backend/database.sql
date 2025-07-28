@@ -38,7 +38,6 @@ DROP TABLE IF EXISTS contract;
 DROP TABLE IF EXISTS special_clause;
 DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS registry_analysis;
-DROP TABLE IF EXISTS registry_analysis_rating;
 DROP TABLE IF EXISTS users;
 
 -- ============================================
@@ -190,3 +189,6 @@ CREATE TABLE register_pdf (
                               upload_date DATE NOT NULL,                    -- 업로드 시간
                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+-- 테스트용 코드
+# INSERT INTO users (email, name, role) VALUES ('test@example.com', '테스트 사용자', '일반');

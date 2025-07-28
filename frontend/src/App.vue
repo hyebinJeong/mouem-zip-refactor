@@ -4,7 +4,7 @@ import Header from './components/Header.vue';
 </script>
 <template>
   <div>
-    <Header />
+    <Header v-if="!$route.meta.hideHeader" />
     <RouterView />
   </div>
 </template>

@@ -20,7 +20,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource({"classpath:/application.properties"})
-@MapperScan(basePackages = {"org.scoula.term.mapper","org.scoula.category.mapper","org.scoula.specialcontractrecommendation.mapper"})
+@MapperScan(basePackages = {"org.scoula.register.mapper", "org.scoula.term.mapper","org.scoula.category.mapper","org.scoula.specialcontractrecommendation.mapper"})
 @ComponentScan(basePackages = {"org.scoula"})
 @EnableTransactionManagement
 @Log4j2

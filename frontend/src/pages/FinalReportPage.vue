@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import DiagnosisGradeInfoModal from '@/components/DiagnosisGradeInfoModal.vue';
+import DiagnosisGradeInfoModal from '@/components/final-report/DiagnosisGradeInfoModal.vue';
 
 const showModal = ref(false);
 

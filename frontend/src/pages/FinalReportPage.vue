@@ -5,6 +5,7 @@ import FinalGrade from '@/components/final-report/FinalGrade.vue';
 import FinalJeonse from '@/components/final-report/FinalJeonse.vue';
 import FinalRegistry from '@/components/final-report/FinalRegistry.vue';
 import FinalChecklist from '@/components/final-report/FinalChecklist.vue';
+import { useNavigation } from '@/composables/final-report/useNavigation';
 
 const showModal = ref(false);
 
@@ -15,6 +16,8 @@ const openModal = () => {
 const closeModal = () => {
   showModal.value = false;
 };
+
+const { goToHome, goToMyPage } = useNavigation();
 </script>
 
 <template>
@@ -43,10 +46,16 @@ const closeModal = () => {
     <p>향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
     <FinalChecklist />
     <div class="final-btn-wrap d-flex justify-content-center gap-5">
-      <button class="btn btn-primary px-4 py-2 rounded-3 background-main">
+      <button
+        class="btn btn-primary px-4 py-2 rounded-3 background-main"
+        @click="goToHome"
+      >
         홈으로 이동
       </button>
-      <button class="btn btn-primary px-4 py-2 rounded-3 background-main">
+      <button
+        class="btn btn-primary px-4 py-2 rounded-3 background-main"
+        @click="goToMyPage"
+      >
         마이페이지로 이동
       </button>
     </div>

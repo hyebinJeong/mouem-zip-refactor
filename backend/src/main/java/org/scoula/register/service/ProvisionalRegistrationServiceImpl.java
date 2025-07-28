@@ -41,19 +41,18 @@ public class ProvisionalRegistrationServiceImpl implements ProvisionalRegistrati
 
             if (registrationPurpose != null &&
                     (registrationPurpose.contains("소유권이전담보가등기") || registrationPurpose.contains("소유권이전청구권가등기")) &&
-                    !registrationPurpose.contains("말소") &&
-                    !canceledRanks.contains(rank)) {
+                    !registrationPurpose.contains("말소")) {
 
-                String registrationCause = row.get(3);  // 등기 원인
+                String date = RegisterUtils.extractDate(RegisterUtils.normalizeText(row.get(2)));  // 접수일자
                 String etc = row.get(4);                // 권리자 및 기타사항
                 
                 String registeredRightHolder = RegisterUtils.extractCreditorOrRightHolder(etc);
 
                 ProvisionalRegistrationDTO info = new ProvisionalRegistrationDTO();
                 info.setRank(rank);
-                info.setRegistrationPurpose(registrationPurpose);
-                info.setRegistrationCause(registrationCause);
+                info.setDate(date);
                 info.setRegisteredRightHolder(registeredRightHolder);
+                info.setCanceled(canceledRanks.contains(rank));
 
                 provisionalRegistrations.add(info);
             }

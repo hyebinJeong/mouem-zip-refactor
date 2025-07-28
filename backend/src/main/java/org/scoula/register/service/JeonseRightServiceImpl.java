@@ -41,10 +41,9 @@ public class JeonseRightServiceImpl implements JeonseRightService {
 
             if (registrationPurpose != null &&
                     registrationPurpose.contains("전세권설정") &&
-                    !registrationPurpose.contains("말소") &&
-                    !canceledRanks.contains(rank)) {
+                    !registrationPurpose.contains("말소")) {
 
-                String registrationCause = RegisterUtils.trimAfterParenthesis(row.get(3));  // 등기 원인
+                String date = RegisterUtils.extractDate(RegisterUtils.normalizeText(row.get(2)));  // 접수일자
                 String etc = row.get(4);                // 권리자 및 기타사항
 
                 String deposit = RegisterUtils.extractAmountByKeywords(etc);
@@ -52,10 +51,10 @@ public class JeonseRightServiceImpl implements JeonseRightService {
 
                 JeonseRightDTO info = new JeonseRightDTO();
                 info.setRank(rank);
-                info.setRegistrationPurpose(registrationPurpose);
-                info.setRegistrationCause(registrationCause);
+                info.setDate(date);
                 info.setDeposit(deposit);
                 info.setMortgagor(mortgagor);
+                info.setCanceled(canceledRanks.contains(rank));
 
                 jeonseRights.add(info);
             }

@@ -42,10 +42,8 @@ public class ProvisionalSeizureServiceImpl implements ProvisionalSeizureService 
 
             if (registrationPurpose != null &&
                     registrationPurpose.contains("가압류") &&
-                    !registrationPurpose.contains("말소") &&
-                    !canceledRanks.contains(rank)) {
-
-                String registrationCause = RegisterUtils.trimAfterParenthesis(row.get(3));  // 등기 원인
+                    !registrationPurpose.contains("말소")) {
+                String date = RegisterUtils.extractDate(RegisterUtils.normalizeText(row.get(2)));  // 접수일자
                 String etc = row.get(4);                // 권리자 및 기타사항
 
                 String maxClaimAmount = RegisterUtils.extractAmountByKeywords(etc);
@@ -53,12 +51,13 @@ public class ProvisionalSeizureServiceImpl implements ProvisionalSeizureService 
 
                 ProvisionalSeizureDTO info = new ProvisionalSeizureDTO();
                 info.setRank(rank);
-                info.setRegistrationPurpose(registrationPurpose);
-                info.setRegistrationCause(registrationCause);
+                info.setDate(date);
                 info.setMaxClaimAmount(maxClaimAmount);
                 info.setCreditor(creditor);
+                info.setCanceled(canceledRanks.contains(rank));
 
                 provisionalSeizures.add(info);
+//                System.out.println(info);
             }
         }
 

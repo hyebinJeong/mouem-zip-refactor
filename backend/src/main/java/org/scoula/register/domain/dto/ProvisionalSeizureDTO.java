@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProvisionalSeizureDTO {
+public class ProvisionalSeizureDTO implements DatedCanceledItem {
     private String rank;
     private String date;
     private String maxClaimAmount;

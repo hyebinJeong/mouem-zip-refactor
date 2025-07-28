@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MortgageDTO {
+public class MortgageDTO implements DatedCanceledItem {
     private String rank;
     private String date;
     private String maxClaimAmount;

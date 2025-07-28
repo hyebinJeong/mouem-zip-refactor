@@ -1,15 +1,8 @@
 <script setup>
 import GuidebookSection from '@/components/GuidebookSection.vue';
-// import { useRouter } from 'vue-router';
 import { useNavigation } from '@/composables/final-report/useNavigation';
 
 const { goToHome } = useNavigation();
-
-// const router = useRouter();
-
-// const goToHome = () => {
-//   router.push('/');
-// };
 
 // 계약 전 항목
 const beforeContractItems = [

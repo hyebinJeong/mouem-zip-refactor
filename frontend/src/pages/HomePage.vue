@@ -1,10 +1,43 @@
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+// 라우트, AuthStore, onMounted 임시 사용
+import { useAuthStore } from '@/stores/auth';
+import { onMounted } from 'vue';
+import axios from 'axios';
 
+const route = useRoute();
+const auth = useAuthStore();
 const router = useRouter();
 
 function goToAnalysis() {
-  router.push('/agreement');
+  onMounted(() => {
+    const token = route.query.token;
+    if (token) {
+      auth.login(token); // pinia에 저장
+      router.replace('/'); // token 숨기기
+    }
+  });
+
+  async function goToAnalysis() {
+    if (!auth.isLoggedIn) {
+      // JWT가 없으면 로그인 페이지로 이동
+      router.push('/login');
+      return;
+    }
+
+    try {
+      //  로그인 상태라면 백엔드 권한 확인
+      await axios.get('/api/check-access/safety-check', {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+
+      // 200 OK면 진단 페이지로 이동
+      router.push('/safety-check');
+    } catch (err) {
+      console.error('접근 권한 없음:', err);
+      router.push('/login'); // 인증 실패 시 로그인 페이지로 이동
+    }
+  }
 }
 </script>
 

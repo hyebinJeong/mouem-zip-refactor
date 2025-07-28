@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.scoula.register.domain.RegistryRating;
 import org.scoula.register.domain.dto.*;
 import org.scoula.register.service.*;
+import org.scoula.register.util.RegisterRatingEvaluator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +45,7 @@ public class TabulaController {
             int userId = 1;
             String address = "서울시 강남구 역삼동 123-45";
             String registryName = "역삼동 kb오피스텔";
-            RegistryRating registryRating = RegistryRating.안전;
+            RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response);
             boolean status = false;
 
             tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status);

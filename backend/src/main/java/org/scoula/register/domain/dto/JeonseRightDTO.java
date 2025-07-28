@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class JeonseRightDTO {
+public class JeonseRightDTO implements DatedCanceledItem {
     private String rank;
     private String date;
     private String deposit;

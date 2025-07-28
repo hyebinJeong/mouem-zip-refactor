@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuctionDTO {
+public class AuctionDTO implements DatedCanceledItem {
     private String rank;
     private String date;
     private String creditor;

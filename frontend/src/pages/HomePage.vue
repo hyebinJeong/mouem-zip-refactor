@@ -9,34 +9,32 @@ const route = useRoute();
 const auth = useAuthStore();
 const router = useRouter();
 
-function goToAnalysis() {
-  onMounted(() => {
-    const token = route.query.token;
-    if (token) {
-      auth.login(token); // pinia에 저장
-      router.replace('/'); // token 숨기기
-    }
-  });
+onMounted(() => {
+  const token = route.query.token;
+  if (token) {
+    auth.login(token); // pinia에 저장
+    router.replace('/'); // token 숨기기
+  }
+});
 
-  async function goToAnalysis() {
-    if (!auth.isLoggedIn) {
-      // JWT가 없으면 로그인 페이지로 이동
-      router.push('/login');
-      return;
-    }
+async function goToAnalysis() {
+  if (!auth.isLoggedIn) {
+    // JWT가 없으면 로그인 페이지로 이동
+    router.push('/login');
+    return;
+  }
 
-    try {
-      //  로그인 상태라면 백엔드 권한 확인
-      await axios.get('/api/check-access/safety-check', {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
+  try {
+    //  로그인 상태라면 백엔드 권한 확인
+    await axios.get('/api/check-access/safety-check', {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
 
-      // 200 OK면 진단 페이지로 이동
-      router.push('/safety-check');
-    } catch (err) {
-      console.error('접근 권한 없음:', err);
-      router.push('/login'); // 인증 실패 시 로그인 페이지로 이동
-    }
+    // 200 OK면 진단 페이지로 이동
+    router.push('/safety-check');
+  } catch (err) {
+    console.error('접근 권한 없음:', err);
+    router.push('/login'); // 인증 실패 시 로그인 페이지로 이동
   }
 }
 </script>

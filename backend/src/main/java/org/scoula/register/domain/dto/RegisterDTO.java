@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterDTO {
-    private Integer registerId;
+    private Integer registryId;
     private Integer userId;
     private String address;
     private String risks;

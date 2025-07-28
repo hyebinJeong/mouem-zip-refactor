@@ -47,7 +47,7 @@
 
     <!-- 캐릭터 -->
     <div class="character">
-      <img src="../assets/homebuddycharacter.svg" alt="HomeBuddy 캐릭터" />
+      <img src="../assets/buddyblue.png" alt="HomeBuddy 캐릭터" />
     </div>
   </div>
 </template>

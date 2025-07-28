@@ -37,11 +37,12 @@
       </div>
     </div>
 
-    <Buddy />
+    <Buddy @open-dictionary="openDictionaryModal" />
 
     <div v-if="showModal" class="image-modal" @click.self="closeModal">
       <img :src="images[currentIndex]" class="modal-img" />
     </div>
+    <TermViewModal v-if="showDictionaryModal" @close="closeDictionaryModal" />
   </div>
 </template>
 
@@ -50,6 +51,18 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import Buddy from '@/components/BuddyHelper.vue'
 import checklistItems from '@/stores/checklistStore.js'
+import TermViewModal from "@/components/TermViewModal.vue";
+
+// 용어 모달 표시 상태
+const showDictionaryModal = ref(false)
+
+// 용어모달 열기/닫기 함수
+const openDictionaryModal = () => {
+  showDictionaryModal.value = true
+}
+const closeDictionaryModal = () => {
+  showDictionaryModal.value = false
+}
 
 const router = useRouter()
 

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 function goToAnalysis() {
-  router.push('/safety-check');
+  router.push('/agreement');
 }
 </script>
 

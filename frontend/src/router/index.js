@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/pages/HomePage.vue';
 import SafetyDiagnosis from '@/pages/SafetyDiagnosis.vue';
+import SafetyDiagnosis2 from '@/pages/SafetyDiagnosis2.vue'; 
 import Preview from '@/pages/checklist/Preview.vue';
 import ReferenceContract from '@/pages/referencecontracts/ReferenceContract.vue';
 import GlossaryBook from '@/pages/GlossaryBook.vue';
@@ -29,6 +30,7 @@ import SpecialContractsEdit from '@/pages/special-contracts/SpecialContractsEdit
 const routes = [
   { path: '/', name: 'home', component: HomePage },
   { path: '/safety-check', name: 'safety-check', component: SafetyDiagnosis },
+  { path: '/safetyDiagnosis2', name: 'safetyDiagnosis2', component: SafetyDiagnosis2 },
   { path: '/checklist', name: 'preview', component: Preview },
   {
     path: '/agreement', // 면책고지 경로

@@ -5,14 +5,12 @@ const selectedAddress = ref('');
 const roadAddress = ref('');
 const jibunAddress = ref('');
 const jeonsePrice = ref('');
-const isApt = ref('');
 const file = ref(null);
 const itemName = ref('');
 
 const openPostcode = () => {
   new window.daum.Postcode({
     oncomplete: function (data) {
-      isApt.value = data.apartment;
       const userType = data.userSelectedType;
       if (userType === 'R' && data.roadAddress) {
         roadAddress.value = data.roadAddress;
@@ -49,7 +47,6 @@ const callBackend = async () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        isApt: isApt.value,
         address: selectedAddress.value,
         jeonsePrice: jeonsePrice.value,
       }),

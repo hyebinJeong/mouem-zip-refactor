@@ -59,7 +59,7 @@ public class DealSearchService {
 
         // 모든 유형에서 매물이 없다면 판단 보류
         if (allDeals.isEmpty()) {
-            System.out.println("❌ 모든 유형에서 실거래 매물 없음 → 판단 보류");
+//            System.out.println("❌ 모든 유형에서 실거래 매물 없음 → 판단 보류");
             return Optional.empty();
         }
 
@@ -67,7 +67,7 @@ public class DealSearchService {
         String inputJibunHead = jibunHead.split("-")[0].trim(); // 예: "595-28" → "595"
 
 
-        System.out.println("📌 [매매가 조회] 검색 지번: " + inputJibunHead + ", 조회 매물 수: " + allDeals.size());
+//        System.out.println("📌 [매매가 조회] 검색 지번: " + inputJibunHead + ", 조회 매물 수: " + allDeals.size());
 
 
         // 입력 지번과 유사한 매물 필터링 (지번 앞자리 기준)
@@ -78,7 +78,7 @@ public class DealSearchService {
 
         // 유사 매물이 없다면 판단 보류
         if (filtered.isEmpty()) {
-            System.out.println("유사 지번 매물 없음 → 판단 보류");
+//            System.out.println("유사 지번 매물 없음 → 판단 보류");
             return Optional.empty();
         }
 
@@ -111,7 +111,7 @@ public class DealSearchService {
 
             return dto.getResponse().getBody().getItems().getItem();
         } catch (Exception e) {
-            System.out.println("응답 파싱 실패 → 빈 리스트 반환");
+//            System.out.println("응답 파싱 실패 → 빈 리스트 반환");
             return List.of();
         }
     }

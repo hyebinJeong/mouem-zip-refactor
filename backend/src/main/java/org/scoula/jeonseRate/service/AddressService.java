@@ -42,7 +42,7 @@ public class AddressService {
                 .bodyToMono(String.class)
                 .block();
 
-        System.out.println("AddressSerivce파일 - JUSO 응답: " + response);
+//        System.out.println("AddressSerivce파일 - JUSO 응답: " + response);
 
         JSONObject json = new JSONObject(response)
                 .getJSONObject("results")

@@ -45,7 +45,7 @@ public class ApartmentApiService {
                 .bodyToMono(String.class)   // 응답 본문을 문자열로 받음
                 .block();
 
-        System.out.println("[API 호출 완료] 유형: 아파트/연립/오피스텔, 응답 길이: " + response.length());
+//        System.out.println("[API 호출 완료] 유형: 아파트/연립/오피스텔, 응답 길이: " + response.length());
 
         try {
             return objectMapper.readValue(response, DealResponseDTO.class);

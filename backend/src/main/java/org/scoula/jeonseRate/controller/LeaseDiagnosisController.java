@@ -22,7 +22,7 @@ public class LeaseDiagnosisController {
 
     @PostMapping("/leasePer")
     public ResponseEntity<?> analyzeLease(@RequestBody LeaseRequestDTO request) {
-        System.out.println(request);
+//        System.out.println(request);
         String keyword = request.getAddress();
 
         if (keyword == null || keyword.isBlank()) {
@@ -41,7 +41,7 @@ public class LeaseDiagnosisController {
         // 지번 주소 앞번호 추출 (예: 595-28 → 595)
         String jibunHead  = addressInfo.getJibunAddr().split("-")[0];
 
-        System.out.println("[요청] 주소: " + request.getAddress() + ", 보증금: " + request.getJeonsePrice());
+//        System.out.println("[요청] 주소: " + request.getAddress() + ", 보증금: " + request.getJeonsePrice());
 
         // 해당 주소에 대한 매매가 평균 조회
         Optional<Integer> averageDealPriceOpt = dealSearchService.getAverageDealAmount(

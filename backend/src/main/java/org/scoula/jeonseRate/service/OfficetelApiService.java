@@ -45,7 +45,7 @@ public class OfficetelApiService {
                 .bodyToMono(String.class)
                 .block();
 
-        System.out.println("📦 [API 호출 완료] 유형: 아파트/연립/오피스텔, 응답 길이: " + response.length());
+//        System.out.println("📦 [API 호출 완료] 유형: 아파트/연립/오피스텔, 응답 길이: " + response.length());
 
         try {
             return objectMapper.readValue(response, DealResponseDTO.class);

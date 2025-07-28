@@ -1,6 +1,7 @@
 package org.scoula.register.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.scoula.register.domain.RegistryRating;
 import org.scoula.register.domain.dto.*;
 import org.scoula.register.service.*;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,15 @@ public class TabulaController {
             response.setInjunctionInfos(injunctionServiceImpl.extractInjunctions(table));
             response.setJeonseRightInfos(jeonseRightServiceImpl.extractJeonseRightInfos(table));
             response.setTrustInfos(trustServiceImpl.extractTrustInfos(table));
+
+            // 임시 값
+            int userId = 1;
+            String address = "서울시 강남구 역삼동 123-45";
+            String registryName = "역삼동 kb오피스텔";
+            RegistryRating registryRating = RegistryRating.안전;
+            boolean status = false;
+
+            tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

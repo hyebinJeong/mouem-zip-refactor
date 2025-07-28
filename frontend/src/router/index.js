@@ -10,6 +10,7 @@ import MyPage from '@/pages/MyPage.vue';
 import NonDiagnosis from '@/pages/checklist/ForNoneDiagnosis.vue';
 import CheckList from '@/pages/checklist/Checklist.vue';
 import FinalReportPage from '@/pages/FinalReportPage.vue';
+import AgreementPage from "@/pages/AgreementPage.vue";
 
 // 카테고리 및 용어 관련 추가
 import CategoryAll from '@/pages/category/CategoryAll.vue';
@@ -29,6 +30,12 @@ const routes = [
   { path: '/', name: 'home', component: HomePage },
   { path: '/safety-check', name: 'safety-check', component: SafetyDiagnosis },
   { path: '/checklist', name: 'preview', component: Preview },
+  {
+    path: '/agreement', // 면책고지 경로
+    name: 'AgreementPage',
+    component: AgreementPage,
+    meta: { hideHeader: true }
+  },
   {
     path: '/reference-contract',
     name: 'reference-contract',

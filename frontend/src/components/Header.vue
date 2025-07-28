@@ -51,6 +51,7 @@ const goMyPage = () => router.push('/my')
   align-items: center;
   justify-content: center;
   width: 100%;
+  border-bottom: 1.5px solid #eaeaea;
 }
 
 .top-bar {

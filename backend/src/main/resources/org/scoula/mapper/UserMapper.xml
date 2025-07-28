@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.oauth.mapper.UserMapper">
+    <select id="findByKakaoId" resultType="org.scoula.oauth.domain.DTO.KakaoUserDTO">
+        SELECT kakao_id AS kakaoId, name
+        FROM users
+        WHERE kakao_id = #{kakaoId}
+    </select>
+
+    <insert id="insertUser">
+        INSERT INTO users (kakao_id, name, role)
+        VALUES (#{kakaoId}, #{name}, 'USER')
+    </insert>
+</mapper>

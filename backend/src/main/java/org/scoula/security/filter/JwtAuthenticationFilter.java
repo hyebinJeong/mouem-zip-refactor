@@ -16,6 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Enumeration;
 
 @Component
 @Log4j2
@@ -25,17 +26,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer "; // 끝에 공백 있음
     private final JwtProcessor jwtProcessor;
     private final UserDetailsService userDetailsService;
+
     private Authentication getAuthentication(String token) {
         String username = jwtProcessor.getUsername(token);
+        // 디버깅용
+        System.out.println("🔍 JWT에서 추출한 kakaoId = " + username);
         UserDetails princiapl = userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(princiapl, null, princiapl.getAuthorities());
     }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
     throws ServletException, IOException {
+
         String bearerToken=request.getHeader(AUTHORIZATION_HEADER);
         if(bearerToken!=null&&bearerToken.startsWith(BEARER_PREFIX)){
             String token=bearerToken.substring(BEARER_PREFIX.length());
+            System.out.println("🔑 JWT 토큰 파싱 전 = " + token); // 디버깅
             //토큰에서사용자정보추출및Authentication객체구성후SecurityContext에저장
             Authentication authentication=getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);

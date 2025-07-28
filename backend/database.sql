@@ -45,9 +45,9 @@ DROP TABLE IF EXISTS users;
 -- ============================================
 CREATE TABLE users (
                        user_id INT AUTO_INCREMENT PRIMARY KEY,
-                       email VARCHAR(100) UNIQUE NOT NULL,
+                       kakao_id VARCHAR(100) UNIQUE NOT NULL,
                        name VARCHAR(50) NOT NULL,
-                       role ENUM('일반', '관리자') DEFAULT '일반'
+                       role VARCHAR(50) DEFAULT 'USER'
 );
 
 -- ============================================

@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/pages/HomePage.vue';
 import SafetyDiagnosis from '@/pages/SafetyDiagnosis.vue';
-import SafetyDiagnosis2 from '@/pages/SafetyDiagnosis2.vue'; 
+import SafetyDiagnosis2 from '@/pages/SafetyDiagnosis2.vue';
 import Preview from '@/pages/checklist/Preview.vue';
 import ReferenceContract from '@/pages/referencecontracts/ReferenceContract.vue';
 import GlossaryBook from '@/pages/GlossaryBook.vue';
@@ -11,7 +11,8 @@ import MyPage from '@/pages/MyPage.vue';
 import NonDiagnosis from '@/pages/checklist/ForNoneDiagnosis.vue';
 import CheckList from '@/pages/checklist/Checklist.vue';
 import FinalReportPage from '@/pages/FinalReportPage.vue';
-import AgreementPage from "@/pages/AgreementPage.vue";
+import AgreementPage from '@/pages/AgreementPage.vue';
+import LoginPage from '@/pages/login/LoginPage.vue';
 
 // 카테고리 및 용어 관련 추가
 import CategoryAll from '@/pages/category/CategoryAll.vue';
@@ -26,17 +27,28 @@ import TermEdit from '@/pages/term/TermEdit.vue';
 import SpecialContractsManager from '@/pages/special-contracts/SpecialContractsManager.vue';
 import SpecialContractsAdd from '@/pages/special-contracts/SpecialContractsAdd.vue';
 import SpecialContractsEdit from '@/pages/special-contracts/SpecialContractsEdit.vue';
+import KakaoCallback from '@/pages/login/KakaoCallback.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
-  { path: '/safety-check', name: 'safety-check', component: SafetyDiagnosis },
-  { path: '/safetyDiagnosis2', name: 'safetyDiagnosis2', component: SafetyDiagnosis2 },
+
+  {
+    path: '/safetyDiagnosis2',
+    name: 'safetyDiagnosis2',
+    component: SafetyDiagnosis2,
+  },
+  {
+    path: '/safety-check',
+    name: 'safety-check',
+    component: SafetyDiagnosis,
+    meta: { requiresAuth: true },
+  },
   { path: '/checklist', name: 'preview', component: Preview },
   {
     path: '/agreement', // 면책고지 경로
     name: 'AgreementPage',
     component: AgreementPage,
-    meta: { hideHeader: true }
+    meta: { hideHeader: true },
   },
   {
     path: '/reference-contract',
@@ -56,6 +68,13 @@ const routes = [
     component: NonDiagnosis,
   },
   { path: '/checklist/checklist', name: 'checklist', component: CheckList },
+  { path: '/login', name: 'Login', component: LoginPage },
+
+  {
+    path: '/oauth/callback/kakao',
+    name: 'KakaoCallback',
+    component: KakaoCallback,
+  },
 
   // 관리자 페이지
   {
@@ -131,6 +150,29 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+// 라우터 가드 설정
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore();
+
+  if (to.meta.requiresAuth) {
+    if (!auth.isLoggedIn) {
+      return next('/login');
+    }
+    try {
+      await axios.get('/api/check-access' + to.path, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      return next();
+    } catch {
+      return next('/login');
+    }
+  }
+
+  return next(); // 인증 필요 없는 페이지는 그냥 통과
 });
 
 export default router;

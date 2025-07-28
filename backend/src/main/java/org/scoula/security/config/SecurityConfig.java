@@ -5,7 +5,6 @@ import lombok.extern.log4j.Log4j2;
 import org.mybatis.spring.annotation.MapperScan;
 import org.scoula.security.filter.AuthenticationErrorFilter;
 import org.scoula.security.filter.JwtAuthenticationFilter;
-import org.scoula.security.filter.JwtUsernamePasswordAuthenticationFilter;
 import org.scoula.security.handler.CustomAccessDeniedHandler;
 import org.scoula.security.handler.CustomAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @Log4j2
-@MapperScan(basePackages = {"org.scoula.security.account.mapper"})
+//@MapperScan(basePackages = {})
 @ComponentScan(basePackages = {"org.scoula.security"})
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -44,9 +43,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-
-    @Autowired
-    private JwtUsernamePasswordAuthenticationFilter jwtUsernamePasswordAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -96,45 +92,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 인증에러필터
                 .addFilterBefore(authenticationErrorFilter, UsernamePasswordAuthenticationFilter.class)
                 // Jwt 인증필터
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                // 로그인인증필터
-                .addFilterBefore(jwtUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         http
                 .authorizeRequests()//경로별접근권한설정
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-//                .antMatchers(HttpMethod.POST,"/api/member").authenticated()
-                .antMatchers(HttpMethod.PUT,"/api/member", "/api/member/*/changepassword").authenticated()
-                .antMatchers(HttpMethod.POST, "/api/board/**").authenticated()
-                .antMatchers(HttpMethod.PUT, "/api/board/**").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/api/board/**").authenticated()
-                .anyRequest().permitAll(); //일단모든접근허용
-//                .antMatchers(HttpMethod.OPTIONS).permitAll()
-//                .antMatchers("/api/security/all").permitAll() //모두허용
-//                .antMatchers("/api/security/member").access("hasRole('ROLE_MEMBER')") //ROLE_MEMBER이상접근허용
-//                .antMatchers("/api/security/admin").access("hasRole('ROLE_ADMIN')") //ROLE_ADMIN이상접근허용
-//                .anyRequest().authenticated(); //나머지는로그인된경우모두허용
+                .antMatchers(HttpMethod.POST, "/api/oauth/**").permitAll() // 카카오 로그인 api는 허용
+                .antMatchers("/", "/index.html", "/oauth/callback/kakao").permitAll()
+                .antMatchers("/api/check-access/**").hasRole("USER")       // 유저 전용 API 보호
+                .antMatchers("/admin/**").hasRole("ADMIN")                 // 관리자 API 보호
+                .anyRequest().denyAll();                                   // 그 외 요청은 거부
+
+
+
 
         // 예외처리설정
         http
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler);
-//        http.authorizeRequests()
-//                .antMatchers("/security/all").permitAll()
-//                .antMatchers("/security/admin").access("hasRole('ROLE_ADMIN')")
-//                .antMatchers("/security/member").access("hasAnyRole('ROLE_MEMBER', 'ROLE_ADMIN')");
-//
-//        http.formLogin()
-//                .loginPage("/security/login")
-//                .loginProcessingUrl("/security/login")
-//                .defaultSuccessUrl("/");
-//
-//        http.logout()
-//                .logoutUrl("/security/logout")
-//                .invalidateHttpSession(true)
-//                .deleteCookies("remember-me", "JSESSION-ID")
-//                .logoutSuccessUrl("/security/logout");
+
 
         http.httpBasic().disable() // 기본 HTTP 인증 비활성화
                 .csrf().disable() // CSRF 비활성화
@@ -145,20 +122,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        log.info("configure ...............................");
-
-//        auth.inMemoryAuthentication()
-//                .withUser("admin")
-//                // .password("{noop}1234")
-//                .password("$2a$10$Tm7NqlXuz4ggpOQGOctDSew8bGobMaejT3dYxJhet4GcBTKf88Af6")
-//                .roles("ADMIN", "MEMBER");
-//
-//        auth.inMemoryAuthentication()
-//                .withUser("member")
-//                // .password("{noop}1234")
-//                .password("$2a$10$Tm7NqlXuz4ggpOQGOctDSew8bGobMaejT3dYxJhet4GcBTKf88Af6")
-//                .roles("MEMBER");
-
         auth
                 .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder());

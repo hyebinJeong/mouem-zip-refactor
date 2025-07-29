@@ -83,7 +83,6 @@ onMounted(async () => {
   try {
     const res = await axios.get(`/safety-check/${registerId}`);
     result.value = res.data;
-    console.log(result.value);
   } catch (e) {
     console.error('분석 결과 가져오기 실패:', e);
   }

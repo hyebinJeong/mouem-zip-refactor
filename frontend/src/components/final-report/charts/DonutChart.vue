@@ -25,7 +25,9 @@ const chartData = {
 const chartOptions = {
   plugins: {
     legend: { display: false },
-    tooltip: { enabled: false },
+    datalabels: {
+      display: false,
+    },
   },
 };
 </script>

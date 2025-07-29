@@ -6,7 +6,7 @@
 <mapper namespace="org.scoula.register.mapper.RegisterMapper">
 
     <insert id="insertRegister" parameterType="org.scoula.register.domain.dto.RegisterDTO">
-        INSERT INTO registry_analysis (user_id, address, risks, registry_name, registry_rating, status)
-        VALUES (#{userId}, #{address}, #{risks}, #{registryName}, #{registryRating}, #{status})
+        INSERT INTO registry_analysis (user_id, address, risks, registry_name, registry_rating, status, file_name)
+        VALUES (#{userId}, #{address}, #{risks}, #{registryName}, #{registryRating}, #{status}, #{fileName})
     </insert>
 </mapper>

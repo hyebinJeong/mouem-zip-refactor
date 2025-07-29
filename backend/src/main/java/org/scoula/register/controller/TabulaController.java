@@ -17,6 +17,7 @@ import java.util.List;
 public class TabulaController {
 
     private final TabulaService tabulaService;
+    private final AwsS3Service awsS3Service;
     private final MortgageServiceImpl mortgageServiceImpl;
     private final SeizureServiceImpl seizureServiceImpl;
     private final ProvisionalSeizureServiceImpl provisionalSeizureServiceImpl;
@@ -29,6 +30,9 @@ public class TabulaController {
     @PostMapping
     public ResponseEntity<RegisterAnalysisResponse> analyzeRegistry(@RequestParam("file") MultipartFile file) {
         try {
+            // S3 업로드
+            String uploadedFileName = awsS3Service.uploadFile(file);
+
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
 
             RegisterAnalysisResponse response = new RegisterAnalysisResponse();
@@ -45,10 +49,12 @@ public class TabulaController {
             int userId = 1;
             String address = "서울시 강남구 역삼동 123-45";
             String registryName = "역삼동 kb오피스텔";
+
+            // 위험 등급 평가
             RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response);
             boolean status = false;
 
-            tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status);
+            tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status, uploadedFileName);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

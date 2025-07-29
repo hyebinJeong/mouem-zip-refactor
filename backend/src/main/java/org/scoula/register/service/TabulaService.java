@@ -52,9 +52,8 @@ public class TabulaService {
         return extractedData;
     }
 
-    public void saveAnalysis(int userId, String address, RegisterAnalysisResponse response, String registryName, RegistryRating registryRating, boolean status) throws Exception {
+    public void saveAnalysis(int userId, String address, RegisterAnalysisResponse response, String registryName, RegistryRating registryRating, boolean status, String fileName) throws Exception {
         String risks = objectMapper.writeValueAsString(response);
-
 
         RegisterDTO dto = new RegisterDTO();
         dto.setUserId(userId);
@@ -63,6 +62,7 @@ public class TabulaService {
         dto.setRegistryName(registryName);
         dto.setRegistryRating(registryRating);
         dto.setStatus(status);
+        dto.setFileName(fileName);
 
         registerMapper.insertRegister(dto);
     }

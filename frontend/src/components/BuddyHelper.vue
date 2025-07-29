@@ -1,5 +1,5 @@
 <template>
-  <div class="buddy-fixed" @click="toggleBalloon">
+  <div class="buddy-fixed" @click="handleClick">
     <img src="@/assets/buddygreen.png" alt="버디" class="buddy-img-out" />
     <div class="balloon-out" v-if="showBalloon">
       어려운 단어가 있다면<br />
@@ -11,10 +11,16 @@
 <script setup>
 import { ref } from 'vue'
 
+const emit = defineEmits(['open-dictionary'])
+
 const showBalloon = ref(true)
-const toggleBalloon = () => {
+const handleClick = () => {
+  // 말풍선 토글
   showBalloon.value = !showBalloon.value
+  // 모달열기알람
+  emit('open-dictionary')
 }
+
 </script>
 
 <style scoped>

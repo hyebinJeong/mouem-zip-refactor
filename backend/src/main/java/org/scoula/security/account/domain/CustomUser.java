@@ -1,23 +1,40 @@
 package org.scoula.security.account.domain;
 
 import lombok.Getter;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
+import org.scoula.oauth.domain.DTO.KakaoUserDTO;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 
 import java.util.Collection;
+import java.util.List;
 
 @Getter
-@Setter
-public class CustomUser extends User {
-    private MemberVO member;
+@RequiredArgsConstructor
+public class CustomUser implements UserDetails {
+    private final KakaoUserDTO user;
 
-    public CustomUser(String username, String password,
-                      Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, authorities);
+    @Override
+    public String getUsername() {
+        return user.getKakaoId();
     }
-    public CustomUser(MemberVO vo) {
-        super(vo.getUsername(), vo.getPassword(), vo.getAuthList());
-        this.member = vo;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // 임시 role 지정
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
+
+    @Override
+    public String getPassword() {
+        return null; // 소셜 로그인에는 비밀번호가 없음
+    }
+
+    //소셜로그인의 경우 항상 true로 반환
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled() { return true; }
 }

@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Component
 public class JwtProcessor {
-    static private final long TOKEN_VALID_MILISECOND = 1000L * 60 * 35; // 5 분
+    static private final long TOKEN_VALID_MILISECOND = 1000L * 60 * 60; // 60 분
 
     private String secretKey = "sladkfjlaksjldkfjldslfjesladkfjlaksjldkfjldslfje";
     private Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -33,12 +33,14 @@ public class JwtProcessor {
     // 예외 ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException,
     // IllegalArgumentException
     public String getUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+            String subject = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+
+            return subject;
     }
 
     // JWT 검증(유효 기간 검증) - 해석 불가인 경우 예외 발생

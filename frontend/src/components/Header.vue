@@ -101,7 +101,7 @@ const goMyPage = () => router.push('/my')
 }
 
 .dropdown-list {
-  background-color: #eaeaea;
+  background-color: #ececec;
   font-weight: bolder;
   font-size: 18px;
   position: absolute;
@@ -148,8 +148,8 @@ const goMyPage = () => router.push('/my')
 }
 
 .menu-item:hover {
-  color: #007bff; /* 글자색 변경 */
-  border-bottom: 2px solid #007bff; /* 밑줄 추가 */
-  transition: all 0.1s ease-in-out; /* 부드러운 효과 */
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+  transition: all 0.1s ease-in-out;
 }
 </style>

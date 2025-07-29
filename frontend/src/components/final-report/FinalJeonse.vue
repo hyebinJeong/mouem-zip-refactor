@@ -1,18 +1,17 @@
 <script setup>
 import BarChart from './charts/BarChart.vue';
 
-const mockData = {
-  jeonseRatio: 77.8,
-  regionAvgJeonseRatio: 75.0,
-};
+const props = defineProps({
+  jeonseRatio: { type: Number, default: 0 },
+  regionAvgJeonseRatio: { type: Number, default: 0 },
+});
 </script>
 
 <template>
   <div class="FinalJeonse">
-    <!-- <h2>전세가율 컴포넌트</h2> -->
     <BarChart
-      :jeonseRatio="mockData.jeonseRatio"
-      :regionAvgJeonseRatio="mockData.regionAvgJeonseRatio"
+      :jeonseRatio="jeonseRatio"
+      :regionAvgJeonseRatio="regionAvgJeonseRatio"
     />
   </div>
 </template>

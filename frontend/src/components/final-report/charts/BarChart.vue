@@ -2,20 +2,13 @@
 import { Bar } from 'vue-chartjs';
 import { Chart, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import plugin from 'chartjs-plugin-datalabels';
 
 // Chart.js 등록
-Chart.register(
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  ChartDataLabels
-  // Tooltip
-);
+Chart.register(BarElement, CategoryScale, LinearScale, ChartDataLabels);
 
 const props = defineProps({
-  jeonseRatio: Number,
-  regionAvgJeonseRatio: Number,
+  jeonseRatio: { type: Number, default: 0 },
+  regionAvgJeonseRatio: { type: Number, default: 0 },
 });
 
 const chartData = {
@@ -24,7 +17,7 @@ const chartData = {
   datasets: [
     {
       // y축
-      data: [props.regionAvgJeonseRatio, props.jeonseRatio],
+      data: [props.regionAvgJeonseRatio || 0, props.jeonseRatio || 0],
       backgroundColor: ['#007bff', '#fec43f'],
       borderRadius: {
         topLeft: 10,
@@ -77,7 +70,7 @@ const chartOptions = {
 
 <style scoped>
 .BarChart {
-  max-width: 100%;
+  width: 60vw;
   margin: 0 auto;
 }
 </style>

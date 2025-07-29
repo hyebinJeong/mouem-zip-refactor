@@ -12,31 +12,11 @@ const gradeColor = {
   판단보류: '#FBC02D',
 };
 
-const registry = ref('');
-const jeonse = ref('');
-const checklist = ref('');
-
-// 테스트용 리포트 id (추후 삭제 예정)
-const reportId = 1;
-
-const fetchGrades = async () => {
-  try {
-    // 백엔드 작업하고 주석 해제에서 실제 데이터 연동 예정
-    // const {data} = await axios.get(`/api/final-report/${reportId}`);
-    // registry.value = data.registryRating;
-    // jeonse.value = data.jeonseRatioRating;
-    // checklist.value = data.checklistRating;
-
-    // 테스트용 데이터
-    registry.value = '보통';
-    jeonse.value = '판단보류';
-    checklist.value = '안전';
-  } catch {
-    console.error('등급 데이터 가져오기 실패', err);
-  }
-};
-
-onMounted(fetchGrades);
+const props = defineProps({
+  registry: { type: String, default: '' },
+  jeonse: { type: String, default: '' },
+  checklist: { type: String, default: '' },
+});
 </script>
 
 <template>
@@ -45,19 +25,19 @@ onMounted(fetchGrades);
       <DonutChart
         v-if="registry"
         :grade="registry"
-        :color="gradeColor[registry]"
+        :color="gradeColor[registry] || '#ddd'"
         label="등기부등본"
       />
       <DonutChart
         v-if="jeonse"
         :grade="jeonse"
-        :color="gradeColor[jeonse]"
+        :color="gradeColor[jeonse] || '#ddd'"
         label="전세가율"
       />
       <DonutChart
         v-if="checklist"
         :grade="checklist"
-        :color="gradeColor[checklist]"
+        :color="gradeColor[checklist] || '#ddd'"
         label="체크리스트"
       />
     </div>
@@ -69,19 +49,21 @@ onMounted(fetchGrades);
   display: flex;
   justify-content: center;
   padding: 1rem;
+  margin-bottom: 3rem;
 }
 
 .donut-wrap {
   display: flex;
   justify-content: center;
-  gap: 8rem;
+  gap: 10rem;
   flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {
   .donut-wrap {
-    column-gap: 4rem;
-    row-gap: 1.5rem;
+    gap: 12rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
   }
 }
 </style>

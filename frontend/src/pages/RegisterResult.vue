@@ -29,36 +29,29 @@
         </span>
         입니다.
       </p>
-
-      <!-- 분석 결과 카드 -->
-      <!-- 위험요소 리스트 - Bootstrap 5 -->
-      <div class="col-6 p-4 overflow-auto" v-if="result && result.analysis">
-        <h3 class="h5 fw-bold mb-4 text-center">
-          어떤 점이 위험한지 하나씩 확인해보세요.
-        </h3>
-
+      <!-- 좌우분할 -->
+      <div class="row w-100">
         <div
-          v-for="item in analysisItems"
-          :key="item.key + '-details'"
-          class="card mb-3"
+          class="col-6 d-flex justify-content-center align-items-center"
+          style="padding: 1rem"
         >
-          <div class="card-body">
-            <h5 class="card-title">{{ item.label }}</h5>
-            <span
-              class="badge"
-              :class="hasInfo(item.key) ? 'bg-danger' : 'bg-success'"
-            >
-              {{
-                hasInfo(item.key) ? '해당 내역이 있어요' : '해당 내역이 없어요'
-              }}
-            </span>
+          <!-- PDF 뷰어 -->
+          <div
+            v-if="result?.fileUrl"
+            class="w-100 mt-4"
+            style="max-width: 64rem"
+          >
+            <PDFView :pdfUrl="result.fileUrl" />
           </div>
         </div>
-      </div>
-
-      <!-- PDF 뷰어 -->
-      <div v-if="result?.fileUrl" class="w-100 mt-4" style="max-width: 64rem">
-        <PDFView :pdfUrl="result.fileUrl" />
+        <div class="col-6 p-0">
+          <AnalysisCards
+            v-if="result && result.analysis"
+            :analysis="result.analysis"
+            :address="result.address"
+            :analysisItems="analysisItems"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -69,6 +62,7 @@ import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import PDFView from '@/components/PDFView.vue';
+import AnalysisCards from '@/components/AnalysisCards.vue';
 
 const route = useRoute();
 const result = ref(null);
@@ -78,23 +72,11 @@ const analysisItems = [
   { label: '가압류', key: 'provisionalSeizureInfos' },
   { label: '압류', key: 'seizureInfos' },
   { label: '가처분', key: 'injunctionInfos' },
-  { label: '신탁등기', key: 'trustInfos' },
   { label: '근저당권', key: 'mortgageInfos' },
+  { label: '신탁등기', key: 'trustInfos' },
   { label: '전세권설정', key: 'jeonseRightInfos' },
   { label: '가등기', key: 'provisionalRegistrationInfos' },
 ];
-
-// 상세 정보가 있는지 확인하는 computed
-const hasAnyDetails = computed(() => {
-  if (!result.value?.analysis) return false;
-
-  return analysisItems.some((item) => result.value.analysis[item.key]?.length);
-});
-
-// 내역 존재 여부 체크 함수
-function hasInfo(key) {
-  return result.value?.analysis?.[key]?.length > 0;
-}
 
 onMounted(async () => {
   const registerId = route.params.registerId;
@@ -108,6 +90,4 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
-/* 추가 스타일 필요하면 여기에 */
-</style>
+<style scoped></style>

@@ -14,7 +14,6 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-// legacy 경로에서 가져와야 내부 구조와 워커가 맞음
 import {
   getDocument,
   GlobalWorkerOptions,
@@ -35,39 +34,26 @@ const errorMessage = ref('');
 
 async function renderPage(num) {
   if (!pdfDoc) {
-    console.error('[renderPage] pdfDoc가 존재하지 않습니다.');
     return;
   }
   try {
-    console.log(`[renderPage] 시작 - 페이지 번호: ${num}`);
     const page = await pdfDoc.getPage(num);
-    console.log('[renderPage] 페이지 객체 가져오기 성공');
 
     const viewport = page.getViewport({ scale: 1.5 });
-    console.log(
-      `[renderPage] viewport 계산 - width: ${viewport.width}, height: ${viewport.height}`
-    );
 
     const ctx = canvas.value.getContext('2d');
     if (!ctx) {
       throw new Error('Canvas 2D context를 가져오지 못함');
     }
-    console.log('[renderPage] Canvas 2D 컨텍스트 가져오기 성공');
 
     canvas.value.height = viewport.height;
     canvas.value.width = viewport.width;
-    console.log(
-      `[renderPage] 캔버스 크기 설정 완료 - width: ${canvas.value.width}, height: ${canvas.value.height}`
-    );
 
     const renderTask = page.render({ canvasContext: ctx, viewport });
-    console.log('[renderPage] 렌더링 시작');
 
     await renderTask.promise;
-    console.log(`[renderPage] 페이지 ${num} 렌더링 완료`);
   } catch (e) {
     errorMessage.value = `페이지 렌더링 실패: ${e.message}`;
-    console.error('[renderPage] 에러 발생:', e);
   }
 }
 

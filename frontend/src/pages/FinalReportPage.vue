@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import DiagnosisGradeInfoModal from '@/components/final-report/DiagnosisGradeInfoModal.vue';
 import FinalGrade from '@/components/final-report/FinalGrade.vue';
 import FinalJeonse from '@/components/final-report/FinalJeonse.vue';
 import FinalRegistry from '@/components/final-report/FinalRegistry.vue';
 import FinalChecklist from '@/components/final-report/FinalChecklist.vue';
 import { useNavigation } from '@/composables/final-report/useNavigation';
+import { getFinalReport } from '@/api/finalReport';
 
 const showModal = ref(false);
 
@@ -18,6 +19,29 @@ const closeModal = () => {
 };
 
 const { goToHome, goToMyPage } = useNavigation();
+
+// 임시 목 데이터
+const reportId = 1;
+const reportData = ref({
+  registryRating: '보통',
+  jeonseRatioRating: '판단보류',
+  checklistRating: '안전',
+  jeonseRatio: 77.8,
+  regionAvgJeonseRatio: 75.0,
+});
+
+// reportData.value = null;
+// onMounted(async () => {
+//   const res = await getFinalReport(reportId);
+//   // 안전하게 받아온 데이터가 없으면 기본값 할당
+//   reportData.value = {
+//     registryRating: res?.registryRating ?? '',
+//     jeonseRatioRating: res?.jeonseRatioRating ?? '',
+//     checklistRating: res?.checklistRating ?? '',
+//     jeonseRatio: res?.jeonseRatio ?? 0,
+//     regionAvgJeonseRatio: res?.regionAvgJeonseRatio ?? 0,
+//   };
+// });
 </script>
 
 <template>
@@ -34,17 +58,50 @@ const { goToHome, goToMyPage } = useNavigation();
       >에 의해 설정된 등급입니다.
     </p>
     <DiagnosisGradeInfoModal :show="showModal" @close="closeModal" />
-    <FinalGrade />
+    <!-- v-if로 reportData 존재 확인 후 렌더링하여 undefined 방지 -->
+
+    <!-- 등급 -->
+    <div class="final-grade-wrap" style="margin-bottom: 10rem">
+      <FinalGrade
+        v-if="reportData"
+        :registry="reportData.registryRating"
+        :jeonse="reportData.jeonseRatioRating"
+        :checklist="reportData.checklistRating"
+      />
+    </div>
+
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
-    <h2>username님의 전세가율을 분석했어요.</h2>
-    <FinalJeonse />
+
+    <!-- 전세가율 -->
+    <h2 class="final-jeonse-wrap mt-5 mb-4">
+      username님의 전세가율을 분석했어요.
+    </h2>
+    <div style="margin-bottom: 5rem">
+      <FinalJeonse
+        v-if="reportData"
+        :jeonseRatio="reportData.jeonseRatio"
+        :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
+      />
+    </div>
+
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
-    <h2>username님의 등기부등본을 분석했어요.</h2>
-    <FinalRegistry />
+
+    <!-- 등기부등본 -->
+    <h2 class="final-registry-wrap mt-5 mb-4">
+      username님의 등기부등본을 분석했어요.
+    </h2>
+    <div style="margin-bottom: 5rem">
+      <FinalRegistry />
+    </div>
+
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
-    <h2>username님이 체크하지 않은 항목이에요.</h2>
-    <p>향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
-    <FinalChecklist />
+
+    <!-- 체크리스트 -->
+    <h2 class="mt-5 mb-3">username님이 체크하지 않은 항목이에요.</h2>
+    <p class="mb-4">향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
+    <div class="final-checklist-wrap" style="margin: 6rem 0">
+      <FinalChecklist />
+    </div>
     <div class="final-btn-wrap d-flex justify-content-center gap-5">
       <button
         class="btn btn-primary px-4 py-2 rounded-3 background-main"
@@ -63,8 +120,9 @@ const { goToHome, goToMyPage } = useNavigation();
 </template>
 
 <style scoped>
-/* .FinalReportPage {
-} */
+.FinalReportPage {
+  margin-bottom: 5rem;
+}
 
 .background-main {
   background: #1a80e5;

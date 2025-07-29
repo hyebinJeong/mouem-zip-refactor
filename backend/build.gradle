@@ -25,6 +25,9 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
+  // AWS S3
+  implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
   // Tabula
   implementation 'technology.tabula:tabula:1.0.5'
 

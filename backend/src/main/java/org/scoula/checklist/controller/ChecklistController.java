@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/checklist")
-@CrossOrigin(origins = "*") // CORS 설정
 public class ChecklistController {
 
     private final ChecklistService checklistService;

@@ -1,4 +1,78 @@
 package org.scoula.jeonseRate.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.scoula.jeonseRate.dto.JeonseRateDTO;
+import org.scoula.jeonseRate.enums.HouseTypeCode;
+import org.scoula.jeonseRate.enums.KosisRegionCode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
 public class KosisJeonseRateService {
+
+    private final WebClient webClient;
+
+
+    @Value("${kosis.key}")
+    private String apiKey;
+
+    private static final String BASE_URL = "https://kosis.kr/openapi/Param/statisticsParameterData.do";
+
+    private static final String ORG_ID = "408";
+    private static final String TBL_ID = "DT_30404_N0006_R1";
+    private static final String ITM_ID = "rate";
+
+
+
+    public List<Map<String, Object>> fetchKosisData(Optional<JeonseRateDTO> averageDealPriceOpt, String sggNm) {
+        Optional<String> objL1 = HouseTypeCode.fromName(averageDealPriceOpt.get().getBuildingType());
+        System.out.println("건물 유형(buildingType): " + averageDealPriceOpt.get().getBuildingType());
+        Optional<String> objL2 = KosisRegionCode.findCodeFromRawRegionName(sggNm);
+        System.out.println("objL2-->" + objL2);
+        // KOSIS 매핑 실패 시 판단 보류
+        if (objL1.isEmpty() || objL2.isEmpty()) {
+            System.out.println("❌ KOSIS 파라미터 매핑 실패 → objL1 또는 objL2 없음");
+            return List.of(); // 빈 리스트 반환
+        }
+
+        String response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("https")
+                        .host("kosis.kr")
+                        .path("/openapi/Param/statisticsParameterData.do")
+                        .queryParam("method", "getList")
+                        .queryParam("apiKey", apiKey)
+                        .queryParam("orgId", ORG_ID)
+                        .queryParam("tblId", TBL_ID)
+                        .queryParam("itmId", ITM_ID)
+                        .queryParam("objL1", objL1)
+                        .queryParam("objL2", objL2)
+                        .queryParam("format", "json")
+                        .queryParam("jsonVD", "Y")
+                        .queryParam("prdSe", "M")           // 주기: 월별
+                        .queryParam("newEstPrdCnt", "3")    // 최근 데이터 개수 → 3개월
+                        .build())
+                .retrieve()
+                .bodyToMono(byte[].class)
+                .map(bytes -> new String(bytes, Charset.forName("UTF-8")))
+                .doOnNext(raw -> System.out.println("📦 응답 원문 (EUC-KR 해석): " + raw))
+                .block();
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(response, new TypeReference<List<Map<String, Object>>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("❌ KOSIS 응답 파싱 실패", e);
+        }
+    }
 }

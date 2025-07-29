@@ -1,4 +1,9 @@
 package org.scoula.jeonseRate.mapper;
 
-public class JeonseAnalysisMapper {
+import org.apache.ibatis.annotations.Mapper;
+import org.scoula.jeonseRate.domain.JeonseAnalysisVO;
+
+@Mapper
+public interface JeonseAnalysisMapper {
+    void insertJeonseAnalysis(JeonseAnalysisVO analysis);
 }

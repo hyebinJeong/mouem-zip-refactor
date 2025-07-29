@@ -3,14 +3,16 @@ package org.scoula.jeonseRate.dto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.scoula.jeonseRate.enums.SafetyGrade;
 
-/**
- * 프론트에서 전세가율 분석을 요청할 때 전송하는 요청 데이터 DTO
- */
+
 @Getter
 @Setter
 @ToString
-public class LeaseRequestDTO {
+public class JeonseRateDTO {
     private String address;         // 사용자가 입력한 주소
-    private String jeonsePrice;     // 전세 보증금 (단위: 만원)
+    private int jeonsePrice;     // 전세 보증금 (단위: 만원)
+    private String buildingType;    // 건물 유형
+    private int areaAVGPrice;       // 지역 평균 매매가
+    private SafetyGrade grade;      // 등급
 }

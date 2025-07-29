@@ -82,7 +82,7 @@ public class LeaseDiagnosisController {
 
         // 9. DB 저장
         JeonseAnalysisVO vo = new JeonseAnalysisVO();
-        vo.setRegistryId(1); // 임시: 실제 프론트에서 받아야 함
+        vo.setRegistryId(2); // 임시: 실제 프론트에서 받아야 함
         vo.setUserId(1);       // 임시: 로그인 연동 후 세션에서 받아야 함
         vo.setExpectedSellingPrice(averageDealPrice); // 평균 매매가
         vo.setDeposit(jeonse);  // 사용자가 입력한 전세보증금

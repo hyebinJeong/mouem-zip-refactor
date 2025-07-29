@@ -192,4 +192,4 @@ CREATE TABLE term(
 # );
 
 -- 테스트용 코드
-INSERT INTO users (kakao_id, name) VALUES ('test@example.com', '테스트 사용자');
+# INSERT INTO users (kakao_id, name) VALUES ('test@example.com', '테스트 사용자');

@@ -25,8 +25,7 @@ public class AwsS3Service {
 
     private final AmazonS3 amazonS3;
 
-    // AWSS3Controller.java
-    public String uploadFile(MultipartFile multipartFile){
+    public String uploadFile(MultipartFile multipartFile) {
 
         if (multipartFile == null || multipartFile.isEmpty()) {
             return null;
@@ -48,9 +47,13 @@ public class AwsS3Service {
     }
 
     // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
-    public String createFileName(String fileName){
+    public String createFileName(String fileName) {
         System.out.println(UUID.randomUUID().toString());
         return UUID.randomUUID().toString().concat(getFileExtension(fileName));
+    }
+
+    public String getFileUrl(String fileName) {
+        return amazonS3.getUrl(bucket, fileName).toString();
     }
 
     //  "."의 존재 유무만 판단
@@ -61,7 +64,6 @@ public class AwsS3Service {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 형식의 파일" + fileName + ") 입니다.");
         }
     }
-
 
     public void deleteFile(String fileName){
         amazonS3.deleteObject(new DeleteObjectRequest(bucket, fileName));

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import PDFView from '@/components/PDFView.vue';
 
 const selectedFile = ref(null);
 const mortgageInfos = ref([]);
@@ -10,6 +11,7 @@ const provisionalRegistrationInfos = ref([]);
 const injunctionInfos = ref([]);
 const jeonseRightInfos = ref([]);
 const trustInfos = ref([]);
+const fileUrl = ref('');
 
 function handleFileChange(event) {
   selectedFile.value = event.target.files[0];
@@ -41,15 +43,17 @@ async function uploadFile() {
     });
     if (analysisResult.ok) {
       const result = await analysisResult.json();
-      mortgageInfos.value = result.mortgageInfos || [];
-      seizureInfos.value = result.seizureInfos || [];
-      provisionalSeizureInfos.value = result.provisionalSeizureInfos || [];
-      auctionInfos.value = result.auctionInfos || [];
+      fileUrl.value = result.fileUrl || '';
+      mortgageInfos.value = result.analysis?.mortgageInfos || [];
+      seizureInfos.value = result.analysis?.seizureInfos || [];
+      provisionalSeizureInfos.value =
+        result.analysis?.provisionalSeizureInfos || [];
+      auctionInfos.value = result.analysis?.auctionInfos || [];
       provisionalRegistrationInfos.value =
-        result.provisionalRegistrationInfos || [];
-      injunctionInfos.value = result.injunctionInfos || [];
-      jeonseRightInfos.value = result.jeonseRightInfos || [];
-      trustInfos.value = result.trustInfos || [];
+        result.analysis?.provisionalRegistrationInfos || [];
+      injunctionInfos.value = result.analysis?.injunctionInfos || [];
+      jeonseRightInfos.value = result.analysis?.jeonseRightInfos || [];
+      trustInfos.value = result.analysis?.trustInfos || [];
     } else {
       console.error('분석 실패');
     }
@@ -243,5 +247,8 @@ async function uploadFile() {
         </tr>
       </tbody>
     </table>
+  </div>
+  <div v-if="fileUrl">
+    <PDFView :pdfUrl="fileUrl" />
   </div>
 </template>

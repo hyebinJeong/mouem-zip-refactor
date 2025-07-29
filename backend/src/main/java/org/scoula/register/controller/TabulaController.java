@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,10 +30,11 @@ public class TabulaController {
     private final TrustServiceImpl trustServiceImpl;
 
     @PostMapping
-    public ResponseEntity<RegisterAnalysisResponse> analyzeRegistry(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> analyzeRegistry(@RequestParam("file") MultipartFile file) {
         try {
             // S3 업로드
             String uploadedFileName = awsS3Service.uploadFile(file);
+            String fileUrl = awsS3Service.getFileUrl(uploadedFileName);
 
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
 
@@ -56,7 +59,12 @@ public class TabulaController {
 
             tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status, uploadedFileName);
 
-            return ResponseEntity.ok(response);
+            Map<String, Object> result = new HashMap<>();
+            result.put("analysis", response);
+            result.put("fileName", uploadedFileName);
+            result.put("fileUrl", fileUrl);
+
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

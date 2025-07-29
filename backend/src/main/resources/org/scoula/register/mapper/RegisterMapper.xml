@@ -6,7 +6,15 @@
 <mapper namespace="org.scoula.register.mapper.RegisterMapper">
 
     <insert id="insertRegister" parameterType="org.scoula.register.domain.dto.RegisterDTO">
+        <selectKey keyProperty="registryId" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
         INSERT INTO registry_analysis (user_id, address, risks, registry_name, registry_rating, status, file_name)
         VALUES (#{userId}, #{address}, #{risks}, #{registryName}, #{registryRating}, #{status}, #{fileName})
     </insert>
+    <select id="selectByRegisterId" parameterType="int" resultType="org.scoula.register.domain.dto.RegisterDTO">
+        SELECT registry_id, user_id, address, risks, registry_name, registry_rating, analysis_date, status, file_name
+        FROM registry_analysis
+        WHERE registry_id = #{registryId}
+    </select>
 </mapper>

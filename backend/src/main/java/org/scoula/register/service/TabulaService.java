@@ -1,5 +1,6 @@
 package org.scoula.register.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -52,7 +53,7 @@ public class TabulaService {
         return extractedData;
     }
 
-    public void saveAnalysis(int userId, String address, RegisterAnalysisResponse response, String registryName, RegistryRating registryRating, boolean status, String fileName) throws Exception {
+    public int saveAnalysis(int userId, String address, RegisterAnalysisResponse response, String registryName, RegistryRating registryRating, boolean status, String fileName) throws Exception {
         String risks = objectMapper.writeValueAsString(response);
 
         RegisterDTO dto = new RegisterDTO();
@@ -65,5 +66,15 @@ public class TabulaService {
         dto.setFileName(fileName);
 
         registerMapper.insertRegister(dto);
+
+        return dto.getRegistryId();
+    }
+
+    public RegisterDTO findByRegisterId(Integer registerId) {
+        return registerMapper.selectByRegisterId(registerId);
+    }
+
+    public RegisterAnalysisResponse convertDTOToResponse(RegisterDTO dto) throws JsonProcessingException {
+        return objectMapper.readValue(dto.getRisks(), RegisterAnalysisResponse.class);
     }
 }

@@ -18,14 +18,12 @@ const contract = ref({
   special: '',
 });
 
-// 기본 특약 3개
 const defaultSpecialTerms = [
   '임대인은 임차인의 대항력 및 확정일자 확보 이전에 해당 부동산에 제3자와의 담보권 설정, 매도, 제3자 점유를 하지 않는다.',
   '임대인은 계약 체결 당시 해당 주택에 존재하는 모든 선순위 권리와 보증금 정보(선순위 세입자 포함)를 정확히 고지하였으며, 향후 변동 시 즉시 통보한다.',
   '본 계약은 공인중개사를 통하지 않고 당사자 간 직거래로 체결되었으며, 이에 따라 발생할 수 있는 권리분쟁은 민법 및 주택임대차보호법에 따르기로 한다.',
 ];
 
-// 전체 특약 목록: 기본 + 사용자 입력
 const mergedSpecialTerms = computed(() => {
   const userSpecials = Array.isArray(contract.value.special)
     ? contract.value.special
@@ -51,11 +49,9 @@ onMounted(() => {
       <h1><span class="highlight">계약서</span>가 완성되었어요.</h1>
       <p class="sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
 
-      <!-- 큰 매물명 제목 -->
       <h2 class="property-title">힐스테이트 팔교엘포레A3BL</h2>
       <hr class="divider" />
 
-      <!-- 표 형태 정보 표시 -->
       <div class="table-box">
         <table class="info-table">
           <tr>
@@ -90,7 +86,6 @@ onMounted(() => {
 
       <hr class="divider" />
 
-      <!-- 특약사항 -->
       <div class="special-section">
         <h3>특약 사항</h3>
 
@@ -165,12 +160,6 @@ h1 {
   vertical-align: top;
 }
 
-.line {
-  border: none;
-  border-top: 2px solid #000;
-  margin: 16px 0;
-}
-
 .divider {
   border: none;
   border-top: 1px solid #ccc;
@@ -193,11 +182,6 @@ h1 {
   color: #333;
   line-height: 1.6;
   margin-bottom: 10px;
-}
-
-.special-section strong {
-  font-weight: 600;
-  color: #111827;
 }
 
 .special-section .custom {

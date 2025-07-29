@@ -9,4 +9,7 @@
     <typeAliases>
         <package name="org.scoula.security.account.domain" />
     </typeAliases>
+    <mappers>
+        <mapper resource="org/scoula/mapper/UserMapper.xml"/>
+    </mappers>
 </configuration>

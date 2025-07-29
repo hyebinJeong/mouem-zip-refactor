@@ -1,14 +1,12 @@
 <template>
   <div class="container">
     <div class="content-box">
-      <!-- 제목 및 피해규모 바 -->
       <div class="header-section">
         <div class="title-text">
           <div class="main-title">
             <button
               class="back-icon-btn"
               @click="$router.push({ name: 'reference-contract' })"
-              title="뒤로가기"
             >
               ←
             </button>
@@ -19,14 +17,11 @@
         </div>
         <div class="scale-bar">
           <div class="scale-label">피해 예상 규모</div>
-          <div class="scale-bar-graph">
-            <div class="bar-fill"></div>
-          </div>
+          <div class="scale-bar-graph"><div class="bar-fill"></div></div>
           <div class="scale-result">중요</div>
         </div>
       </div>
 
-      <!-- 특약 항목 리스트 -->
       <div class="scroll-wrapper">
         <div class="grid-box">
           <div
@@ -41,13 +36,11 @@
         </div>
       </div>
 
-      <!-- 캐릭터 이미지 -->
       <div class="character-box">
         <img src="@/assets/skybuddy.png" alt="버디 캐릭터" />
       </div>
     </div>
 
-    <!-- 모달 -->
     <div v-if="selectedItem" class="modal-overlay" @click.self="closeModal">
       <div class="modal-box">
         <div class="modal-header">
@@ -91,14 +84,12 @@ export default {
       try {
         const response = await axios.get('/api/recommendation');
         const data = response.data;
-
         const importanceMap = {
           높음: 'red',
           중간: 'yellow',
           낮음: 'green',
           기타: 'white',
         };
-
         const grouped = {};
 
         data.forEach((item) => {
@@ -128,15 +119,21 @@ export default {
       this.selectedItem = null;
     },
     selectClause(clause) {
-      console.log('선택한 조항:', clause);
-
       const selected = JSON.parse(
         sessionStorage.getItem('selectedClauses') || '[]'
       );
-      selected.push(clause);
-      sessionStorage.setItem('selectedClauses', JSON.stringify(selected));
 
-      alert('조항이 선택되었습니다.');
+      const alreadyExists = selected.some((item) => item.text === clause.text);
+
+      if (!alreadyExists) {
+        selected.push(clause);
+        sessionStorage.setItem('selectedClauses', JSON.stringify(selected));
+        alert('특약 사항이 추가되었습니다.');
+      } else {
+        alert('이미 선택된 조항입니다.');
+      }
+
+      this.closeModal();
     },
   },
 };

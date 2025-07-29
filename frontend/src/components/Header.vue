@@ -101,7 +101,7 @@ const goMyPage = () => router.push('/my')
 }
 
 .dropdown-list {
-  background-color: #d9d9d9;
+  background-color: #eaeaea;
   font-weight: bolder;
   font-size: 18px;
   position: absolute;
@@ -114,7 +114,8 @@ const goMyPage = () => router.push('/my')
   list-style: none;
   z-index: 10;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  border-radius: 4px;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .dropdown-list li {
@@ -139,5 +140,16 @@ const goMyPage = () => router.push('/my')
   cursor: pointer;
   z-index: 3;
   margin-left: auto;
+}
+
+.mypage:hover {
+  color: #007bff;
+  transition: all 0.1s ease-in-out;
+}
+
+.menu-item:hover {
+  color: #007bff; /* 글자색 변경 */
+  border-bottom: 2px solid #007bff; /* 밑줄 추가 */
+  transition: all 0.1s ease-in-out; /* 부드러운 효과 */
 }
 </style>

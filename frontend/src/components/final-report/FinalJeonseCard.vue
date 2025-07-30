@@ -18,8 +18,11 @@ const props = defineProps({
     <p>예상 전세가율:{{ (jeonseRatio || 0).toLocaleString() }}%</p>
     <hr />
     <p class="mt-3">
-      <span class="fw-bold">{{ username }}님의 전세가율은</span>
-      <span>{{ jeonseRatioRating }}입니다.</span>
+      <span>{{ username }}님의 전세가율은 </span>
+      <span
+        ><span class="fw-bold">{{ jeonseRatioRating }}</span
+        >등급입니다.</span
+      >
     </p>
   </div>
 </template>

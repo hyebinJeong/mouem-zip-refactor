@@ -9,7 +9,7 @@ const gradeColor = {
   보통: '#39B54A',
   주의: '#F7941D',
   위험: '#ED1C24',
-  판단보류: '#FBC02D',
+  판단보류: '#6C757D',
 };
 
 const props = defineProps({

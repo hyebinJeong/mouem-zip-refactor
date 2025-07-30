@@ -9,6 +9,7 @@ import org.scoula.jeonseRate.mapper.JeonseAnalysisMapper;
 import org.scoula.jeonseRate.service.AddressService;
 import org.scoula.jeonseRate.service.DealSearchService;
 import org.scoula.jeonseRate.service.KosisJeonseRateService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -137,5 +138,18 @@ public class LeaseDiagnosisController {
             months.add(String.format("%d%02d", target.getYear(), target.getMonthValue()));
         }
         return months;
+    }
+
+    @GetMapping("/result")
+    public ResponseEntity<?> getJeonseAnalysisResult(@RequestParam("registerId") int registerId) {
+        JeonseAnalysisVO analysis = jeonseAnalysisMapper.findByRegisterId(registerId);
+
+        if (analysis == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("분석 결과가 존재하지 않습니다.");
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "jeonseRate", analysis.getJeonseRatio()
+        ));
     }
 }

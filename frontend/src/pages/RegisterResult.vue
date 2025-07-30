@@ -49,7 +49,7 @@
             어떤 점이 위험한지 하나씩 확인해보세요.
           </h3>
           <h4>주소: {{ result.address }}</h4>
-          <h4>예상 전세가율:</h4>
+          <h4>예상 전세가율: {{ result.jeonseRate }}</h4>
           <AnalysisCards
             v-if="result && result.analysis"
             :analysis="result.analysis"
@@ -85,8 +85,17 @@ const analysisItems = [
 onMounted(async () => {
   const registerId = route.params.registerId;
   try {
-    const res = await axios.get(`/api/safety-check/${registerId}`);
-    result.value = res.data;
+    // 두 개의 API 요청을 병렬로 처리
+    const [safetyRes, jeonseRes] = await Promise.all([
+      axios.get(`/api/safety-check/${registerId}`),
+      axios.get(`/api/diagnosis/result?registerId=${registerId}`),
+    ]);
+
+    // jeonseRate를 기존 결과에 병합
+    result.value = {
+      ...safetyRes.data,
+      jeonseRate: jeonseRes.data.jeonseRate,
+    };
   } catch (e) {
     console.error('분석 결과 가져오기 실패:', e);
   }

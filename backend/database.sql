@@ -1,6 +1,6 @@
 # 기존 테이블 삭제 밑에 주석 풀고 진행하시면 됩니다.
 #  -- 외래 키 제약 해제
-#  SET FOREIGN_KEY_CHECKS = 0;
+# SET FOREIGN_KEY_CHECKS = 0;
 #
 #  -- DROP TABLE (역순으로 삭제)
 #  DROP TABLE IF EXISTS seizures;
@@ -27,7 +27,6 @@
 #  SET FOREIGN_KEY_CHECKS = 1;
 
 -- 수정 후 테이블
-
 DROP TABLE IF EXISTS contract_special_clause;
 DROP TABLE IF EXISTS final_report;
 DROP TABLE IF EXISTS checklist;

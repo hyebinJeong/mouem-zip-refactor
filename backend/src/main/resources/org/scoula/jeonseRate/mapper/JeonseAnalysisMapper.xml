@@ -23,4 +23,17 @@
                    #{jeonseRatioRating}
                )
     </insert>
+
+    <select id="findByRegisterId" resultType="org.scoula.jeonseRate.domain.JeonseAnalysisVO">
+        SELECT
+            registry_id,
+            user_id,
+            expected_selling_price,
+            deposit,
+            jeonse_ratio,
+            region_avg_jeonse_ratio,
+            jeonse_ratio_rating
+        FROM jeonse_analysis
+        WHERE registry_id = #{registerId}
+    </select>
 </mapper>

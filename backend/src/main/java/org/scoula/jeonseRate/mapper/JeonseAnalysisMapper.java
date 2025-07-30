@@ -6,4 +6,5 @@ import org.scoula.jeonseRate.domain.JeonseAnalysisVO;
 @Mapper
 public interface JeonseAnalysisMapper {
     void insertJeonseAnalysis(JeonseAnalysisVO analysis);
+    JeonseAnalysisVO findByRegisterId(int registerId);
 }

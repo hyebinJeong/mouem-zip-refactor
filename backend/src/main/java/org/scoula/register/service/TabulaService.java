@@ -53,6 +53,7 @@ public class TabulaService {
         return extractedData;
     }
 
+    // 등기부등본 테이블에 저장
     public int saveAnalysis(int userId, String address, RegisterAnalysisResponse response, String registryName, RegistryRating registryRating, boolean status, String fileName) throws Exception {
         String risks = objectMapper.writeValueAsString(response);
 
@@ -74,7 +75,13 @@ public class TabulaService {
         return registerMapper.selectByRegisterId(registerId);
     }
 
+    // 문자열로 저장된 json Java 객체로 역직렬화
     public RegisterAnalysisResponse convertDTOToResponse(RegisterDTO dto) throws JsonProcessingException {
         return objectMapper.readValue(dto.getRisks(), RegisterAnalysisResponse.class);
+    }
+
+    // 유저 번호로 분석된 등기부 목록 찾기(삭제상태 false인 목록만)
+    public List<RegisterDTO> findByUserId(Integer userId) {
+        return registerMapper.selectByUserId(userId);
     }
 }

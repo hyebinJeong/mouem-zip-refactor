@@ -27,7 +27,7 @@ const reportData = ref({
   registryRating: '보통',
   jeonseRatioRating: '위험',
   checklistRating: '안전',
-  jeonseRatio: 77.8,
+  jeonseRatio: 80,
   regionAvgJeonseRatio: 75.0,
   jeonseDeposit: 28000, // 만원 단위
   salePrice: 36000,
@@ -44,6 +44,9 @@ const reportData = ref({
 //     checklistRating: res?.checklistRating ?? '',
 //     jeonseRatio: res?.jeonseRatio ?? 0,
 //     regionAvgJeonseRatio: res?.regionAvgJeonseRatio ?? 0,
+//     salePrice: res?.salePrice ?? 0,
+//     jeonseDeposit: res?.jeonseDeposit ?? 0,
+//     username: res?.username ?? '사용자',
 //   };
 // });
 </script>
@@ -65,7 +68,7 @@ const reportData = ref({
     <!-- v-if로 reportData 존재 확인 후 렌더링하여 undefined 방지 -->
 
     <!-- 등급 -->
-    <div class="final-grade-wrap" style="margin-bottom: 10rem">
+    <div class="final-grade-wrap">
       <FinalGrade
         v-if="reportData"
         :registry="reportData.registryRating"
@@ -79,21 +82,31 @@ const reportData = ref({
     <!-- 전세가율 -->
     <div class="final-jeonse-wrap mt-5 mb-4">
       <div v-if="reportData.jeonseRatioRating !== '판단보류'">
-        <h2>{{ reportData.username }}님의 전세가율을 분석했어요.</h2>
-        <FinalJeonse
-          v-if="reportData"
-          :jeonseRatio="reportData.jeonseRatio"
-          :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
-        />
-
-        <FinalJeonseCard
-          v-if="reportData"
-          :salePrice="reportData.salePrice"
-          :jeonseDeposit="reportData.jeonseDeposit"
-          :jeonseRatio="reportData.jeonseRatio"
-          :jeonseRatioRating="reportData.jeonseRatioRating"
-          :username="reportData.username"
-        />
+        <h2 style="margin-bottom: 2rem">
+          {{ reportData.username }}님의 전세가율을 분석했어요.
+        </h2>
+        <div
+          class="d-flex flex-column flex-md-row justify-content-center align-items-end"
+          style="max-width: 960px; margin: 0 auto; height: auto"
+        >
+          <div class="final-jeonse-col" style="width: 100%; max-width: 480px">
+            <FinalJeonse
+              v-if="reportData"
+              :jeonseRatio="reportData.jeonseRatio"
+              :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
+            />
+          </div>
+          <div class="final-jeonse-col">
+            <FinalJeonseCard
+              v-if="reportData"
+              :salePrice="reportData.salePrice"
+              :jeonseDeposit="reportData.jeonseDeposit"
+              :jeonseRatio="reportData.jeonseRatio"
+              :jeonseRatioRating="reportData.jeonseRatioRating"
+              :username="reportData.username"
+            />
+          </div>
+        </div>
       </div>
       <div v-else>
         <h2>
@@ -139,12 +152,18 @@ const reportData = ref({
 </template>
 
 <style scoped>
-.FinalReportPage {
-  margin-bottom: 5rem;
+.final-jeonse-col {
+  width: 100%;
+  max-width: 480px;
 }
-
 .background-main {
   background: #1a80e5;
   color: #fff;
+}
+
+@media (max-width: 768px) {
+  .final-jeonse-col {
+    width: 100% !important;
+  }
 }
 </style>

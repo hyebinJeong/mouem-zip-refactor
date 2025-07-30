@@ -51,7 +51,12 @@ watch(
 <template>
   <div class="DonutChart" v-if="chartData && chartOptions">
     <div class="canvas-container">
-      <Doughnut :data="chartData" :options="chartOptions" />
+      <Doughnut
+        :data="chartData"
+        :options="chartOptions"
+        :width="180"
+        :height="180"
+      />
       <div class="donut-center-text" :style="{ color: props.color }">
         {{ props.grade }}
       </div>
@@ -63,8 +68,6 @@ watch(
 <style scoped>
 .DonutChart {
   position: relative;
-  width: 200px;
-  height: 200px;
   margin: 0 auto 2rem auto;
   display: flex;
   flex-direction: column;
@@ -74,17 +77,17 @@ watch(
 
 .donut-center-text {
   position: absolute;
-  top: 70%;
+  top: 35%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
 .donut-label {
   text-align: center;
   margin-top: 0.75rem;
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #000;
 }

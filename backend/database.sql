@@ -1,6 +1,6 @@
 # 기존 테이블 삭제 밑에 주석 풀고 진행하시면 됩니다.
 #  -- 외래 키 제약 해제
-#  SET FOREIGN_KEY_CHECKS = 0;
+# SET FOREIGN_KEY_CHECKS = 0;
 #
 #  -- DROP TABLE (역순으로 삭제)
 #  DROP TABLE IF EXISTS seizures;
@@ -27,7 +27,6 @@
 #  SET FOREIGN_KEY_CHECKS = 1;
 
 -- 수정 후 테이블
-
 DROP TABLE IF EXISTS contract_special_clause;
 DROP TABLE IF EXISTS final_report;
 DROP TABLE IF EXISTS checklist;
@@ -77,8 +76,6 @@ CREATE TABLE jeonse_analysis (
                                  jeonse_ratio DECIMAL(5,2) NOT NULL,        -- 전세가율
                                  region_avg_jeonse_ratio DECIMAL(5,2) NOT NULL, -- 지역 평균 전세가율
                                  jeonse_ratio_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
-                                 analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                                 status BOOLEAN NOT NULL,
                                  FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
                                  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );

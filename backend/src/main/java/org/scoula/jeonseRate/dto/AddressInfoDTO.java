@@ -13,4 +13,6 @@ import lombok.Setter;
 public class AddressInfoDTO {
     private String admCd;       // 법정동 코드
     private String jibunAddr;   // 지번 주소
+    private String siNm;        // 시도명
+    //private String sggNm;       // 구명
 }

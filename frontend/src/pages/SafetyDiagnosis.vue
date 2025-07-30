@@ -107,6 +107,11 @@ const submitForm = async () => {
     return;
   }
 
+  if (jeonsePrice.value < 1000) {
+    alert('보증금은 최소 1,000만원 이상 입력해주세요.');
+    return;
+  }
+
   const formData = new FormData();
   formData.append('file', file.value);
   formData.append('address', selectedAddress.value);
@@ -114,6 +119,7 @@ const submitForm = async () => {
   formData.append('registryName', registryName.value);
 
   try {
+    // 1단계: 등기부등본 분석
     const response = await fetch('http://localhost:8080/api/safety-check', {
       method: 'POST',
       body: formData,
@@ -125,6 +131,22 @@ const submitForm = async () => {
     }
 
     const registerId = await response.json();
+
+    // 2단계: 전세가율 분석
+    const leaseRes = await fetch('/api/diagnosis/leasePer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        registerId: registerId,
+        address: selectedAddress.value,
+        jeonsePrice: jeonsePrice.value,
+      }),
+    });
+    if (!leaseRes.ok) {
+      throw new Error(await leaseRes.text());
+    }
+
+    // 3단계: 모든 분석 완료 후 결과 페이지로 이동
     router.push(`/safety-check/${registerId}`);
   } catch (e) {
     alert('분석 실패: ' + e.message);

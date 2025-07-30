@@ -52,6 +52,11 @@ import { useRouter } from 'vue-router'
 import Buddy from '@/components/BuddyHelper.vue'
 import checklistItems from '@/stores/checklistStore.js'
 import TermViewModal from "@/components/TermViewModal.vue";
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const userId = Number(route.query.userId)
+const registryId = Number(route.query.registryId)
 
 // 용어 모달 표시 상태
 const showDictionaryModal = ref(false)
@@ -84,8 +89,6 @@ const prevSlide = () => {
 const checked = ref(Array(checklistItems.length).fill(false))
 
 const goNext = async () => {
-  const userId = 1; // 실제 로그인 유저 ID로 대체
-  const registryId = 123; // 계약서 분석 결과 ID (정확히 입력 필요)
 
   const payload = {
     userId,

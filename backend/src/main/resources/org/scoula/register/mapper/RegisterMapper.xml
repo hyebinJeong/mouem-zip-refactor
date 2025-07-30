@@ -17,4 +17,9 @@
         FROM registry_analysis
         WHERE registry_id = #{registryId}
     </select>
+    <select id="selectByUserId" resultType="org.scoula.register.domain.dto.RegisterDTO">
+        SELECT *
+        FROM registry_analysis
+        WHERE user_id = #{userId} AND status = false
+    </select>
 </mapper>

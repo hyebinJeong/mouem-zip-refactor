@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.checklist.mapper.ChecklistMapper">
+
+    <insert id="insertChecklist">
+        INSERT INTO checklist (registry_id, user_id, checked, checklist_rating)
+        VALUES (#{registryId}, #{userId}, #{checkedJson}, #{checklistRating})
+    </insert>
+
+</mapper>

@@ -45,10 +45,14 @@
           </div>
         </div>
         <div class="col-6 p-0">
+          <h3 class="h5 fw-bold mb-4">
+            어떤 점이 위험한지 하나씩 확인해보세요.
+          </h3>
+          <h4>주소: {{ result.address }}</h4>
+          <h4>예상 전세가율:</h4>
           <AnalysisCards
             v-if="result && result.analysis"
             :analysis="result.analysis"
-            :address="result.address"
             :analysisItems="analysisItems"
           />
         </div>
@@ -81,7 +85,7 @@ const analysisItems = [
 onMounted(async () => {
   const registerId = route.params.registerId;
   try {
-    const res = await axios.get(`/safety-check/${registerId}`);
+    const res = await axios.get(`/api/safety-check/${registerId}`);
     result.value = res.data;
   } catch (e) {
     console.error('분석 결과 가져오기 실패:', e);

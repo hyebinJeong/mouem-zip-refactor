@@ -100,33 +100,23 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useCategoryStore } from '@/stores/categoryStore';
 
 const router = useRouter();
 const search = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 15;
 
-const categories = ref([
-  {
-    id: 1,
-    name: '전세계약과 돈 관련',
-    description:
-      '전세 계약에서 오는 보증금, 계약금, 관리비 등 금전 거래 용어를 다룹니다.',
-    color: '#DFF6DD',
-  },
-  {
-    id: 2,
-    name: '전세 권리 보호',
-    description:
-      '계약 전 꼭 확인해야 할 등기부 권리관계, 담보, 중개사 보장 등 보호장치 용어를 포함합니다.',
-    color: '#DDF1FC',
-  },
-]);
+const categoryStore = useCategoryStore();
+
+onMounted(() => {
+  categoryStore.fetchCategories();
+});
 
 const filteredCategories = computed(() =>
-  categories.value.filter(
+  categoryStore.categories.filter(
     (c) =>
       c.name.toLowerCase().includes(search.value.toLowerCase()) ||
       c.description.toLowerCase().includes(search.value.toLowerCase())

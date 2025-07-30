@@ -1,4 +1,3 @@
-<!-- src/views/category/CategoryAdd.vue -->
 <template>
   <div
     class="p-4 position-relative"
@@ -24,6 +23,7 @@
           type="text"
           class="form-control"
           placeholder="카테고리를 입력해주세요."
+          required
         />
       </div>
 
@@ -33,6 +33,7 @@
           v-model="category_description"
           class="form-control"
           placeholder="카테고리 설명을 입력해주세요."
+          required
         ></textarea>
       </div>
 
@@ -59,24 +60,29 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useCategoryStore } from '@/stores/categoryStore';
 
 const router = useRouter();
+const categoryStore = useCategoryStore();
 
 const category_name = ref('');
 const category_description = ref('');
 const category_color = ref('#000000');
 
 const goBack = () => {
-  router.back(); // 또는 router.push('/category')
+  router.back();
 };
 
-const handleSubmit = () => {
-  // 저장 처리 로직 예시
-  console.log({
-    category_name: category_name.value,
-    category_description: category_description.value,
-    category_color: category_color.value,
-  });
-  goBack();
+const handleSubmit = async () => {
+  try {
+    await categoryStore.addCategory({
+      name: category_name.value,
+      description: category_description.value,
+      color: category_color.value,
+    });
+    goBack();
+  } catch (error) {
+    alert('카테고리 추가 중 오류가 발생했습니다.');
+  }
 };
 </script>

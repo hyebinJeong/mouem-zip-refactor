@@ -4,7 +4,6 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueDevTools from 'vite-plugin-vue-devtools';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), vueDevTools()],
   resolve: {
@@ -18,6 +17,9 @@ export default defineConfig({
         target: 'http://localhost:8080',
       },
     },
+  },
+  optimizeDeps: {
+    include: ['pdfjs-dist/legacy/build/pdf'],
   },
   build: {
     outDir: '../backend/src/main/webapp/resources',

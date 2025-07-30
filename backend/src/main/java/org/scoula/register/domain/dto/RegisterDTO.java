@@ -19,4 +19,5 @@ public class RegisterDTO {
     private RegistryRating registryRating;
     private LocalDateTime analysis_date;
     private boolean status;
+    private String fileName;
 }

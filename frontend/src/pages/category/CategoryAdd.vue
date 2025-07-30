@@ -76,9 +76,9 @@ const goBack = () => {
 const handleSubmit = async () => {
   try {
     await categoryStore.addCategory({
-      name: category_name.value,
+      categoryName: category_name.value,
       description: category_description.value,
-      color: category_color.value,
+      categoryColor: category_color.value,
     });
     goBack();
   } catch (error) {

@@ -82,9 +82,9 @@ const goBack = () => {
 const loadCategory = () => {
   const category = categoryStore.getCategoryById(id);
   if (category) {
-    category_name.value = category.name;
+    category_name.value = category.categoryName;
     category_description.value = category.description;
-    category_color.value = category.color;
+    category_color.value = category.categoryColor;
   } else {
     alert('존재하지 않는 카테고리입니다.');
     goBack();
@@ -94,9 +94,9 @@ const loadCategory = () => {
 const handleSubmit = async () => {
   try {
     await categoryStore.updateCategory(id, {
-      name: category_name.value,
+      categoryName: category_name.value,
       description: category_description.value,
-      color: category_color.value,
+      categoryColor: category_color.value,
     });
     goBack();
   } catch (error) {

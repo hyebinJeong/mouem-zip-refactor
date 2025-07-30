@@ -37,17 +37,17 @@
       <tbody>
         <tr
           v-for="item in paginatedCategories"
-          :key="item.id"
-          @click="goToEdit(item.id)"
+          :key="item.categoryId"
+          @click="goToEdit(item.categoryId)"
           style="cursor: pointer"
         >
-          <td class="text-body">{{ item.name }}</td>
+          <td class="text-body">{{ item.categoryName }}</td>
           <td>{{ truncateText(item.description, 30) }}</td>
           <td>
             <span
               class="d-inline-block rounded-circle"
               :style="{
-                backgroundColor: item.color,
+                backgroundColor: item.categoryColor,
                 width: '20px',
                 height: '20px',
               }"
@@ -118,7 +118,7 @@ onMounted(() => {
 const filteredCategories = computed(() =>
   categoryStore.categories.filter(
     (c) =>
-      c.name.toLowerCase().includes(search.value.toLowerCase()) ||
+      c.categoryName.toLowerCase().includes(search.value.toLowerCase()) ||
       c.description.toLowerCase().includes(search.value.toLowerCase())
   )
 );

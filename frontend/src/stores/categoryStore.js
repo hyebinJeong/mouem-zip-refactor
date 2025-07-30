@@ -12,7 +12,7 @@ export const useCategoryStore = defineStore('category', {
       this.loading = true;
       this.error = null;
       try {
-        const res = await axios.get('/api/categories'); // 실제 API 경로 맞게 수정하세요
+        const res = await axios.get('/api/category-manager'); // 변경된 API 경로
         this.categories = res.data;
       } catch (err) {
         this.error = err;
@@ -22,7 +22,7 @@ export const useCategoryStore = defineStore('category', {
     },
     async addCategory(newCategory) {
       try {
-        const res = await axios.post('/api/categories', newCategory);
+        const res = await axios.post('/api/category-manager', newCategory);
         this.categories.push(res.data);
       } catch (err) {
         this.error = err;
@@ -31,10 +31,10 @@ export const useCategoryStore = defineStore('category', {
     },
     async updateCategory(id, updatedCategory) {
       try {
-        await axios.put(`/api/categories/${id}`, updatedCategory);
-        const index = this.categories.findIndex((c) => c.id === id);
+        await axios.put(`/api/category-manager/${id}`, updatedCategory);
+        const index = this.categories.findIndex((c) => c.categoryId === id);
         if (index !== -1) {
-          this.categories[index] = { id, ...updatedCategory };
+          this.categories[index] = { categoryId: id, ...updatedCategory };
         }
       } catch (err) {
         this.error = err;
@@ -43,15 +43,15 @@ export const useCategoryStore = defineStore('category', {
     },
     async deleteCategory(id) {
       try {
-        await axios.delete(`/api/categories/${id}`);
-        this.categories = this.categories.filter((c) => c.id !== id);
+        await axios.delete(`/api/category-manager/${id}`);
+        this.categories = this.categories.filter((c) => c.categoryId !== id);
       } catch (err) {
         this.error = err;
         throw err;
       }
     },
     getCategoryById(id) {
-      return this.categories.find((c) => c.id === id);
+      return this.categories.find((c) => c.categoryId === id);
     },
   },
 });

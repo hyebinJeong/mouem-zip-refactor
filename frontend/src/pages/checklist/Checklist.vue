@@ -83,8 +83,33 @@ const prevSlide = () => {
 
 const checked = ref(Array(checklistItems.length).fill(false))
 
-const goNext = () => {
-  router.push('/next-page')
+const goNext = async () => {
+  const userId = 1; // 실제 로그인 유저 ID로 대체
+  const registryId = 123; // 계약서 분석 결과 ID (정확히 입력 필요)
+
+  const payload = {
+    userId,
+    registryId,
+    checked: checked.value
+  }
+
+  try {
+    const res = await fetch('http://localhost:8080/api/checklist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+
+    if (!res.ok) throw new Error('전송 실패')
+    alert('체크리스트 저장 완료!')
+    router.push('/next-page')
+
+  } catch (e) {
+    console.error(e)
+    alert('저장에 실패했습니다.')
+  }
 }
 
 // 이미지 모달

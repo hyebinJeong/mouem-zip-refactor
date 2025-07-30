@@ -11,5 +11,6 @@
     </typeAliases>
     <mappers>
         <mapper resource="org/scoula/mapper/UserMapper.xml"/>
+        <mapper resource="org/scoula/checklistmapper/ChecklistMapper.xml"/>
     </mappers>
 </configuration>

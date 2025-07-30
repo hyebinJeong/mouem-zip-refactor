@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/pages/HomePage.vue';
 import SafetyDiagnosis from '@/pages/SafetyDiagnosis.vue';
 import SafetyDiagnosis2 from '@/pages/SafetyDiagnosis2.vue';
+import RegisterResult from '@/pages/RegisterResult.vue';
 import Preview from '@/pages/checklist/Preview.vue';
 import ReferenceContract from '@/pages/referencecontracts/ReferenceContract.vue';
 import GlossaryBook from '@/pages/GlossaryBook.vue';
@@ -42,6 +43,11 @@ const routes = [
     name: 'safety-check',
     component: SafetyDiagnosis,
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/safety-check/:registerId',
+    name: 'RegisterResult',
+    component: RegisterResult,
   },
   { path: '/checklist', name: 'preview', component: Preview },
   {

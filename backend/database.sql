@@ -77,8 +77,6 @@ CREATE TABLE jeonse_analysis (
                                  jeonse_ratio DECIMAL(5,2) NOT NULL,        -- 전세가율
                                  region_avg_jeonse_ratio DECIMAL(5,2) NOT NULL, -- 지역 평균 전세가율
                                  jeonse_ratio_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
-                                 analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                                 status BOOLEAN NOT NULL,
                                  FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
                                  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );

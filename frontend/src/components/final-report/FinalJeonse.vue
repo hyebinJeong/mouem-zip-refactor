@@ -1,12 +1,22 @@
-<script setup></script>
+<script setup>
+import BarChart from './charts/BarChart.vue';
+
+const props = defineProps({
+  jeonseRatio: { type: Number, default: 0 },
+  regionAvgJeonseRatio: { type: Number, default: 0 },
+});
+</script>
 
 <template>
   <div class="FinalJeonse">
-    <h2>전세가율 컴포넌트</h2>
+    <BarChart
+      :jeonseRatio="jeonseRatio"
+      :regionAvgJeonseRatio="regionAvgJeonseRatio"
+    />
   </div>
 </template>
 
 <style scoped>
-.FinalJeonse {
-}
+/* .FinalJeonse {
+} */
 </style>

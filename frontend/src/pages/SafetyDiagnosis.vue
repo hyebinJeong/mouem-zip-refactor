@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <h2 class="headline">
-      매물 안전성 분석, <strong>딱 <span class="blue">세 가지</span></strong
+      매물 안전성 분석, <strong>딱 <span class="blue">네 가지</span></strong
       >만 해요.
     </h2>
     <p class="sub">보증금, 주소를 입력하고 등기부등본만 올리면 끝!</p>
@@ -177,8 +177,9 @@ onMounted(() => {
 }
 .sub {
   text-align: center;
-  color: #555;
+  color: #424242;
   margin-bottom: 30px;
+  font-weight: bold;
 }
 .blue {
   color: #1a80e5;
@@ -202,6 +203,7 @@ label {
 .address-box {
   display: flex;
   gap: 10px;
+  width: 100%; 
 }
 .address-box input {
   flex: 1;
@@ -210,6 +212,7 @@ label {
   font-size: 12px;
   color: #888;
   margin-bottom: 8px;
+  white-space: nowrap;
 }
 .input-box {
   width: 100%;
@@ -223,8 +226,8 @@ label {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: textfield;
-  box-sizing: border-box; /* 추가 */
-  outline: none; /* 추가 */
+  box-sizing: border-box; 
+  outline: none; 
 }
 .upload-box {
   border: 2px dashed #ccc;
@@ -249,6 +252,7 @@ label {
   display: block;
 }
 .address-box button {
+  flex-shrink: 0;
   padding: 10px 14px;
   background-color: #2a7be4;
   color: white;

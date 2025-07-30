@@ -233,8 +233,8 @@ label {
   border: none;
   border-radius: 12px !important; /* !important로 강제 적용 */
   cursor: pointer;
-  box-sizing: border-box; /* 추가 */
-  outline: none; /* 추가 */
+  box-sizing: border-box;
+  outline: none;
 }
 .submit-btn {
   width: 100%;
@@ -246,7 +246,7 @@ label {
   border-radius: 12px !important; /* !important로 강제 적용 */
   cursor: pointer;
   margin-top: 20px;
-  box-sizing: border-box; /* 추가 */
-  outline: none; /* 추가 */
+  box-sizing: border-box;
+  outline: none;
 }
 </style>

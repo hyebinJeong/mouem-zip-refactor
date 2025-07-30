@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class PageController {
     @GetMapping("/safety-check")
     public String safetyCheckPage() {
-        return "forward:/index.html";  // 또는 적절한 뷰 이름
+        return "forward:/index.html";
     }
 
     @GetMapping("/safety-check/{registerId}")
     public String analysisResultPage(@PathVariable("registerId") Integer registerId, Model model) {
         model.addAttribute("registerId", registerId);
-        return "forward:/index.html"; // 또는 분석 결과 전용 페이지
+        return "forward:/index.html";
     }
 }

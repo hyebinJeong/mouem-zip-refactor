@@ -81,7 +81,7 @@ const analysisItems = [
 onMounted(async () => {
   const registerId = route.params.registerId;
   try {
-    const res = await axios.get(`/safety-check/${registerId}`);
+    const res = await axios.get(`/api/safety-check/${registerId}`);
     result.value = res.data;
   } catch (e) {
     console.error('분석 결과 가져오기 실패:', e);

@@ -5,11 +5,14 @@ import org.scoula.register.domain.RegistryRating;
 import org.scoula.register.domain.dto.*;
 import org.scoula.register.service.*;
 import org.scoula.register.util.RegisterRatingEvaluator;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,6 +20,7 @@ import java.util.List;
 public class TabulaController {
 
     private final TabulaService tabulaService;
+    private final AwsS3Service awsS3Service;
     private final MortgageServiceImpl mortgageServiceImpl;
     private final SeizureServiceImpl seizureServiceImpl;
     private final ProvisionalSeizureServiceImpl provisionalSeizureServiceImpl;
@@ -27,8 +31,11 @@ public class TabulaController {
     private final TrustServiceImpl trustServiceImpl;
 
     @PostMapping
-    public ResponseEntity<RegisterAnalysisResponse> analyzeRegistry(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> analyzeRegistry(@RequestParam("file") MultipartFile file) {
         try {
+            // S3 업로드
+            String uploadedFileName = awsS3Service.uploadFile(file);
+
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
 
             RegisterAnalysisResponse response = new RegisterAnalysisResponse();
@@ -45,12 +52,79 @@ public class TabulaController {
             int userId = 1;
             String address = "서울시 강남구 역삼동 123-45";
             String registryName = "역삼동 kb오피스텔";
+
+            // 위험 등급 평가
             RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response);
             boolean status = false;
 
-            tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status);
+            int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status, uploadedFileName);
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(registerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/{registerId}")
+    public ResponseEntity<?> getAnalysisByRegisterId(@PathVariable("registerId") Integer registerId) {
+        try {
+            RegisterDTO dto = tabulaService.findByRegisterId(registerId);
+            RegisterAnalysisResponse response = tabulaService.convertDTOToResponse(dto);
+
+            // 필터링 처리 (canceled=false만 남김)
+            response.setMortgageInfos(
+                    response.getMortgageInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setSeizureInfos(
+                    response.getSeizureInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setProvisionalSeizureInfos(
+                    response.getProvisionalSeizureInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setAuctionInfos(
+                    response.getAuctionInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setProvisionalRegistrationInfos(
+                    response.getProvisionalRegistrationInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setInjunctionInfos(
+                    response.getInjunctionInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setJeonseRightInfos(
+                    response.getJeonseRightInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setTrustInfos(
+                    response.getTrustInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+
+            String fileUrl = awsS3Service.getFileUrl(dto.getFileName());
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("analysis", response);
+            result.put("address", dto.getAddress());
+            result.put("rating", dto.getRegistryRating());
+            result.put("fileUrl", fileUrl);
+
+            return ResponseEntity.ok(result);
+        } catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("분석 결과를 찾을 수 없습니다.");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

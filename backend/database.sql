@@ -62,6 +62,7 @@ CREATE TABLE registry_analysis (
                                    registry_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL, -- 등기부등본 등급
                                    analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
                                    status BOOLEAN NOT NULL,
+                                   file_name VARCHAR(100) NOT NULL,
                                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
@@ -178,17 +179,17 @@ CREATE TABLE term(
                      FOREIGN KEY (category_id) REFERENCES category(category_id) ON DELETE CASCADE
 );
 
--- ============================================
--- 11. 등기부등본 PDF 저장
--- ============================================
-CREATE TABLE register_pdf (
-                              pdf_id INT PRIMARY KEY AUTO_INCREMENT,        -- pdf번호
-                              user_id INT,                         -- 유저번호
-                              file_name VARCHAR(255) NOT NULL,              -- 파일이름
-                              file_url VARCHAR(255) NOT NULL,               -- 파일url
-                              upload_date DATE NOT NULL,                    -- 업로드 시간
-                              FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-);
+# -- ============================================
+# -- 11. 등기부등본 PDF 저장
+# -- ============================================
+# CREATE TABLE register_pdf (
+#                               pdf_id INT PRIMARY KEY AUTO_INCREMENT,        -- pdf번호
+#                               user_id INT,                         -- 유저번호
+#                               file_name VARCHAR(255) NOT NULL,              -- 파일이름
+#                               file_url VARCHAR(255) NOT NULL,               -- 파일url
+#                               upload_date DATE NOT NULL,                    -- 업로드 시간
+#                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+# );
 
 -- 테스트용 코드
-# INSERT INTO users (email, name, role) VALUES ('test@example.com', '테스트 사용자', '일반');
+# INSERT INTO users (kakao_id, name) VALUES ('test@example.com', '테스트 사용자');

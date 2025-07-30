@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/category-manager")  // 변경된 경로
 public class CategorymanagerController {
 
     @Autowired
     private CategorymanagerService categorymanagerService;
 
-    @GetMapping
+    @GetMapping("")
     public List<CategorymanagerVO> getAllCategories() {
         return categorymanagerService.getAllCategories();
     }
@@ -25,7 +25,7 @@ public class CategorymanagerController {
         return categorymanagerService.getCategoryById(id);
     }
 
-    @PostMapping
+    @PostMapping("")
     public void addCategory(@RequestBody CategorymanagerDTO dto) {
         CategorymanagerVO vo = new CategorymanagerVO();
         vo.setCategoryName(dto.getCategoryName());

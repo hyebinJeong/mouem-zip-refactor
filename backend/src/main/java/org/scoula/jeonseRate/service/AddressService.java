@@ -56,6 +56,9 @@ public class AddressService {
         // 부번이 0이면 생략, 아니면 "본번-부번" 형태로 조합
         String jibun = lnbrSlno.equals("0") ? lnbrMnnm : lnbrMnnm + "-" + lnbrSlno;
 
-        return new AddressInfoDTO(admCd, jibun);
+        //String sggNm = json.getString("sggNm");
+        String siNm = json.getString("siNm");
+
+        return new AddressInfoDTO(admCd, jibun, siNm);
     }
 }

@@ -2,7 +2,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/pages/HomePage.vue';
 import SafetyDiagnosis from '@/pages/SafetyDiagnosis.vue';
-import SafetyDiagnosis2 from '@/pages/SafetyDiagnosis2.vue';
 import RegisterResult from '@/pages/RegisterResult.vue';
 import Preview from '@/pages/checklist/Preview.vue';
 import ReferenceContract from '@/pages/referencecontracts/ReferenceContract.vue';
@@ -33,11 +32,6 @@ import KakaoCallback from '@/pages/login/KakaoCallback.vue';
 const routes = [
   { path: '/', name: 'home', component: HomePage },
 
-  {
-    path: '/safetyDiagnosis2',
-    name: 'safetyDiagnosis2',
-    component: SafetyDiagnosis2,
-  },
   {
     path: '/safety-check',
     name: 'safety-check',

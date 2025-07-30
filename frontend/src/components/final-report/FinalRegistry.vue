@@ -7,6 +7,6 @@
 </template>
 
 <style scoped>
-.FinalRegistry {
-}
+/* .FinalRegistry {
+} */
 </style>

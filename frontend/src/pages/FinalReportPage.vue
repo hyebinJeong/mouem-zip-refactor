@@ -7,6 +7,7 @@ import FinalRegistry from '@/components/final-report/FinalRegistry.vue';
 import FinalChecklist from '@/components/final-report/FinalChecklist.vue';
 import { useNavigation } from '@/composables/final-report/useNavigation';
 import { getFinalReport } from '@/api/finalReport';
+import FinalJeonseCard from '@/components/final-report/FinalJeonseCard.vue';
 
 const showModal = ref(false);
 
@@ -24,10 +25,13 @@ const { goToHome, goToMyPage } = useNavigation();
 const reportId = 1;
 const reportData = ref({
   registryRating: '보통',
-  jeonseRatioRating: '판단보류',
+  jeonseRatioRating: '위험',
   checklistRating: '안전',
-  jeonseRatio: 77.8,
+  jeonseRatio: 80,
   regionAvgJeonseRatio: 75.0,
+  jeonseDeposit: 28000, // 만원 단위
+  salePrice: 36000,
+  username: '버디',
 });
 
 // reportData.value = null;
@@ -40,6 +44,9 @@ const reportData = ref({
 //     checklistRating: res?.checklistRating ?? '',
 //     jeonseRatio: res?.jeonseRatio ?? 0,
 //     regionAvgJeonseRatio: res?.regionAvgJeonseRatio ?? 0,
+//     salePrice: res?.salePrice ?? 0,
+//     jeonseDeposit: res?.jeonseDeposit ?? 0,
+//     username: res?.username ?? '사용자',
 //   };
 // });
 </script>
@@ -61,7 +68,7 @@ const reportData = ref({
     <!-- v-if로 reportData 존재 확인 후 렌더링하여 undefined 방지 -->
 
     <!-- 등급 -->
-    <div class="final-grade-wrap" style="margin-bottom: 10rem">
+    <div class="final-grade-wrap">
       <FinalGrade
         v-if="reportData"
         :registry="reportData.registryRating"
@@ -73,33 +80,58 @@ const reportData = ref({
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
     <!-- 전세가율 -->
-    <h2 class="final-jeonse-wrap mt-5 mb-4">
-      username님의 전세가율을 분석했어요.
-    </h2>
-    <div style="margin-bottom: 5rem">
-      <FinalJeonse
-        v-if="reportData"
-        :jeonseRatio="reportData.jeonseRatio"
-        :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
-      />
+    <div class="final-jeonse-wrap mt-5 mb-4">
+      <div v-if="reportData.jeonseRatioRating !== '판단보류'">
+        <h2 style="margin-bottom: 2rem">
+          {{ reportData.username }}님의 전세가율을 분석했어요.
+        </h2>
+        <div
+          class="d-flex flex-column flex-md-row justify-content-center align-items-end"
+          style="max-width: 960px; margin: 0 auto; height: auto"
+        >
+          <div class="final-jeonse-col" style="width: 100%; max-width: 480px">
+            <FinalJeonse
+              v-if="reportData"
+              :jeonseRatio="reportData.jeonseRatio"
+              :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
+            />
+          </div>
+          <div class="final-jeonse-col">
+            <FinalJeonseCard
+              v-if="reportData"
+              :salePrice="reportData.salePrice"
+              :jeonseDeposit="reportData.jeonseDeposit"
+              :jeonseRatio="reportData.jeonseRatio"
+              :jeonseRatioRating="reportData.jeonseRatioRating"
+              :username="reportData.username"
+            />
+          </div>
+        </div>
+      </div>
+      <div v-else>
+        <h2>
+          {{ reportData.username }}님의 전세가율은 판단보류 등급으로, 분석이
+          어려워요.
+        </h2>
+      </div>
     </div>
 
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
     <!-- 등기부등본 -->
-    <h2 class="final-registry-wrap mt-5 mb-4">
-      username님의 등기부등본을 분석했어요.
-    </h2>
-    <div style="margin-bottom: 5rem">
-      <FinalRegistry />
+    <div class="final-registry-wrap mt-5 mb-4">
+      <h2>{{ reportData.username }}님의 등기부등본을 분석했어요.</h2>
+      <div style="margin-bottom: 5rem">
+        <FinalRegistry />
+      </div>
     </div>
 
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
     <!-- 체크리스트 -->
-    <h2 class="mt-5 mb-3">username님이 체크하지 않은 항목이에요.</h2>
-    <p class="mb-4">향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
-    <div class="final-checklist-wrap" style="margin: 6rem 0">
+    <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
+      <h2>{{ reportData.username }}님이 체크하지 않은 항목이에요.</h2>
+      <p class="mb-4">향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
       <FinalChecklist />
     </div>
     <div class="final-btn-wrap d-flex justify-content-center gap-5">
@@ -120,12 +152,18 @@ const reportData = ref({
 </template>
 
 <style scoped>
-.FinalReportPage {
-  margin-bottom: 5rem;
+.final-jeonse-col {
+  width: 100%;
+  max-width: 480px;
 }
-
 .background-main {
   background: #1a80e5;
   color: #fff;
+}
+
+@media (max-width: 768px) {
+  .final-jeonse-col {
+    width: 100% !important;
+  }
 }
 </style>

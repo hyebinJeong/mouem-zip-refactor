@@ -72,6 +72,11 @@ const goMyPage = () => router.push('/my')
   cursor: pointer;
 }
 
+.logo-wrapper:hover{
+  transform: scale(1.03);
+  transition: transform 0.3s ease;
+}
+
 .logo {
   width: 200px;
   height: auto;

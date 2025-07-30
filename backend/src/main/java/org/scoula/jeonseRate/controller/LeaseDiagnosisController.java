@@ -30,6 +30,7 @@ public class LeaseDiagnosisController {
     public ResponseEntity<?> analyzeLease(@RequestBody JeonseRateDTO request) {
 //        System.out.println(request);
         String keyword = request.getAddress();
+        int registerId = request.getRegisterId();
 
         if (keyword == null || keyword.isBlank()) {
             return ResponseEntity.badRequest().body("주소가 없습니다.");
@@ -57,7 +58,7 @@ public class LeaseDiagnosisController {
         if (averageDealPriceOpt.isEmpty()) {
             SafetyGrade grade = SafetyGrade.판단보류;
             JeonseAnalysisVO vo = new JeonseAnalysisVO();
-            vo.setRegistryId(2);
+            vo.setRegistryId(registerId);
             vo.setUserId(1);
             vo.setExpectedSellingPrice(-1);
             vo.setDeposit(request.getJeonsePrice());
@@ -100,7 +101,7 @@ public class LeaseDiagnosisController {
 
         // 9. DB 저장
         JeonseAnalysisVO vo = new JeonseAnalysisVO();
-        vo.setRegistryId(2); // 임시: 실제 프론트에서 받아야 함
+        vo.setRegistryId(registerId); // 임시: 실제 프론트에서 받아야 함
         vo.setUserId(1);       // 임시: 로그인 연동 후 세션에서 받아야 함
         vo.setExpectedSellingPrice(averageDealPrice); // 평균 매매가
         vo.setDeposit(jeonse);  // 사용자가 입력한 전세보증금
@@ -111,18 +112,18 @@ public class LeaseDiagnosisController {
         jeonseAnalysisMapper.insertJeonseAnalysis(vo);
 
         // 10. 응답 반환(테스트용)
-        Map<String, Object> result = new HashMap<>();
-        result.put("admCd", addressInfo.getAdmCd());            // 법정동 코드
-        result.put("jibunAddr", addressInfo.getJibunAddr());    // 지번 주소
-        result.put("jeonsePrice", jeonse);                      // 입력 전세 보증금
-        result.put("expectedSalePrice", (int) averageDealPrice);// 예상 매매가
-        result.put("jeonseRate", roundedJeonseRate);            // 전세가율 (%)
-        result.put("avgKosisRate", Math.round(avgKosisRate * 10.0) / 10.0);
-        result.put("deviation", deviation);
-        result.put("grade", grade.name()); // 문자열로 변환
+//        Map<String, Object> result = new HashMap<>();
+//        result.put("admCd", addressInfo.getAdmCd());            // 법정동 코드
+//        result.put("jibunAddr", addressInfo.getJibunAddr());    // 지번 주소
+//        result.put("jeonsePrice", jeonse);                      // 입력 전세 보증금
+//        result.put("expectedSalePrice", (int) averageDealPrice);// 예상 매매가
+//        result.put("jeonseRate", roundedJeonseRate);            // 전세가율 (%)
+//        result.put("avgKosisRate", Math.round(avgKosisRate * 10.0) / 10.0);
+//        result.put("deviation", deviation);
+//        result.put("grade", grade.name()); // 문자열로 변환
 
 //        System.out.println(result);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.noContent().build();
     }
 
     /**

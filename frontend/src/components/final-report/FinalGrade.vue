@@ -9,7 +9,7 @@ const gradeColor = {
   보통: '#39B54A',
   주의: '#F7941D',
   위험: '#ED1C24',
-  판단보류: '#FBC02D',
+  판단보류: '#6C757D',
 };
 
 const props = defineProps({
@@ -20,26 +20,29 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="FinalGrade mb-5">
+  <div class="FinalGrade">
     <div class="donut-wrap">
-      <DonutChart
-        v-if="registry"
-        :grade="registry"
-        :color="gradeColor[registry] || '#ddd'"
-        label="등기부등본"
-      />
-      <DonutChart
-        v-if="jeonse"
-        :grade="jeonse"
-        :color="gradeColor[jeonse] || '#ddd'"
-        label="전세가율"
-      />
-      <DonutChart
-        v-if="checklist"
-        :grade="checklist"
-        :color="gradeColor[checklist] || '#ddd'"
-        label="체크리스트"
-      />
+      <div class="donut-item" v-if="registry">
+        <DonutChart
+          :grade="registry"
+          :color="gradeColor[registry] || '#ddd'"
+          label="등기부등본"
+        />
+      </div>
+      <div class="donut-item" v-if="jeonse">
+        <DonutChart
+          :grade="jeonse"
+          :color="gradeColor[jeonse] || '#ddd'"
+          label="전세가율"
+        />
+      </div>
+      <div class="donut-item" v-if="checklist">
+        <DonutChart
+          :grade="checklist"
+          :color="gradeColor[checklist] || '#ddd'"
+          label="체크리스트"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -53,17 +56,24 @@ const props = defineProps({
 }
 
 .donut-wrap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  gap: 4rem 6rem;
+  margin: 1rem 0;
+}
+
+.donut-item {
+  width: 180px;
   display: flex;
-  justify-content: center;
-  gap: 10rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
   .donut-wrap {
-    gap: 12rem;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 }
 </style>

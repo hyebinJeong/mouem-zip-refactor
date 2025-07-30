@@ -55,9 +55,27 @@ public class LeaseDiagnosisController {
         );
         // 조회된 매물이 없을 경우 메시지 반환
         if (averageDealPriceOpt.isEmpty()) {
+            SafetyGrade grade = SafetyGrade.판단보류;
+            JeonseAnalysisVO vo = new JeonseAnalysisVO();
+            vo.setRegistryId(2);
+            vo.setUserId(1);
+            vo.setExpectedSellingPrice(-1);
+            vo.setDeposit(request.getJeonsePrice());
+            vo.setJeonseRatio(-1);
+            vo.setRegionAvgJeonseRatio(-1);
+            vo.setJeonseRatioRating(grade);
+            jeonseAnalysisMapper.insertJeonseAnalysis(vo);
             return ResponseEntity.ok(Map.of(
                     "status", "NO_MATCHING_DEAL",
-                    "message", "해당 주소에 대한 유사 매물 정보를 찾을 수 없습니다."
+                    "message", "해당 주소에 대한 유사 매물 정보를 찾을 수 없습니다.",
+                    "grade", grade.name(),
+                    "jeonsePrice", request.getJeonsePrice(),
+                    "expectedSalePrice", -1,
+                    "jeonseRate", -1,
+                    "avgKosisRate", -1,
+                    "deviation", -1,
+                    "admCd", addressInfo.getAdmCd(),
+                    "jibunAddr", addressInfo.getJibunAddr()
             ));
         }
 
@@ -103,7 +121,7 @@ public class LeaseDiagnosisController {
         result.put("deviation", deviation);
         result.put("grade", grade.name()); // 문자열로 변환
 
-        System.out.println(result);
+//        System.out.println(result);
         return ResponseEntity.ok(result);
     }
 

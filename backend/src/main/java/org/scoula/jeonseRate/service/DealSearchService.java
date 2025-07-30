@@ -84,7 +84,7 @@ public class DealSearchService {
 
         // 모든 유형에서 매물이 없다면 판단 보류
         if (allDeals.isEmpty()) {
-            System.out.println("❌ 모든 유형에서 실거래 매물 없음 → 판단 보류");
+//            System.out.println("모든 유형에서 실거래 매물 없음 → 판단 보류");
             return Optional.empty();
         }
 
@@ -93,12 +93,11 @@ public class DealSearchService {
                 .filter(d -> d.getJibun() != null && d.getJibun().equals(jibun))
                 .collect(Collectors.toList());
 
-        System.out.println("필터~!: " + filtered);
-        System.out.println("📌 [매매가 조회] 검색 지번: " + jibun + ", 조회 매물 수: " + allDeals.size());
+//        System.out.println("📌 [매매가 조회] 검색 지번: " + jibun + ", 조회 매물 수: " + allDeals.size());
 
         // 매물이 없다면 판단 보류
         if (filtered.isEmpty()) {
-            System.out.println("같은 지번 매물 없음 → 판단 보류");
+//            System.out.println("같은 지번 매물 없음 → 판단 보류");
             return Optional.empty();
         }
 
@@ -130,7 +129,7 @@ public class DealSearchService {
             }
             return dto.getResponse().getBody().getItems().getItem();
         } catch (Exception e) {
-            System.out.println("응답 파싱 실패 → 빈 리스트 반환");
+//            System.out.println("응답 파싱 실패 → 빈 리스트 반환");
             return List.of();
         }
     }
@@ -156,8 +155,7 @@ public class DealSearchService {
                 .bodyToMono(String.class)   // 응답 본문을 문자열로 받음
                 .block();
 
-        System.out.println("매물->" + response);
-        System.out.println("[API 호출 완료] 유형: 아파트/연립/오피스텔, 응답 길이: " + response.length());
+//        System.out.println("매물->" + response);
 
         try {
             return objectMapper.readValue(response, DealResponseDTO.class);

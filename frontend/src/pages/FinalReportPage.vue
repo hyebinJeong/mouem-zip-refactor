@@ -7,6 +7,7 @@ import FinalRegistry from '@/components/final-report/FinalRegistry.vue';
 import FinalChecklist from '@/components/final-report/FinalChecklist.vue';
 import { useNavigation } from '@/composables/final-report/useNavigation';
 import { getFinalReport } from '@/api/finalReport';
+import FinalJeonseCard from '@/components/final-report/FinalJeonseCard.vue';
 
 const showModal = ref(false);
 
@@ -28,6 +29,9 @@ const reportData = ref({
   checklistRating: '안전',
   jeonseRatio: 77.8,
   regionAvgJeonseRatio: 75.0,
+  jeonseDeposit: 28000, // 만원 단위
+  salePrice: 36000,
+  username: '버디',
 });
 
 // reportData.value = null;
@@ -73,22 +77,23 @@ const reportData = ref({
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
     <!-- 전세가율 -->
-    <h2 class="final-jeonse-wrap mt-5 mb-4">
-      username님의 전세가율을 분석했어요.
-    </h2>
-    <div style="margin-bottom: 5rem">
-      <FinalJeonse
-        v-if="reportData"
-        :jeonseRatio="reportData.jeonseRatio"
-        :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
-      />
+    <div class="final-jeonse-wrap mt-5 mb-4">
+      <h2>{{ username }}님의 전세가율을 분석했어요.</h2>
+      <div style="margin-bottom: 5rem">
+        <FinalJeonse
+          v-if="reportData"
+          :jeonseRatio="reportData.jeonseRatio"
+          :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
+        />
+        <FinalJeonseCard />
+      </div>
     </div>
 
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
     <!-- 등기부등본 -->
     <h2 class="final-registry-wrap mt-5 mb-4">
-      username님의 등기부등본을 분석했어요.
+      {{ username }}님의 등기부등본을 분석했어요.
     </h2>
     <div style="margin-bottom: 5rem">
       <FinalRegistry />
@@ -97,7 +102,7 @@ const reportData = ref({
     <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
     <!-- 체크리스트 -->
-    <h2 class="mt-5 mb-3">username님이 체크하지 않은 항목이에요.</h2>
+    <h2 class="mt-5 mb-3">{{ username }}님이 체크하지 않은 항목이에요.</h2>
     <p class="mb-4">향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
     <div class="final-checklist-wrap" style="margin: 6rem 0">
       <FinalChecklist />

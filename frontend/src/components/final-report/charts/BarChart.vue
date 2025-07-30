@@ -49,7 +49,7 @@ const chartOptions = {
     y: {
       display: false,
       beginAtZero: true,
-      max: 100,
+      max: 120, // 라벨까지 잘 보이도록
     },
     x: {
       grid: { display: false }, // x축 선 제거
@@ -64,13 +64,15 @@ const chartOptions = {
 
 <template>
   <div class="BarChart">
-    <Bar :data="chartData" :options="chartOptions" />
+    <Bar :data="chartData" :options="chartOptions" :height="300" />
   </div>
 </template>
 
 <style scoped>
 .BarChart {
-  width: 60vw;
+  width: 100%;
+  max-width: 320px;
+  height: 300px;
   margin: 0 auto;
 }
 </style>

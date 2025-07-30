@@ -142,14 +142,12 @@ public class LeaseDiagnosisController {
 
     @GetMapping("/result")
     public ResponseEntity<?> getJeonseAnalysisResult(@RequestParam("registerId") int registerId) {
-        JeonseAnalysisVO analysis = jeonseAnalysisMapper.findByRegisterId(registerId);
+        Integer ratio  = jeonseAnalysisMapper.findJeonseRatioByRegisterId(registerId);
 
-        if (analysis == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("분석 결과가 존재하지 않습니다.");
+        if (ratio == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("전세가율 정보가 없습니다.");
         }
 
-        return ResponseEntity.ok(Map.of(
-                "jeonseRate", analysis.getJeonseRatio()
-        ));
+        return ResponseEntity.ok(Map.of("jeonseRate", ratio));
     }
 }

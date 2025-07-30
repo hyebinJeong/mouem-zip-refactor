@@ -235,8 +235,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onEscPress))
 
 .buddy-fixed {
   position: fixed;
-  top:200px;
-  right: 200px;
+  top:220px;
+  right: 100px;
   z-index: 50;
   display: flex;
   flex-direction: column;

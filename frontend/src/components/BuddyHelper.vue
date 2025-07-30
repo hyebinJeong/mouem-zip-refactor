@@ -26,8 +26,8 @@ const handleClick = () => {
 <style scoped>
 .buddy-fixed {
   position: fixed;
-  top: 200px;
-  right: 200px;
+  top: 220px;
+  right: 140px;
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -49,5 +49,29 @@ const handleClick = () => {
   font-size: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   white-space: nowrap;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.balloon-out::before,
+.balloon-out::after {
+  content: "";
+  position: absolute;
+  border-width: 10px;
+  border-style: solid;
+  right: 20px;
+}
+
+.balloon-out::before {
+  bottom: -21px;
+  border-color: rgba(0, 0, 0, 0.1) transparent transparent transparent;
+}
+
+.balloon-out::after {
+  bottom: -20px;
+  border-color: #fff transparent transparent transparent;
 }
 </style>

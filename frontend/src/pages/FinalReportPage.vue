@@ -32,6 +32,7 @@ const reportData = ref({
   jeonseDeposit: 28000, // 만원 단위
   salePrice: 36000,
   username: '버디',
+  checked: [true, true, false, true, false, true, true, true, false],
 });
 
 // reportData.value = null;
@@ -47,6 +48,7 @@ const reportData = ref({
 //     salePrice: res?.salePrice ?? 0,
 //     jeonseDeposit: res?.jeonseDeposit ?? 0,
 //     username: res?.username ?? '사용자',
+//     checked: res?.checked ?? []
 //   };
 // });
 </script>

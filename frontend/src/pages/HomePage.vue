@@ -255,4 +255,48 @@ async function goToAnalysis() {
 .green-text {
   color: #28a745;
 }
+@keyframes stepFadeIn {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.step-box {
+  opacity: 0;
+  animation: stepFadeIn 0.8s ease forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.step-box:nth-of-type(1) { animation-delay: 0.25s; }
+.step-box:nth-of-type(3) { animation-delay: 0.5s; }
+.step-box:nth-of-type(5) { animation-delay: 0.75s; }
+
+
+.step-box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes buddyJump {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+  50% { transform: translateY(0); }
+  70% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+
+@keyframes buddyWave {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(2deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.buddy-character {
+  height: 120px;
+  animation: buddyJump 1s ease forwards, buddyWave 2s ease-in-out infinite 1s;
+  transform-origin: bottom center;
+}
 </style>

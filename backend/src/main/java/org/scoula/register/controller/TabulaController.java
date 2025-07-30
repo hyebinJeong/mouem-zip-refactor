@@ -16,7 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/safety-check")
+@RequestMapping("/api/safety-check")
 public class TabulaController {
 
     private final TabulaService tabulaService;
@@ -31,7 +31,7 @@ public class TabulaController {
     private final TrustServiceImpl trustServiceImpl;
 
     @PostMapping
-    public ResponseEntity<?> analyzeRegistry(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> analyzeRegistry(@RequestParam("file") MultipartFile file, @RequestParam("address") String address, @RequestParam("registryName") String registryName) {
         try {
             // S3 업로드
             String uploadedFileName = awsS3Service.uploadFile(file);
@@ -50,8 +50,6 @@ public class TabulaController {
 
             // 임시 값
             int userId = 1;
-            String address = "서울시 강남구 역삼동 123-45";
-            String registryName = "역삼동 kb오피스텔";
 
             // 위험 등급 평가
             RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response);

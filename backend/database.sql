@@ -91,7 +91,7 @@ CREATE TABLE checklist (
                            user_id INT,
                            checked TEXT NOT NULL,               -- 체크 여부 전체 JSON으로 저장
                            checklist_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
-                           FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+                           FOREIGN KEY (user_id) REFERENCES users(user_id)  ON DELETE CASCADE,
                            FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE
 );
 

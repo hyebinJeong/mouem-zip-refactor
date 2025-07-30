@@ -1,4 +1,11 @@
-<script setup></script>
+<script setup>
+import checklistStore from '@/stores/checklistStore';
+import { computed } from 'vue';
+
+const props = defineProps({
+  checked: { type: Array, required: true },
+});
+</script>
 
 <template>
   <div class="FinalChecklist">

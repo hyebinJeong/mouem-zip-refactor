@@ -4,9 +4,6 @@
     style="padding: 1rem"
     v-if="analysis && analysisItems.length"
   >
-    <h3 class="h5 fw-bold mb-4">어떤 점이 위험한지 하나씩 확인해보세요.</h3>
-    <h4>주소: {{ address }}</h4>
-    <h4>예상 전세가율:</h4>
     <div v-for="item in analysisItems" :key="item.key" class="w-100 mb-4">
       <div class="card w-100">
         <div class="card-body">
@@ -101,7 +98,6 @@ import { defineProps } from 'vue';
 
 const props = defineProps({
   analysis: Object,
-  address: String,
   analysisItems: {
     type: Array,
     required: true,

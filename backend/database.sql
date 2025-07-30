@@ -44,7 +44,8 @@ DROP TABLE IF EXISTS users;
 -- 1. 사용자 관련
 -- ============================================
 CREATE TABLE users (
-                       kakao_id VARCHAR(100) PRIMARY KEY,
+                       user_id INT AUTO_INCREMENT PRIMARY KEY,
+                       kakao_id VARCHAR(100) UNIQUE NOT NULL,
                        name VARCHAR(50) NOT NULL,
                        role VARCHAR(50) DEFAULT 'USER'
 );
@@ -54,7 +55,7 @@ CREATE TABLE users (
 -- ============================================
 CREATE TABLE registry_analysis (
                                    registry_id INT AUTO_INCREMENT PRIMARY KEY,
-                                   kakao_id VARCHAR(100),
+                                   user_id INT,
                                    address VARCHAR(255) NOT NULL,             -- 주소
                                    risks TEXT NOT NULL,                  -- 위험 요소 전체를 JSON으로 저장
                                    registry_name VARCHAR(100) NOT NULL,  -- 등기부등본 이름
@@ -62,7 +63,7 @@ CREATE TABLE registry_analysis (
                                    analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
                                    status BOOLEAN NOT NULL,
                                    file_name VARCHAR(100) NOT NULL,
-                                   FOREIGN KEY (kakao_id) REFERENCES users(kakao_id) ON DELETE CASCADE
+                                   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- ============================================
@@ -70,7 +71,7 @@ CREATE TABLE registry_analysis (
 -- ============================================
 CREATE TABLE jeonse_analysis (
                                  registry_id INT PRIMARY KEY,
-                                 kakao_id VARCHAR(100),
+                                 user_id INT,
                                  expected_selling_price INT NOT NULL,       -- 예상 매매가
                                  deposit INT NOT NULL,                      -- 보증금
                                  jeonse_ratio DECIMAL(5,2) NOT NULL,        -- 전세가율
@@ -79,7 +80,7 @@ CREATE TABLE jeonse_analysis (
                                  analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                                  status BOOLEAN NOT NULL,
                                  FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
-                                 FOREIGN KEY (kakao_id) REFERENCES users(kakao_id) ON DELETE CASCADE
+                                 FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- ============================================
@@ -87,10 +88,10 @@ CREATE TABLE jeonse_analysis (
 -- ============================================
 CREATE TABLE checklist (
                            registry_id INT PRIMARY KEY,
-                           kakao_id VARCHAR(100),
+                           user_id INT,
                            checked TEXT NOT NULL,               -- 체크 여부 전체 JSON으로 저장
                            checklist_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
-                           FOREIGN KEY (kakao_id) REFERENCES users(kakao_id)  ON DELETE CASCADE,
+                           FOREIGN KEY (user_id) REFERENCES users(user_id)  ON DELETE CASCADE,
                            FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE
 );
 
@@ -99,11 +100,11 @@ CREATE TABLE checklist (
 -- ============================================
 CREATE TABLE final_report (
                               report_id INT AUTO_INCREMENT PRIMARY KEY,
-                              kakao_id VARCHAR(100),
+                              user_id INT,
                               registry_id INT,
                               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                               status BOOLEAN NOT NULL,
-                              FOREIGN KEY (kakao_id) REFERENCES users(kakao_id) ON DELETE CASCADE,
+                              FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
                               FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE
 );
 
@@ -112,7 +113,7 @@ CREATE TABLE final_report (
 -- ============================================
 CREATE TABLE contract (
                           contract_id INT AUTO_INCREMENT PRIMARY KEY, -- 계약서 번호 (PK)
-                          kakao_id VARCHAR(100),                      -- 유저 ID (FK)
+                          user_id INT,                      -- 유저 ID (FK)
                           contract_name VARCHAR(100) NOT NULL,       -- 계약서 이름
                           lessor_name VARCHAR(20) NOT NULL,          -- 임대인 성명
                           lessee_name VARCHAR(20) NOT NULL,          -- 임차인 성명
@@ -130,7 +131,7 @@ CREATE TABLE contract (
                           lease_start DATE NOT NULL,                 -- 임대 시작일
                           lease_end DATE NOT NULL,                   -- 임대 종료일
                           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,                  -- 생성일
-                          FOREIGN KEY (kakao_id) REFERENCES users(kakao_id) ON DELETE CASCADE
+                          FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- ============================================

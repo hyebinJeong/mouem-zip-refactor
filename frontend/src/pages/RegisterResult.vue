@@ -72,7 +72,13 @@
         >
           <p class="fw-bold fs-5 mb-2" style="color: #151fae">기본 정보</p>
           <h4>주소: {{ result.address }}</h4>
-          <h4>예상 전세가율: {{ result.jeonseRate }} %</h4>
+          <h4>
+            예상 전세가율:
+            <span v-if="result.jeonseRate !== -1"
+              >{{ result.jeonseRate }} %</span
+            >
+            <span v-else style="color: gray">판단 불가</span>
+          </h4>
           <div style="flex: 1; overflow-y: auto; margin-top: 1rem">
             <AnalysisCards
               v-if="result && result.analysis"

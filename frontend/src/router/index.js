@@ -49,6 +49,7 @@ const routes = [
     name: 'AgreementPage',
     component: AgreementPage,
     meta: { hideHeader: true },
+    meta: { requiresAuth: true },
   },
   {
     path: '/reference-contract',
@@ -61,7 +62,7 @@ const routes = [
     component: GuidebookPage,
   },
   { path: '/glossary', name: 'glossary', component: GlossaryBook },
-  { path: '/my', name: 'my', component: MyPage },
+  { path: '/my', name: 'my', component: MyPage, meta: { requiresAuth: true } },
   {
     path: '/checklist/nondiagnosis',
     name: 'nondiagnosis',

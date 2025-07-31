@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.scoula.oauth.domain.DTO.KakaoApiResponse;
 import org.scoula.oauth.domain.DTO.KakaoTokenResponseDTO;
 import org.scoula.oauth.domain.DTO.KakaoUserDTO;
+import org.scoula.oauth.mapper.UserMapper;
 import org.scoula.security.util.JwtProcessor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
     private final JwtProcessor jwtProcessor;
     private final UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final UserMapper userMapper;
 
     @Override
     public String getAccessTokenFromKakao(String code) {
@@ -98,9 +100,11 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
             ObjectMapper objectMapper = new ObjectMapper();
             KakaoApiResponse response = objectMapper.readValue(json, KakaoApiResponse.class);
 
-            // response.getId() → kakaoId
-            // response.getProperties().getNickname() → name
-            return new KakaoUserDTO(response.getId(), response.getProperties().getNickname());
+
+            String kakaoId = response.getId();
+            String name = response.getProperties().getNickname();
+            String email = response.getKakao_account().getEmail();
+            return new KakaoUserDTO(kakaoId, name, email, true);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,6 +112,34 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
         }
     }
 
+    @Override
+    public void softDeleteUser(String kakaoId) {
+        userMapper.softDeleteUser(kakaoId);
+    }
 
+    public void unlinkKakaoAccount(String accessToken) {
+        try {
+            URL url = new URL("https://kapi.kakao.com/v1/user/unlink");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                System.out.println("[회원탈퇴 성공]");
+            } else {
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    System.out.println("[회원탈퇴 실패] " + line);
+                }
+                br.close();
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("카카오 회원 탈퇴 요청 실패", e);
+        }
+    }
 
 }

@@ -38,7 +38,7 @@ DROP TABLE IF EXISTS special_clause;
 DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS registry_analysis;
 DROP TABLE IF EXISTS users;
-
+SELECT * from users;
 -- ============================================
 -- 1. 사용자 관련
 -- ============================================
@@ -46,7 +46,9 @@ CREATE TABLE users (
                        user_id INT AUTO_INCREMENT PRIMARY KEY,
                        kakao_id VARCHAR(100) UNIQUE NOT NULL,
                        name VARCHAR(50) NOT NULL,
-                       role VARCHAR(50) DEFAULT 'USER'
+                       email VARCHAR(100),
+                       role VARCHAR(50) DEFAULT 'USER',
+                       state boolean DEFAULT TRUE
 );
 
 -- ============================================

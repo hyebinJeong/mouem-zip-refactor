@@ -27,7 +27,8 @@ import javax.sql.DataSource;
         "org.scoula.specialcontractrecommendation.mapper",
         "org.scoula.oauth.mapper",
         "org.scoula.checklist.mapper",
-        "org.scoula.jeonseRate.mapper"
+        "org.scoula.jeonseRate.mapper",
+        "org.scoula.categorymanager.mapper"
 })
 @ComponentScan(basePackages = {"org.scoula", "org.scoula.oauth.service"})
 @EnableTransactionManagement

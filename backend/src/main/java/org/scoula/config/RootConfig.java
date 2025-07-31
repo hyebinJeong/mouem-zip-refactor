@@ -20,15 +20,31 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource({"classpath:/application.properties"})
-@MapperScan(basePackages = {"org.scoula.term.mapper","org.scoula.category.mapper","org.scoula.categorymanager.mapper"})
-@ComponentScan(basePackages = {"org.scoula"})
+@MapperScan(basePackages = {
+        "org.scoula.register.mapper",
+        "org.scoula.term.mapper",
+        "org.scoula.category.mapper",
+        "org.scoula.specialcontractrecommendation.mapper",
+        "org.scoula.oauth.mapper",
+        "org.scoula.checklist.mapper",
+        "org.scoula.jeonseRate.mapper",
+        "org.scoula.categorymanager.mapper"
+})
+@ComponentScan(basePackages = {
+        "org.scoula",
+        "org.scoula.oauth.service"
+})
 @EnableTransactionManagement
 @Log4j2
 public class RootConfig {
+
     @Value("${jdbc.driver}") String driver;
     @Value("${jdbc.url}") String url;
     @Value("${jdbc.username}") String username;
     @Value("${jdbc.password}") String password;
+
+    @Autowired
+    ApplicationContext applicationContext;
 
     @Bean
     public DataSource dataSource() {
@@ -37,24 +53,19 @@ public class RootConfig {
         config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
-        HikariDataSource dataSource = new HikariDataSource(config);
-        return dataSource;
+        return new HikariDataSource(config);
     }
-
-    @Autowired
-    ApplicationContext applicationContext;
 
     @Bean
     public SqlSessionFactory sqlSessionFactory() throws Exception {
         SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
         sqlSessionFactory.setConfigLocation(applicationContext.getResource("classpath:/mybatis-config.xml"));
         sqlSessionFactory.setDataSource(dataSource());
-        return (SqlSessionFactory) sqlSessionFactory.getObject();
+        return sqlSessionFactory.getObject();
     }
 
     @Bean
-    public DataSourceTransactionManager transactionManager(){
-        DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
-        return manager;
+    public DataSourceTransactionManager transactionManager() {
+        return new DataSourceTransactionManager(dataSource());
     }
 }

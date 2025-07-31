@@ -11,6 +11,7 @@ public class FinalReportRawDTO {
     private Double jeonseRatio;
     private Double regionAvgJeonseRatio;
     private Long deposit;
+    private Long expectedSellingPrice; // 예상 매매가
     private String checked; // json 문자열 그대로
     private String checklistRating;
 }

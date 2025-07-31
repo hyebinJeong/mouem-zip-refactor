@@ -15,6 +15,7 @@
             ja.jeonse_ratio AS jeonseRatio,
             ja.region_avg_jeonse_ratio AS regionAvgJeonseRatio,
             ja.deposit AS deposit,
+            ja.expected_selling_price AS expectedSellingPrice,
             c.checked AS checked,
             c.checklist_rating AS checklistRating
         FROM final_report fr

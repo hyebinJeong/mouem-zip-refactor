@@ -40,6 +40,7 @@ public class FinalReportServiceImpl implements FinalReportService {
                 .jeonseRatio(rawDto.getJeonseRatio())
                 .regionAvgJeonseRatio(rawDto.getRegionAvgJeonseRatio())
                 .deposit(rawDto.getDeposit())
+                .expectedSellingPrice(rawDto.getExpectedSellingPrice())
                 .checked(checkedList)
                 .checklistRating(rawDto.getChecklistRating())
                 .build();

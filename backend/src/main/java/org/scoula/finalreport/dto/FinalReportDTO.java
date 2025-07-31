@@ -1,9 +1,7 @@
 package org.scoula.finalreport.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -17,6 +15,7 @@ public class FinalReportDTO {
     private Double jeonseRatio; // 전세가율
     private Double regionAvgJeonseRatio; // 지역 평균 전세가율
     private Long deposit; // 보증금
+    private Long expectedSellingPrice; // 예상 매매가
     private List<Boolean> checked; // 체크 항목 상태
     private String checklistRating;
 }

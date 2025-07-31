@@ -20,31 +20,15 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource({"classpath:/application.properties"})
-@MapperScan(basePackages = {
-        "org.scoula.register.mapper",
-        "org.scoula.term.mapper",
-        "org.scoula.category.mapper",
-        "org.scoula.specialcontractrecommendation.mapper",
-        "org.scoula.oauth.mapper",
-        "org.scoula.checklist.mapper",
-        "org.scoula.jeonseRate.mapper",
-        "org.scoula.categorymanager.mapper"
-})
-@ComponentScan(basePackages = {
-        "org.scoula",
-        "org.scoula.oauth.service"
-})
+@MapperScan(basePackages = {"org.scoula.term.mapper","org.scoula.category.mapper","org.scoula.categorymanager.mapper"})
+@ComponentScan(basePackages = {"org.scoula"})
 @EnableTransactionManagement
 @Log4j2
 public class RootConfig {
-
     @Value("${jdbc.driver}") String driver;
     @Value("${jdbc.url}") String url;
     @Value("${jdbc.username}") String username;
     @Value("${jdbc.password}") String password;
-
-    @Autowired
-    ApplicationContext applicationContext;
 
     @Bean
     public DataSource dataSource() {
@@ -53,19 +37,24 @@ public class RootConfig {
         config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
-        return new HikariDataSource(config);
+        HikariDataSource dataSource = new HikariDataSource(config);
+        return dataSource;
     }
+
+    @Autowired
+    ApplicationContext applicationContext;
 
     @Bean
     public SqlSessionFactory sqlSessionFactory() throws Exception {
         SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
         sqlSessionFactory.setConfigLocation(applicationContext.getResource("classpath:/mybatis-config.xml"));
         sqlSessionFactory.setDataSource(dataSource());
-        return sqlSessionFactory.getObject();
+        return (SqlSessionFactory) sqlSessionFactory.getObject();
     }
 
     @Bean
-    public DataSourceTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(dataSource());
+    public DataSourceTransactionManager transactionManager(){
+        DataSourceTransactionManager manager = new DataSourceTransactionManager(dataSource());
+        return manager;
     }
 }

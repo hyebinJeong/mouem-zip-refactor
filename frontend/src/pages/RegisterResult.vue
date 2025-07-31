@@ -38,7 +38,7 @@
         >
           {{ result.rating }} 등급
         </span>
-        입니다.
+        <span class="fw-bold">입니다.</span>
       </div>
       <!-- 좌우분할 -->
       <div class="row w-100 align-items-start" style="height: 80vh">

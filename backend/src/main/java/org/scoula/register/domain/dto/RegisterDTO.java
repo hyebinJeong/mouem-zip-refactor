@@ -17,7 +17,7 @@ public class RegisterDTO {
     private String risks;
     private String registryName;
     private RegistryRating registryRating;
-    private LocalDateTime analysis_date;
+    private LocalDateTime analysisDate;
     private boolean status;
     private String fileName;
 }

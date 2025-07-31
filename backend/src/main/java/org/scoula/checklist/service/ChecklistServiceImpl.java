@@ -13,7 +13,6 @@ public class ChecklistServiceImpl implements ChecklistService {
     private final ChecklistMapper mapper;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final int[] scores = {15, 15, 5, 15, 15, 5, 5, 10, 15};
 
     public ChecklistServiceImpl(ChecklistMapper mapper) {
         this.mapper = mapper;
@@ -26,6 +25,7 @@ public class ChecklistServiceImpl implements ChecklistService {
             String checklistRating = calculateRating(dto.getChecked());
             mapper.insertChecklist(dto.getRegistryId(), dto.getUserId(), checkedJson, checklistRating);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("체크리스트 저장 실패", e);
         }
     }

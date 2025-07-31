@@ -7,7 +7,7 @@
 
     <select id="getFinalReport"
             parameterType="long"
-            resultType="org.scoula.finalreport.dto.FinalReportDTO">
+            resultType="org.scoula.finalreport.dto.FinalReportRawDTO">
         SELECT
             u.name AS username,
             ra.registry_rating AS registryRating,
@@ -24,5 +24,4 @@
                  JOIN checklist c ON ra.registry_id = c.registry_id
         WHERE fr.report_id = #{reportId}
     </select>
-
 </mapper>

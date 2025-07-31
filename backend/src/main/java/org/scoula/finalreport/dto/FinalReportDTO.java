@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+// 최종 응답용 dto
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class FinalReportDTO {
     private String username;

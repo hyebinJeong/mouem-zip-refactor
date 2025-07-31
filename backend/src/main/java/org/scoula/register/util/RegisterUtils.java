@@ -94,7 +94,7 @@ public class RegisterUtils {
         String after = text.substring(minIdx + foundKeyword.length()).trim();
 
         // 사업자번호 또는 주민번호와 같은 숫자 패턴 기준으로 자르기
-        Pattern pattern = Pattern.compile("^(.*?)\\d{3}-\\d{2}-\\d{5}");
+        Pattern pattern = Pattern.compile("^(.+?)\\s+(\\d{6}-\\d{7}|\\d{6}-\\d{1}\\*{6})");
         Matcher matcher = pattern.matcher(after);
         if (matcher.find()) {
             return matcher.group(1).trim();

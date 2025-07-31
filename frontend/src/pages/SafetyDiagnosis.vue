@@ -40,7 +40,7 @@
           style="display: none"
         />
         <span>{{
-          file?.name || 'Click or drag file to this area to upload'
+          file?.name || '여기를 눌러 파일을 선택하거나 첨부할 파일을 끌어다 놓으세요'
         }}</span>
       </div>
     </div>

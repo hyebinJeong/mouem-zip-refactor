@@ -48,8 +48,7 @@ const routes = [
     path: '/agreement', // 면책고지 경로
     name: 'AgreementPage',
     component: AgreementPage,
-    meta: { hideHeader: true },
-    meta: { requiresAuth: true },
+    meta: { hideHeader: true, requiresAuth: true },
   },
   {
     path: '/reference-contract',

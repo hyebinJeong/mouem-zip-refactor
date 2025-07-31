@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import DiagnosisGradeInfoModal from '@/components/final-report/DiagnosisGradeInfoModal.vue';
 import FinalGrade from '@/components/final-report/FinalGrade.vue';
 import FinalJeonse from '@/components/final-report/FinalJeonse.vue';
@@ -8,20 +9,30 @@ import FinalChecklist from '@/components/final-report/FinalChecklist.vue';
 import { useNavigation } from '@/composables/final-report/useNavigation';
 import { getFinalReport } from '@/api/finalReport';
 import FinalJeonseCard from '@/components/final-report/FinalJeonseCard.vue';
-import { computed } from 'vue';
 import checklistStore from '@/stores/checklistStore';
 
+const route = useRoute();
+// const reportData = ref(null);
 const showModal = ref(false);
 
 const openModal = () => {
   showModal.value = true;
 };
-
 const closeModal = () => {
   showModal.value = false;
 };
 
 const { goToHome, goToMyPage } = useNavigation();
+
+// 쿼리 파라미터 기반 (만약 path param 방식이면 수정하기)
+// const registryId = Number(route.query.registryId);
+
+// onMounted(async () => {
+//   if (!registryId || isNaN(registryId)) {
+//     console.warn('유효하지 않은 registryId');
+//     return;
+//   }
+// });
 
 // 임시 목 데이터
 const reportId = 1;
@@ -38,8 +49,6 @@ const reportData = ref({
   // checked: [true, true, true, true, true, true, true, true, true],
 });
 
-// reportData.value = null;
-// onMounted(async () => {
 //   const res = await getFinalReport(reportId);
 //   // 안전하게 받아온 데이터가 없으면 기본값 할당
 //   reportData.value = {
@@ -53,7 +62,6 @@ const reportData = ref({
 //     username: res?.username ?? '사용자',
 //     checked: res?.checked ?? []
 //   };
-// });
 
 const uncheckedItems = computed(() => {
   return checklistStore.filter(

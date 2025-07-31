@@ -13,6 +13,8 @@ import CheckList from '@/pages/checklist/Checklist.vue';
 import FinalReportPage from '@/pages/FinalReportPage.vue';
 import AgreementPage from '@/pages/AgreementPage.vue';
 import LoginPage from '@/pages/login/LoginPage.vue';
+import ContractListPage from '@/pages/listpages/ContractListPage.vue'
+import ReportListPage from '@/pages/listpages/ReportListPage.vue'
 
 // 카테고리 및 용어 관련 추가
 import CategoryAll from '@/pages/category/CategoryAll.vue';
@@ -144,6 +146,17 @@ const routes = [
     path: '/final-report',
     name: 'finalReportPage',
     component: FinalReportPage,
+  },
+
+  {
+    path: '/contract-list',
+    name: 'ContractListPage',
+    component: () => import('@/pages/listpages/ContractListPage.vue')
+  },
+
+  { path: '/report-list',
+    name: 'reportList',
+    component: () => import('@/pages/listpages/ReportListPage.vue')
   },
 ];
 

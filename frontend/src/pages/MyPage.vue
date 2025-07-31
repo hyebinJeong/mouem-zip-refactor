@@ -3,6 +3,8 @@ import Header from '../components/Header.vue';
 import { useAuthStore } from '@/stores/auth';
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const clientId = '88a530611ac6fa5a18f5747f67b6a359';
 const redirectUri = 'http://localhost:8080/';
@@ -55,6 +57,14 @@ async function onWithdraw() {
       console.error(error);
     }
   }
+}
+
+function goToContractPage() {
+  router.push('/contract-list')
+}
+function goToReportPage() {
+  console.log("good")
+  router.push('/report-list')
 }
 </script>
 
@@ -179,6 +189,10 @@ td {
   font-size: 14px;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.more-btn:hover{
+  background-color: #2563eb;
 }
 
 /* 반응형 대응 */

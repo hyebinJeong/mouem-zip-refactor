@@ -44,24 +44,48 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-const router = useRouter()
+import axios from 'axios'
 
-// 더미 매물 데이터
-const properties = [
-  { address: '서울시 강남구 역삼동 123-45', createdAt: '2025-07-20' },
-  { address: '서울시 강남구 역삼동 678-90', createdAt: '2025-07-21' },
-]
+const router = useRouter()
+const properties = ref([])
+
+// userId는 나중에 JWT 토큰에서 추출할 예정
+const userId = 1
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/registry/user/${userId}`)
+    properties.value = response.data.map(item => ({
+      registryId: item.registryId, // ✅ registry_id 추가
+      address: item.address,
+      createdAt: new Date(item.analysisDate).toLocaleDateString('ko-KR')
+    }))
+  } catch (error) {
+    console.error('매물 정보를 불러오는 중 오류 발생:', error)
+  }
+})
 
 function goToChecklist() {
   router.push('/checklist/nondiagnosis')
 }
 
 function handleRowClick(item) {
-  console.log('클릭한 매물:', item)
-  // 나중에 여기에 상세 이동 router.push(`/property/${item.id}`) 등 연결 가능
+  const userId = 1; // JWT에서 추출 예정
+
+  router.push({
+    path: '/checklist/checklist',
+    query: {
+      userId: userId,
+      registryId: item.registryId
+    }
+  })
 }
+
+
 </script>
+
 
 <style scoped>
 .wrapper {

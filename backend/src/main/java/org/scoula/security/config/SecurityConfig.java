@@ -104,7 +104,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .anyRequest().denyAll();                                   // 그 외 요청은 거부
                 .anyRequest().permitAll();                                  // 임시 개발용으로 api 모두 허용
 
-
+        http.cors();
 
         // 예외처리설정
         http

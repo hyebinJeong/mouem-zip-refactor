@@ -38,7 +38,8 @@ DROP TABLE IF EXISTS special_clause;
 DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS registry_analysis;
 DROP TABLE IF EXISTS users;
-SELECT * from users;
+# SELECT * from users;
+
 -- ============================================
 -- 1. 사용자 관련
 -- ============================================

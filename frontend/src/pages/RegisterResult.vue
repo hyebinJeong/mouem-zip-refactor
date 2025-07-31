@@ -28,7 +28,7 @@
         class="text-center px-4 py-3 mb-4"
         style="background-color: #f0f6ff; border-radius: 1rem; max-width: 640px"
       >
-        <span class="fw-bold">사용자님이 올려주신 등기부등본은</span>
+        <span class="fw-bold">사용자님이 올려주신 등기부등본은 </span>
         <span
           :class="{
             'text-success fw-bold': result.rating === '보통',
@@ -72,7 +72,7 @@
         >
           <p class="fw-bold fs-5 mb-2" style="color: #151fae">기본 정보</p>
           <h4>주소: {{ result.address }}</h4>
-          <h4>예상 전세가율: {{ result.jeonseRate }}</h4>
+          <h4>예상 전세가율: {{ result.jeonseRate }} %</h4>
           <div style="flex: 1; overflow-y: auto; margin-top: 1rem">
             <AnalysisCards
               v-if="result && result.analysis"

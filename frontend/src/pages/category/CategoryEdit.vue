@@ -1,4 +1,3 @@
-<!-- src/views/category/CategoryEdit.vue -->
 <template>
   <div
     class="p-4 position-relative"
@@ -24,6 +23,7 @@
           type="text"
           class="form-control"
           placeholder="카테고리를 입력해주세요."
+          required
         />
       </div>
 
@@ -33,6 +33,7 @@
           v-model="category_description"
           class="form-control"
           placeholder="카테고리 설명을 입력해주세요."
+          required
         ></textarea>
       </div>
 
@@ -62,10 +63,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useCategoryStore } from '@/stores/categoryStore';
 
 const router = useRouter();
 const route = useRoute();
-const id = route.params.id; // 수정할 카테고리 ID
+const categoryStore = useCategoryStore();
+
+const id = Number(route.params.id);
 
 const category_name = ref('');
 const category_description = ref('');
@@ -75,24 +79,47 @@ const goBack = () => {
   router.back();
 };
 
-const handleSubmit = () => {
-  console.log('수정됨:', {
-    category_name: category_name.value,
-    category_description: category_description.value,
-    category_color: category_color.value,
-  });
-  goBack();
+const loadCategory = () => {
+  const category = categoryStore.getCategoryById(id);
+  if (category) {
+    category_name.value = category.categoryName;
+    category_description.value = category.description;
+    category_color.value = category.categoryColor;
+  } else {
+    alert('존재하지 않는 카테고리입니다.');
+    goBack();
+  }
 };
 
-const handleDelete = () => {
-  console.log('삭제됨:', id);
-  goBack();
+const handleSubmit = async () => {
+  try {
+    await categoryStore.updateCategory(id, {
+      categoryName: category_name.value,
+      description: category_description.value,
+      categoryColor: category_color.value,
+    });
+    goBack();
+  } catch (error) {
+    alert('카테고리 수정 중 오류가 발생했습니다.');
+  }
+};
+
+const handleDelete = async () => {
+  if (confirm('정말 삭제하시겠습니까?')) {
+    try {
+      await categoryStore.deleteCategory(id);
+      goBack();
+    } catch (error) {
+      alert('삭제 중 오류가 발생했습니다.');
+    }
+  }
 };
 
 onMounted(() => {
-  // 예시로 기존 카테고리 정보 설정
-  category_name.value = '전세권 / 안전장치';
-  category_description.value = '보호 장치 관련 용어를 분류합니다.';
-  category_color.value = '#33CC99';
+  if (!categoryStore.categories.length) {
+    categoryStore.fetchCategories().then(loadCategory);
+  } else {
+    loadCategory();
+  }
 });
 </script>

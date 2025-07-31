@@ -56,7 +56,11 @@
         <ul class="pagination">
           <!-- 맨 앞으로 -->
           <li class="page-item" :class="{ disabled: currentPage === 1 }">
-            <button class="page-link" @click="changePage(1)" :disabled="currentPage === 1">
+            <button
+              class="page-link"
+              @click="changePage(1)"
+              :disabled="currentPage === 1"
+            >
               «
             </button>
           </li>
@@ -74,8 +78,15 @@
           </li>
 
           <!-- 맨 뒤로 -->
-          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-            <button class="page-link" @click="changePage(totalPages)" :disabled="currentPage === totalPages">
+          <li
+            class="page-item"
+            :class="{ disabled: currentPage === totalPages }"
+          >
+            <button
+              class="page-link"
+              @click="changePage(totalPages)"
+              :disabled="currentPage === totalPages"
+            >
               »
             </button>
           </li>
@@ -105,10 +116,11 @@ const contracts = ref([
   {
     id: 1,
     title: '안전 장치 조항',
-    detail: '임대인은 임차인의 대학력 및 확정일자 확보 이전에 해당 부동산에 제3자와의 담보권 설정, 매도, 제3자 점유를 하지 않는다.',
+    detail:
+      '임대인은 임차인의 대학력 및 확정일자 확보 이전에 해당 부동산에 제3자와의 담보권 설정, 매도, 제3자 점유를 하지 않는다.',
     importance: 'high',
   },
- {
+  {
     id: 2,
     title: '보증금 반환 조항',
     detail: '세부내용2',
@@ -282,7 +294,6 @@ const contracts = ref([
     detail: '세부내용40',
     importance: 'low',
   },
-
 ]);
 
 const filteredContracts = computed(() =>
@@ -325,11 +336,13 @@ const importanceDot = (level) => {
 };
 
 const importanceLabel = (level) => {
-  return {
-    high: '높음',
-    medium: '보통',
-    low: '낮음',
-  }[level] || '';
+  return (
+    {
+      high: '높음',
+      medium: '보통',
+      low: '낮음',
+    }[level] || ''
+  );
 };
 
 const truncateText = (text, maxLength) => {
@@ -350,13 +363,13 @@ button.btn-link {
   border-radius: 50%;
 }
 .red {
-  background-color: #ff0404;
+  background-color: #ff0000;
 }
 .yellow {
-  background-color: #ffde59;
+  background-color: #ffa500;
 }
 .green {
-  background-color: #42bc00;
+  background-color: #00ff00;
 }
 
 .pagination .page-item.active .page-link {

@@ -52,6 +52,7 @@ public class AddressService {
         String admCd = json.getString("admCd");       // 법정동 코드
         String lnbrMnnm = json.getString("lnbrMnnm"); // 지번 본번 (예: "595")
         String lnbrSlno = json.getString("lnbrSlno"); // 지번 부번 (예: "28")
+        String bdNm = json.optString("bdNm", "");  // 건물명 (없으면 빈 문자열)
 
         // 부번이 0이면 생략, 아니면 "본번-부번" 형태로 조합
         String jibun = lnbrSlno.equals("0") ? lnbrMnnm : lnbrMnnm + "-" + lnbrSlno;
@@ -59,6 +60,7 @@ public class AddressService {
         //String sggNm = json.getString("sggNm");
         String siNm = json.getString("siNm");
 
-        return new AddressInfoDTO(admCd, jibun, siNm);
+        return new AddressInfoDTO(admCd, jibun, siNm, bdNm);
+//        return new AddressInfoDTO(admCd, jibun, siNm);
     }
 }

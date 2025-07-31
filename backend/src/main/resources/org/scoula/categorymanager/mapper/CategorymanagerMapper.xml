@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.categorymanager.mapper.CategorymanagerMapper">
+
+  <resultMap id="CategoryResultMap" type="org.scoula.categorymanager.domain.CategorymanagerVO">
+    <id property="categoryId" column="category_id"/>
+    <result property="categoryName" column="category_name"/>
+    <result property="description" column="description"/>
+    <result property="categoryColor" column="category_color"/>
+  </resultMap>
+
+  <select id="getAllCategories" resultMap="CategoryResultMap">
+    SELECT * FROM category
+  </select>
+
+  <select id="getCategoryById" resultMap="CategoryResultMap">
+    SELECT * FROM category WHERE category_id = #{categoryId}
+  </select>
+
+  <insert id="insertCategory">
+    INSERT INTO category (category_name, description, category_color)
+    VALUES (#{categoryName}, #{description}, #{categoryColor})
+  </insert>
+
+  <update id="updateCategory">
+    UPDATE category
+    SET category_name = #{categoryName},
+        description = #{description},
+        category_color = #{categoryColor}
+    WHERE category_id = #{categoryId}
+  </update>
+
+  <delete id="deleteCategory">
+    DELETE FROM category WHERE category_id = #{categoryId}
+  </delete>
+
+</mapper>

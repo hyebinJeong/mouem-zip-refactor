@@ -134,9 +134,9 @@ const reportData = ref({
     <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
       <h2>{{ reportData.username }}님이 체크하지 않은 항목이에요.</h2>
       <p class="mb-4">향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
-      <FinalChecklist />
+      <FinalChecklist :checked="reportData.checked" />
     </div>
-    <div class="final-btn-wrap d-flex justify-content-center gap-5">
+    <div class="final-btn-wrap d-flex justify-content-center">
       <button
         class="btn btn-primary px-4 py-2 rounded-3 background-main"
         @click="goToHome"
@@ -161,6 +161,10 @@ const reportData = ref({
 .background-main {
   background: #1a80e5;
   color: #fff;
+}
+
+.final-btn-wrap {
+  column-gap: 14rem;
 }
 
 @media (max-width: 768px) {

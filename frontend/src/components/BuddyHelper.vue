@@ -1,7 +1,7 @@
 <template>
   <div class="buddy-fixed" @click="handleClick">
     <img src="@/assets/buddygreen.png" alt="버디" class="buddy-img-out" />
-    <div class="balloon-out" v-if="showBalloon">
+    <div class="balloon-out">
       어려운 단어가 있다면<br />
       여기를 클릭하세요!
     </div>
@@ -9,18 +9,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+const emit = defineEmits(['open-dictionary']);
 
-const emit = defineEmits(['open-dictionary'])
-
-const showBalloon = ref(true)
 const handleClick = () => {
-  // 말풍선 토글
-  showBalloon.value = !showBalloon.value
   // 모달열기알람
-  emit('open-dictionary')
-}
-
+  emit('open-dictionary');
+};
 </script>
 
 <style scoped>
@@ -52,13 +46,18 @@ const handleClick = () => {
   animation: pulse 1.5s ease-in-out infinite;
 }
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
 }
 
 .balloon-out::before,
 .balloon-out::after {
-  content: "";
+  content: '';
   position: absolute;
   border-width: 10px;
   border-style: solid;

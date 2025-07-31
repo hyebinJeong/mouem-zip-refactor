@@ -8,6 +8,8 @@ import FinalChecklist from '@/components/final-report/FinalChecklist.vue';
 import { useNavigation } from '@/composables/final-report/useNavigation';
 import { getFinalReport } from '@/api/finalReport';
 import FinalJeonseCard from '@/components/final-report/FinalJeonseCard.vue';
+import { computed } from 'vue';
+import checklistStore from '@/stores/checklistStore';
 
 const showModal = ref(false);
 
@@ -33,6 +35,7 @@ const reportData = ref({
   salePrice: 36000,
   username: '버디',
   checked: [true, true, false, true, false, true, true, true, false],
+  // checked: [true, true, true, true, true, true, true, true, true],
 });
 
 // reportData.value = null;
@@ -51,6 +54,12 @@ const reportData = ref({
 //     checked: res?.checked ?? []
 //   };
 // });
+
+const uncheckedItems = computed(() => {
+  return checklistStore.filter(
+    (_, index) => !reportData.value.checked?.[index]
+  );
+});
 </script>
 
 <template>
@@ -132,9 +141,16 @@ const reportData = ref({
 
     <!-- 체크리스트 -->
     <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
-      <h2>{{ reportData.username }}님이 체크하지 않은 항목이에요.</h2>
-      <p class="mb-4">향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
-      <FinalChecklist :checked="reportData.checked" />
+      <div v-if="uncheckedItems.length > 0">
+        <h2>{{ reportData.username }}님이 체크하지 않은 항목이에요.</h2>
+        <p class="mb-4">향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
+        <FinalChecklist :checked="reportData.checked" />
+      </div>
+      <div v-else>
+        <h2>
+          {{ reportData.username }}님은 모든 체크리스트 항목을 확인했어요.
+        </h2>
+      </div>
     </div>
     <div class="final-btn-wrap d-flex justify-content-center">
       <button

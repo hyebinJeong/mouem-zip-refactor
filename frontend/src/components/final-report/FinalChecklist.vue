@@ -13,17 +13,12 @@ const uncheckedItems = computed(() => {
 
 <template>
   <div class="FinalChecklist">
-    <template v-if="uncheckedItems.length > 0">
-      <div
-        v-for="(item, index) in uncheckedItems"
-        :key="index"
-        class="checkedlist-box p-3 rounded mb-3 text-start"
-      >
-        <p class="mb-0">{{ item }}</p>
-      </div>
-    </template>
-    <div v-else>
-      <h3>모든 항목을 체크했어요.</h3>
+    <div
+      v-for="(item, index) in uncheckedItems"
+      :key="index"
+      class="checkedlist-box p-3 rounded mb-3 text-start"
+    >
+      <p class="mb-0">{{ item }}</p>
     </div>
   </div>
 </template>

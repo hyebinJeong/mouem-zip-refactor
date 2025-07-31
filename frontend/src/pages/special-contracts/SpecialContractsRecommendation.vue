@@ -3,15 +3,7 @@
     <div class="content-box">
       <div class="header-section">
         <div class="title-text">
-          <div class="main-title">
-            <button
-              class="back-icon-btn"
-              @click="$router.push({ name: 'reference-contract' })"
-            >
-              ←
-            </button>
-            계약서에 이런 특약을 넣으면 좋아요.
-          </div>
+          <div class="main-title">계약서에 이런 특약을 넣으면 좋아요.</div>
           <div class="sub-title">한눈에 보기 좋게 정리했어요.</div>
           <div class="note">실제 피해 사례 기반으로 정리했어요.</div>
         </div>
@@ -36,8 +28,14 @@
         </div>
       </div>
 
-      <div class="character-box">
+      <div
+        class="character-box"
+        @click="$router.push({ name: 'reference-contract' })"
+      >
         <img src="@/assets/skybuddy.png" alt="버디 캐릭터" />
+        <div class="speech-bubble">
+          선택을 완료하셨다면<br />저를 클릭해주세요!
+        </div>
       </div>
     </div>
 
@@ -219,6 +217,59 @@ export default {
   padding-bottom: 80px;
 }
 
+/* 기존 .scroll-wrapper 유지 + 아래 추가 */
+.scroll-wrapper::-webkit-scrollbar {
+  width: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.scroll-wrapper:hover::-webkit-scrollbar {
+  opacity: 1;
+}
+
+/* 기존 .character-box 수정 */
+.character-box {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.character-box img {
+  width: 60px;
+  height: auto;
+}
+
+/* 말풍선 스타일 */
+.speech-bubble {
+  position: absolute;
+  left: 60px;
+  bottom: 20px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+  line-height: 1.4;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  bottom: 12px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #ffffff transparent transparent;
+}
+
 .grid-box {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -359,21 +410,5 @@ export default {
   padding: 6px 10px;
   cursor: pointer;
   font-size: 13px;
-}
-
-.back-icon-btn {
-  background: none;
-  border: none;
-  font-size: 30px;
-  font-weight: 1000px;
-  cursor: pointer;
-  color: #374151;
-  padding-right: 8px;
-  line-height: 1;
-  transition: color 0.2s ease;
-}
-
-.back-icon-btn:hover {
-  color: #1f2937;
 }
 </style>

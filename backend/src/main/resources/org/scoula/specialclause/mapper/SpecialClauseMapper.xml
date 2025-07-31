@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- resources/mapper/contract/ContractMapper.xml -->
+<mapper namespace="org.scoula.specialclause.mapper.SpecialClauseMapper">
+
+    <select id="findAll" resultType="org.scoula.specialclause.domain.SpecialClauseDTO">
+        SELECT * FROM special_clause
+    </select>
+
+    <insert id="insertSpecialClause" useGeneratedKeys="true" keyProperty="specialClauseId">
+        INSERT INTO special_clause (category, importance, importance_color, description)
+        VALUES (#{category}, #{importance}, #{importanceColor}, #{description})
+    </insert>
+
+    <insert id="insertContractSpecialClauses">
+        INSERT INTO contract_special_clause (contract_id, special_clause_id)
+        VALUES
+        <foreach collection="specialClauseIds" item="id" separator=",">
+            (#{contractId}, #{id})
+        </foreach>
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM special_clause WHERE special_clause_id = #{id}
+    </delete>
+
+</mapper>
+
+

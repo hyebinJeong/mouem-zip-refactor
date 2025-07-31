@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const router = useRouter();
 
+const contractName = ref(''); // ✅ 계약서 이름
 const lessor = ref('');
 const lessee = ref('');
 const address = ref('');
@@ -15,9 +17,15 @@ const maintenanceFee = ref('');
 const startDate = ref('');
 const endDate = ref('');
 const special = ref(['']);
+const landCategory = ref('');
+const landArea = ref('');
+const buildingArea = ref('');
+const leasePart = ref('');
+const leaseArea = ref('');
 
 function saveContractToSession() {
   const contractData = {
+    contractName: contractName.value, // ✅ 저장
     lessor: lessor.value,
     lessee: lessee.value,
     address: address.value,
@@ -29,6 +37,11 @@ function saveContractToSession() {
     startDate: startDate.value,
     endDate: endDate.value,
     special: special.value,
+    landCategory: landCategory.value,
+    landArea: landArea.value,
+    buildingArea: buildingArea.value,
+    leasePart: leasePart.value,
+    leaseArea: leaseArea.value,
   };
   sessionStorage.setItem('contractData', JSON.stringify(contractData));
 }
@@ -43,6 +56,7 @@ onMounted(() => {
   const contractData = sessionStorage.getItem('contractData');
 
   if (isHardReload() && !fromSpecialPage) {
+    contractName.value = '';
     lessor.value = '';
     lessee.value = '';
     address.value = '';
@@ -54,10 +68,17 @@ onMounted(() => {
     startDate.value = '';
     endDate.value = '';
     special.value = [''];
+    landCategory.value = '';
+    landArea.value = '';
+    buildingArea.value = '';
+    leasePart.value = '';
+    leaseArea.value = '';
+
     sessionStorage.removeItem('contractData');
     sessionStorage.removeItem('selectedClauses');
   } else if (contractData) {
     const data = JSON.parse(contractData);
+    contractName.value = data.contractName || '';
     lessor.value = data.lessor || '';
     lessee.value = data.lessee || '';
     address.value = data.address || '';
@@ -72,6 +93,11 @@ onMounted(() => {
       Array.isArray(data.special) && data.special.length > 0
         ? data.special
         : [''];
+    landCategory.value = data.landCategory || '';
+    landArea.value = data.landArea || '';
+    buildingArea.value = data.buildingArea || '';
+    leasePart.value = data.leasePart || '';
+    leaseArea.value = data.leaseArea || '';
   }
 
   const selected = JSON.parse(
@@ -89,6 +115,7 @@ onMounted(() => {
 
 watch(
   [
+    contractName,
     lessor,
     lessee,
     address,
@@ -100,6 +127,11 @@ watch(
     startDate,
     endDate,
     special,
+    landCategory,
+    landArea,
+    buildingArea,
+    leasePart,
+    leaseArea,
   ],
   saveContractToSession,
   { deep: true }
@@ -116,8 +148,9 @@ const removeSpecialTerm = (index) => {
   }
 };
 
-const onSubmit = () => {
+const onSubmit = async () => {
   const requiredFields = [
+    contractName.value,
     lessor.value,
     lessee.value,
     address.value,
@@ -128,6 +161,11 @@ const onSubmit = () => {
     maintenanceFee.value,
     startDate.value,
     endDate.value,
+    landCategory.value,
+    landArea.value,
+    buildingArea.value,
+    leasePart.value,
+    leaseArea.value,
   ];
 
   if (requiredFields.some((field) => !field || field.trim() === '')) {
@@ -135,6 +173,60 @@ const onSubmit = () => {
     return;
   }
 
+  const validSpecials = special.value.filter(
+    (term) => term && term.trim() !== ''
+  );
+  if (validSpecials.length === 0) {
+    alert('특약사항을 최소 1개 이상 입력하거나 선택해주세요.');
+    return;
+  }
+
+  try {
+    const selected = JSON.parse(
+      sessionStorage.getItem('selectedClauses') || '[]'
+    );
+
+    const specialClauseIds = selected
+      .map((clause) => clause.id)
+      .filter((id) => id !== null && id !== undefined);
+
+    const writtenClauses = special.value.filter(
+      (term) =>
+        term &&
+        term.trim() !== '' &&
+        !selected.some((clause) => clause.text === term)
+    );
+
+    const payload = {
+      userId: 1, // 임시
+      contractName: contractName.value,
+      lessorName: lessor.value,
+      lesseeName: lessee.value,
+      address: address.value,
+      landCategory: landCategory.value,
+      landArea: parseFloat(landArea.value),
+      buildingUsage: structure.value,
+      buildingArea: parseFloat(buildingArea.value),
+      leasedPart: leasePart.value,
+      leasedArea: parseFloat(leaseArea.value),
+      deposit: parseInt(deposit.value),
+      downPayment: parseInt(contractAmount.value),
+      balance: parseInt(rent.value),
+      maintenanceCost: parseInt(maintenanceFee.value),
+      leaseStart: startDate.value,
+      leaseEnd: endDate.value,
+      specialClauseIds: specialClauseIds,
+      specialClauseTexts: writtenClauses,
+    };
+
+    await axios.post('/api/contract', payload);
+    alert('계약서가 저장되었습니다.');
+  } catch (err) {
+    console.error('계약서 저장 중 오류 발생:', err);
+    alert('저장에 실패했습니다.');
+  }
+
+  // 기존 동작은 그대로 유지
   saveContractToSession();
   router.push({ name: 'ReferenceContractSuccess' });
 };
@@ -150,6 +242,11 @@ const goToSpecialPage = () => {
     <div class="contract-box">
       <h1 class="title">계약서 작성을 위해 필요한 정보를 입력해주세요.</h1>
       <form class="form-grid" @submit.prevent="onSubmit">
+        <!-- ✅ 계약서 이름 맨 위 -->
+        <div class="form-row full">
+          <label>계약서 이름</label>
+          <input v-model="contractName" type="text" placeholder="성명" />
+        </div>
         <div class="form-row">
           <label>임대인(집주인)</label>
           <input v-model="lessor" type="text" placeholder="성명" />
@@ -168,11 +265,11 @@ const goToSpecialPage = () => {
         </div>
         <div class="form-row">
           <label>토지 지목</label>
-          <input type="text" placeholder="대" />
+          <input v-model="landCategory" type="text" placeholder="대" />
         </div>
         <div class="form-row">
           <label>토지 면적</label>
-          <input type="text" placeholder="m²" />
+          <input v-model="landArea" type="text" placeholder="m²" />
         </div>
         <div class="form-row">
           <label>건물 구조·용도</label>
@@ -180,15 +277,15 @@ const goToSpecialPage = () => {
         </div>
         <div class="form-row">
           <label>건물 면적</label>
-          <input type="text" placeholder="m²" />
+          <input v-model="buildingArea" type="text" placeholder="m²" />
         </div>
         <div class="form-row">
           <label>임차할 부분</label>
-          <input type="text" placeholder="동·호수" />
+          <input v-model="leasePart" type="text" placeholder="동·호수" />
         </div>
         <div class="form-row">
           <label>임차할 면적</label>
-          <input type="text" placeholder="m²" />
+          <input v-model="leaseArea" type="text" placeholder="m²" />
         </div>
         <div class="form-row">
           <label>보증금</label>
@@ -215,6 +312,8 @@ const goToSpecialPage = () => {
             <span>까지</span>
           </div>
         </div>
+
+        <!-- 특약사항 -->
         <div class="form-row full special-terms">
           <label>특약 사항</label>
           <div class="special-input-wrapper">
@@ -256,7 +355,6 @@ const goToSpecialPage = () => {
               >
                 특약 예시에서 선택하기
               </button>
-
               <p class="tip">특약사항을 추가해드릴게요.</p>
             </div>
           </div>

@@ -38,7 +38,7 @@
         >
           {{ result.rating }} 등급
         </span>
-        입니다.
+        <span class="fw-bold">입니다.</span>
       </div>
       <!-- 좌우분할 -->
       <div class="row w-100 align-items-start" style="height: 80vh">
@@ -71,8 +71,14 @@
           "
         >
           <p class="fw-bold fs-5 mb-2" style="color: #151fae">기본 정보</p>
-          <h4>주소: {{ result.address }}</h4>
-          <h4>예상 전세가율: {{ result.jeonseRate }} %</h4>
+          <p style="font-size: 1.25rem">주소: {{ result.address }}</p>
+          <p style="font-size: 1.25rem">
+            예상 전세가율:
+            <span v-if="result.jeonseRate !== -1"
+              >{{ result.jeonseRate }} %</span
+            >
+            <span v-else style="color: gray">판단 불가</span>
+          </p>
           <div style="flex: 1; overflow-y: auto; margin-top: 1rem">
             <AnalysisCards
               v-if="result && result.analysis"
@@ -87,7 +93,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import PDFView from '@/components/PDFView.vue';

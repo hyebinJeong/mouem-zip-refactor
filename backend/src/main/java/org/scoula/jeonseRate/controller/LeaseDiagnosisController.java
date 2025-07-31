@@ -49,11 +49,14 @@ public class LeaseDiagnosisController {
         // 4. 지번 주소 (예: 595-28)
         String jibun  = addressInfo.getJibunAddr();
 
+        // 5. 건물명
+        String buildingName = addressInfo.getBdNm();
+
 //        System.out.println("[요청] 주소: " + request.getAddress() + ", 보증금: " + request.getJeonsePrice());
 
         // 5. 해당 주소에 대한 매매가 평균 조회
         Optional<JeonseRateDTO> averageDealPriceOpt = dealSearchService.getDealAmount(
-                lawdCode, jibun , recentMonths
+                lawdCode, jibun, buildingName, recentMonths
         );
         // 조회된 매물이 없을 경우 메시지 반환
         if (averageDealPriceOpt.isEmpty()) {
@@ -112,18 +115,6 @@ public class LeaseDiagnosisController {
 
         jeonseAnalysisMapper.insertJeonseAnalysis(vo);
 
-        // 10. 응답 반환(테스트용)
-//        Map<String, Object> result = new HashMap<>();
-//        result.put("admCd", addressInfo.getAdmCd());            // 법정동 코드
-//        result.put("jibunAddr", addressInfo.getJibunAddr());    // 지번 주소
-//        result.put("jeonsePrice", jeonse);                      // 입력 전세 보증금
-//        result.put("expectedSalePrice", (int) averageDealPrice);// 예상 매매가
-//        result.put("jeonseRate", roundedJeonseRate);            // 전세가율 (%)
-//        result.put("avgKosisRate", Math.round(avgKosisRate * 10.0) / 10.0);
-//        result.put("deviation", deviation);
-//        result.put("grade", grade.name()); // 문자열로 변환
-
-//        System.out.println(result);
         return ResponseEntity.noContent().build();
     }
 

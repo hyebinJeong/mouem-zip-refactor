@@ -18,12 +18,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserMapper userMapper;
 
     @Override
-    public UserDetails loadUserByUsername(String kakaoId) throws UsernameNotFoundException {
-        KakaoUserDTO user = userMapper.findByKakaoId(kakaoId);
-        if (user == null) {
-            throw new UsernameNotFoundException("사용자 없음: " + kakaoId);
+    public UserDetails loadUserByUsername(String userIdStr) throws UsernameNotFoundException {
+        Long userId;
+        try {
+            userId = Long.valueOf(userIdStr);
+        } catch (NumberFormatException e) {
+            throw new UsernameNotFoundException("잘못된 user_id 형식: " + userIdStr);
         }
-        // UserDetails 구현체 생성
+
+        KakaoUserDTO user = userMapper.findByUserId(userId);
+        if (user == null) {
+            throw new UsernameNotFoundException("사용자 없음: " + userId);
+        }
+
         return new CustomUser(user);
     }
 }

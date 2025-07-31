@@ -22,7 +22,8 @@
       >
         {{ result ? result.rating : '로딩중' }}
       </div>
-
+      <BuddyHelper @open-dictionary="openDictionaryModal" />
+      <TermViewModal v-if="showDictionaryModal" @close="closeDictionaryModal" />
       <!-- 등급 설명 -->
       <div
         class="text-center px-4 py-3 mb-4"
@@ -98,6 +99,8 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import PDFView from '@/components/PDFView.vue';
 import AnalysisCards from '@/components/AnalysisCards.vue';
+import BuddyHelper from '@/components/BuddyHelper.vue';
+import TermViewModal from '@/components/TermViewModal.vue';
 
 const route = useRoute();
 const result = ref(null);
@@ -112,6 +115,17 @@ const analysisItems = [
   { label: '전세권설정', key: 'jeonseRightInfos' },
   { label: '가등기', key: 'provisionalRegistrationInfos' },
 ];
+
+// 용어 모달 표시 상태
+const showDictionaryModal = ref(false);
+
+// 용어모달 열기/닫기 함수
+const openDictionaryModal = () => {
+  showDictionaryModal.value = true;
+};
+const closeDictionaryModal = () => {
+  showDictionaryModal.value = false;
+};
 
 onMounted(async () => {
   const registerId = route.params.registerId;

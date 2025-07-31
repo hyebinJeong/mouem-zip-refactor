@@ -33,7 +33,6 @@ import KakaoCallback from '@/pages/login/KakaoCallback.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
-
   {
     path: '/safety-check',
     name: 'safety-check',
@@ -44,6 +43,7 @@ const routes = [
     path: '/safety-check/:registerId',
     name: 'RegisterResult',
     component: RegisterResult,
+    meta: { requiresAuth: true },
   },
   { path: '/checklist', name: 'preview', component: Preview },
   {

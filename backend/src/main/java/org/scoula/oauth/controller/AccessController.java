@@ -15,4 +15,11 @@ public class AccessController {
         return ResponseEntity.ok("AUTHORIZED");
     }
 
+
+    @GetMapping("/agreement")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> checkAgreementCheckAccess() {
+        return ResponseEntity.ok("AUTHORIZED");
+    }
+
 }

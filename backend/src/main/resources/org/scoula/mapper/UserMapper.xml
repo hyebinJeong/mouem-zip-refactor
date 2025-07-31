@@ -5,13 +5,25 @@
 
 <mapper namespace="org.scoula.oauth.mapper.UserMapper">
     <select id="findByKakaoId" resultType="org.scoula.oauth.domain.DTO.KakaoUserDTO">
-        SELECT kakao_id AS kakaoId, name
+        SELECT kakao_id AS kakaoId, name, email, state
         FROM users
         WHERE kakao_id = #{kakaoId}
     </select>
 
     <insert id="insertUser">
-        INSERT INTO users (kakao_id, name, role)
-        VALUES (#{kakaoId}, #{name}, 'USER')
+        INSERT INTO users (kakao_id, name, email, role)
+        VALUES (#{kakaoId}, #{name}, #{email}, 'USER')
     </insert>
+
+    <update id="reactivateUser">
+        UPDATE users
+        SET state = true
+        WHERE kakao_id = #{kakaoId}
+    </update>
+
+    <update id="softDeleteUser">
+        UPDATE users
+        SET state = false
+        WHERE kakao_id = #{kakaoId}
+    </update>
 </mapper>

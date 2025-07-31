@@ -6,4 +6,6 @@ public interface KakaoOAuthService {
     String getAccessTokenFromKakao(String code);
     KakaoUserDTO requestKakaoUserInfo(String accessToken);
     String loginWithKakao(String kakaoAccessToken);
+    void softDeleteUser(String kakaoId);
+    void unlinkKakaoAccount(String accessToken);
 }

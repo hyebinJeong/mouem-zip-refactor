@@ -1,12 +1,20 @@
 <script setup>
 import GuidebookSection from '@/components/GuidebookSection.vue';
-import { useRouter } from 'vue-router';
+import { useNavigation } from '@/composables/final-report/useNavigation';
+import Buddy from "@/components/BuddyHelper.vue";
+import TermViewModal from "@/components/TermViewModal.vue";
 
-const router = useRouter();
+import { ref } from 'vue';
 
-const goToHome = () => {
-  router.push('/');
+const showDictionaryModal = ref(false);
+const openDictionaryModal = () => {
+  showDictionaryModal.value = true;
 };
+const closeDictionaryModal = () => {
+  showDictionaryModal.value = false;
+};
+
+const { goToHome } = useNavigation();
 
 // 계약 전 항목
 const beforeContractItems = [
@@ -88,6 +96,11 @@ const onContractDayItems = [
         </button>
       </div>
     </div>
+    <!-- 버디 캐릭터 -->
+    <Buddy @open-dictionary="openDictionaryModal" />
+
+    <!-- 용어 모달 -->
+    <TermViewModal v-if="showDictionaryModal" @close="closeDictionaryModal" />
   </div>
 </template>
 

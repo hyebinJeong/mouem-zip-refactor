@@ -49,6 +49,21 @@ public class RegisterUtils {
         return result;
     }
 
+    public static String extractDate(String text) {
+        // 숫자 사이 한글 제거
+        String cleanedText = text.replaceAll("(?<=\\d)(?!(년|월|일))[가-힣]+(?=\\d)", "");
+
+        Pattern pattern = Pattern.compile("\\d{4}년\\d{1,2}월\\d{1,2}일");
+        Matcher matcher = pattern.matcher(cleanedText);
+
+        if (matcher.find()) {
+            String result = matcher.group();
+            return result;
+        } else {
+            return null;
+        }
+    }
+
     public static String extractCreditorOrRightHolder(String text) {
         if (text == null) {
             return null;

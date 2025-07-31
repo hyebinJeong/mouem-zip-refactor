@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InjunctionDTO {
+public class InjunctionDTO implements DatedCanceledItem {
     private String rank;
-    private String registrationPurpose;
-    private String registrationCause;
+    private String date;
     private String creditor;
+    private boolean canceled;
 }

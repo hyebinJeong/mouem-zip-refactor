@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SeizureDTO {
+public class SeizureDTO implements DatedCanceledItem {
     private String rank;
-    private String registrationPurpose;
-    private String registrationCause;
+    private String date;
     private String rightHolder;
+    private boolean canceled;
 }

@@ -50,15 +50,6 @@ export default {
 </script>
 
 <template>
-  <div>
-    <!-- 모달 열기 버튼 -->
-    <button class="btn btn-primary" @click="showTermModal = true">
-      용어집 모달 열기
-    </button>
-
-    <!-- 모달 -->
-    <TermViewModal v-if="showTermModal" @close="showTermModal = false" />
-  </div>
 
   <div class="term-view container mt-5">
     <!-- 검색창 -->

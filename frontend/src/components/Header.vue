@@ -51,6 +51,7 @@ const goMyPage = () => router.push('/my')
   align-items: center;
   justify-content: center;
   width: 100%;
+  border-bottom: 1.5px solid #eaeaea;
 }
 
 .top-bar {
@@ -69,6 +70,11 @@ const goMyPage = () => router.push('/my')
   justify-content: flex-start;
   align-items: center;
   cursor: pointer;
+}
+
+.logo-wrapper:hover{
+  transform: scale(1.03);
+  transition: transform 0.3s ease;
 }
 
 .logo {
@@ -100,7 +106,7 @@ const goMyPage = () => router.push('/my')
 }
 
 .dropdown-list {
-  background-color: #d9d9d9;
+  background-color: #ececec;
   font-weight: bolder;
   font-size: 18px;
   position: absolute;
@@ -113,7 +119,8 @@ const goMyPage = () => router.push('/my')
   list-style: none;
   z-index: 10;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  border-radius: 4px;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .dropdown-list li {
@@ -138,5 +145,16 @@ const goMyPage = () => router.push('/my')
   cursor: pointer;
   z-index: 3;
   margin-left: auto;
+}
+
+.mypage:hover {
+  color: #007bff;
+  transition: all 0.1s ease-in-out;
+}
+
+.menu-item:hover {
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+  transition: all 0.1s ease-in-out;
 }
 </style>

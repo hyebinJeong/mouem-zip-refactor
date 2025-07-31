@@ -2,9 +2,9 @@ package org.scoula.security.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.scoula.oauth.domain.DTO.KakaoUserDTO;
+import org.scoula.oauth.mapper.UserMapper;
 import org.scoula.security.account.domain.CustomUser;
-import org.scoula.security.account.domain.MemberVO;
-import org.scoula.security.account.mapper.UserDetailsMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,13 +15,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserDetailsMapper mapper;
+    private final UserMapper userMapper;
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        MemberVO vo = mapper.get(username);
-        if(vo == null) {
-            throw new UsernameNotFoundException(username + "은 없는 id입니다.");
+    public UserDetails loadUserByUsername(String kakaoId) throws UsernameNotFoundException {
+        KakaoUserDTO user = userMapper.findByKakaoId(kakaoId);
+        if (user == null) {
+            throw new UsernameNotFoundException("사용자 없음: " + kakaoId);
         }
-        return new CustomUser(vo);
+        // UserDetails 구현체 생성
+        return new CustomUser(user);
     }
 }

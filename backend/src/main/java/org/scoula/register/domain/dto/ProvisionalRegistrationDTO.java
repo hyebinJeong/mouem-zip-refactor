@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProvisionalRegistrationDTO {
+public class ProvisionalRegistrationDTO implements DatedCanceledItem {
     private String rank;
-    private String registrationPurpose;
-    private String registrationCause;
+    private String date;
     private String registeredRightHolder;
+    private boolean canceled;
 }

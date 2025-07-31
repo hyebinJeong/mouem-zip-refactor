@@ -37,11 +37,12 @@
       </div>
     </div>
 
-    <Buddy />
+    <Buddy @open-dictionary="openDictionaryModal" />
 
     <div v-if="showModal" class="image-modal" @click.self="closeModal">
       <img :src="images[currentIndex]" class="modal-img" />
     </div>
+    <TermViewModal v-if="showDictionaryModal" @close="closeDictionaryModal" />
   </div>
 </template>
 
@@ -50,6 +51,23 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import Buddy from '@/components/BuddyHelper.vue'
 import checklistItems from '@/stores/checklistStore.js'
+import TermViewModal from "@/components/TermViewModal.vue";
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const userId = Number(route.query.userId)
+const registryId = Number(route.query.registryId)
+
+// 용어 모달 표시 상태
+const showDictionaryModal = ref(false)
+
+// 용어모달 열기/닫기 함수
+const openDictionaryModal = () => {
+  showDictionaryModal.value = true
+}
+const closeDictionaryModal = () => {
+  showDictionaryModal.value = false
+}
 
 const router = useRouter()
 
@@ -70,8 +88,31 @@ const prevSlide = () => {
 
 const checked = ref(Array(checklistItems.length).fill(false))
 
-const goNext = () => {
-  router.push('/next-page')
+const goNext = async () => {
+
+  const payload = {
+    userId,
+    registryId,
+    checked: checked.value
+  }
+
+  try {
+    const res = await fetch('http://localhost:8080/api/checklist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+
+    if (!res.ok) throw new Error('전송 실패')
+    alert('체크리스트 저장 완료!')
+    router.push('/next-page')
+
+  } catch (e) {
+    console.error(e)
+    alert('저장에 실패했습니다.')
+  }
 }
 
 // 이미지 모달
@@ -222,8 +263,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onEscPress))
 
 .buddy-fixed {
   position: fixed;
-  top:200px;
-  right: 200px;
+  top:220px;
+  right: 100px;
   z-index: 50;
   display: flex;
   flex-direction: column;

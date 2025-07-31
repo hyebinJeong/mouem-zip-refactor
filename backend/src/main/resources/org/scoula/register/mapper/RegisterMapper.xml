@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.register.mapper.RegisterMapper">
+
+    <insert id="insertRegister" parameterType="org.scoula.register.domain.dto.RegisterDTO">
+        <selectKey keyProperty="registryId" order="AFTER" resultType="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO registry_analysis (user_id, address, risks, registry_name, registry_rating, status, file_name)
+        VALUES (#{userId}, #{address}, #{risks}, #{registryName}, #{registryRating}, #{status}, #{fileName})
+    </insert>
+    <select id="selectByRegisterId" parameterType="int" resultType="org.scoula.register.domain.dto.RegisterDTO">
+        SELECT registry_id, user_id, address, risks, registry_name, registry_rating, analysis_date, status, file_name
+        FROM registry_analysis
+        WHERE registry_id = #{registryId}
+    </select>
+    <select id="selectByUserId" resultType="org.scoula.register.domain.dto.RegisterDTO">
+        SELECT *
+        FROM registry_analysis
+        WHERE user_id = #{userId} AND status = false
+    </select>
+</mapper>

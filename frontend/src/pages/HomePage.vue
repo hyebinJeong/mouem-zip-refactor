@@ -1,10 +1,41 @@
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+// 라우트, AuthStore, onMounted 임시 사용
+import { useAuthStore } from '@/stores/auth';
+import { onMounted } from 'vue';
+import axios from 'axios';
 
+const route = useRoute();
+const auth = useAuthStore();
 const router = useRouter();
 
-function goToAnalysis() {
-  router.push('/safety-check');
+onMounted(() => {
+  const token = route.query.token;
+  if (token) {
+    auth.login(token); // pinia에 저장
+    router.replace('/'); // token 숨기기
+  }
+});
+
+async function goToAnalysis() {
+  if (!auth.isLoggedIn) {
+    // JWT가 없으면 로그인 페이지로 이동
+    router.push('/login');
+    return;
+  }
+
+  try {
+    //  로그인 상태라면 백엔드 권한 확인
+    await axios.get('/api/check-access/safety-check', {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+
+    // 200 OK면 진단 페이지로 이동
+    router.push('/safety-check');
+  } catch (err) {
+    console.error('접근 권한 없음:', err);
+    router.push('/login'); // 인증 실패 시 로그인 페이지로 이동
+  }
 }
 </script>
 
@@ -223,5 +254,49 @@ function goToAnalysis() {
 
 .green-text {
   color: #28a745;
+}
+@keyframes stepFadeIn {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.step-box {
+  opacity: 0;
+  animation: stepFadeIn 0.8s ease forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.step-box:nth-of-type(1) { animation-delay: 0.25s; }
+.step-box:nth-of-type(3) { animation-delay: 0.5s; }
+.step-box:nth-of-type(5) { animation-delay: 0.75s; }
+
+
+.step-box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes buddyJump {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+  50% { transform: translateY(0); }
+  70% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+
+@keyframes buddyWave {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(2deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.buddy-character {
+  height: 120px;
+  animation: buddyJump 1s ease forwards, buddyWave 2s ease-in-out infinite 1s;
+  transform-origin: bottom center;
 }
 </style>

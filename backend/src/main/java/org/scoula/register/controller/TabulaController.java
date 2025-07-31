@@ -1,21 +1,26 @@
 package org.scoula.register.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.scoula.register.domain.RegistryRating;
 import org.scoula.register.domain.dto.*;
 import org.scoula.register.service.*;
+import org.scoula.register.util.RegisterRatingEvaluator;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/safety-check")
+@RequestMapping("/api/safety-check")
 public class TabulaController {
 
     private final TabulaService tabulaService;
+    private final AwsS3Service awsS3Service;
     private final MortgageServiceImpl mortgageServiceImpl;
     private final SeizureServiceImpl seizureServiceImpl;
     private final ProvisionalSeizureServiceImpl provisionalSeizureServiceImpl;
@@ -26,115 +31,98 @@ public class TabulaController {
     private final TrustServiceImpl trustServiceImpl;
 
     @PostMapping
-    @ResponseBody
-    public ResponseEntity<List<List<String>>> extractTableFromPdf(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> analyzeRegistry(@RequestParam("file") MultipartFile file, @RequestParam("address") String address, @RequestParam("registryName") String registryName) {
         try {
+            // S3 업로드
+            String uploadedFileName = awsS3Service.uploadFile(file);
+
             List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            return ResponseEntity.ok(table); // JSON 형태로 표 데이터 반환
+
+            RegisterAnalysisResponse response = new RegisterAnalysisResponse();
+            response.setMortgageInfos(mortgageServiceImpl.extractMortgageInfos(table));
+            response.setSeizureInfos(seizureServiceImpl.extractSeizureInfos(table));
+            response.setProvisionalSeizureInfos(provisionalSeizureServiceImpl.extractProvisionalSeizureInfos(table));
+            response.setAuctionInfos(auctionServiceImpl.extractAuctionInfos(table));
+            response.setProvisionalRegistrationInfos(provisionalRegistrationServiceImpl.extractProvisionalRegistrationInfos(table));
+            response.setInjunctionInfos(injunctionServiceImpl.extractInjunctions(table));
+            response.setJeonseRightInfos(jeonseRightServiceImpl.extractJeonseRightInfos(table));
+            response.setTrustInfos(trustServiceImpl.extractTrustInfos(table));
+
+            // 임시 값
+            int userId = 1;
+
+            // 위험 등급 평가
+            RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response);
+            boolean status = false;
+
+            int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status, uploadedFileName);
+
+            return ResponseEntity.ok(registerId);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    @PostMapping("/mortgages")
-    @ResponseBody
-    public ResponseEntity<List<MortgageDTO>> extractMortgages(@RequestParam("file") MultipartFile file) {
+    @GetMapping("/{registerId}")
+    public ResponseEntity<?> getAnalysisByRegisterId(@PathVariable("registerId") Integer registerId) {
         try {
-            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<MortgageDTO> mortgages = mortgageServiceImpl.extractMortgageInfos(table);
-            return ResponseEntity.ok(mortgages);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+            RegisterDTO dto = tabulaService.findByRegisterId(registerId);
+            RegisterAnalysisResponse response = tabulaService.convertDTOToResponse(dto);
 
-    @PostMapping("/seizures")
-    @ResponseBody
-    public ResponseEntity<List<SeizureDTO>> extractSeizures(@RequestParam("file") MultipartFile file) {
-        try {
-            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<SeizureDTO> seizures = seizureServiceImpl.extractSeizureInfos(table);
-            return ResponseEntity.ok(seizures);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+            // 필터링 처리 (canceled=false만 남김)
+            response.setMortgageInfos(
+                    response.getMortgageInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setSeizureInfos(
+                    response.getSeizureInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setProvisionalSeizureInfos(
+                    response.getProvisionalSeizureInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setAuctionInfos(
+                    response.getAuctionInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setProvisionalRegistrationInfos(
+                    response.getProvisionalRegistrationInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setInjunctionInfos(
+                    response.getInjunctionInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setJeonseRightInfos(
+                    response.getJeonseRightInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
+            response.setTrustInfos(
+                    response.getTrustInfos().stream()
+                            .filter(item -> !item.isCanceled())
+                            .toList()
+            );
 
-    @PostMapping("/provisional")
-    @ResponseBody
-    public ResponseEntity<List<ProvisionalSeizureDTO>> extractProvisionalSeizures(@RequestParam("file") MultipartFile file) {
-        try {
-            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<ProvisionalSeizureDTO> provisionalSeizure = provisionalSeizureServiceImpl.extractProvisionalSeizureInfos(table);
-            return ResponseEntity.ok(provisionalSeizure);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+            String fileUrl = awsS3Service.getFileUrl(dto.getFileName());
 
-    @PostMapping("/auction")
-    @ResponseBody
-    public ResponseEntity<List<AuctionDTO>> extractAuctions(@RequestParam("file") MultipartFile file) {
-        try {
-            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<AuctionDTO> auction = auctionServiceImpl.extractAuctionInfos(table);
-            return ResponseEntity.ok(auction);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+            Map<String, Object> result = new HashMap<>();
+            result.put("analysis", response);
+            result.put("address", dto.getAddress());
+            result.put("rating", dto.getRegistryRating());
+            result.put("fileUrl", fileUrl);
 
-    @PostMapping("/registration")
-    @ResponseBody
-    public ResponseEntity<List<ProvisionalRegistrationDTO>> extractProvisionalRegistrations(@RequestParam("file") MultipartFile file) {
-        try {
-            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<ProvisionalRegistrationDTO> provisionalRegistration = provisionalRegistrationServiceImpl.extractProvisionalRegistrationInfos(table);
-            return ResponseEntity.ok(provisionalRegistration);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    @PostMapping("/injunction")
-    @ResponseBody
-    public ResponseEntity<List<InjunctionDTO>> extractInjunctions(@RequestParam("file") MultipartFile file) {
-        try {
-            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<InjunctionDTO> injunction = injunctionServiceImpl.extractInjunctions(table);
-            return ResponseEntity.ok(injunction);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    @PostMapping("/jeonse-right")
-    @ResponseBody
-    public ResponseEntity<List<JeonseRightDTO>> extractJeonseRights(@RequestParam("file") MultipartFile file) {
-        try {
-            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<JeonseRightDTO> jeonseRight = jeonseRightServiceImpl.extractJeonseRightInfos(table);
-            return ResponseEntity.ok(jeonseRight);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    @PostMapping("/trust")
-    @ResponseBody
-    public ResponseEntity<List<TrustDTO>> extractTrusts(@RequestParam("file") MultipartFile file) {
-        try {
-            List<List<String>> table = tabulaService.extractTable(file.getInputStream());
-            List<TrustDTO> trust = trustServiceImpl.extractTrustInfos(table);
-            return ResponseEntity.ok(trust);
+            return ResponseEntity.ok(result);
+        } catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("분석 결과를 찾을 수 없습니다.");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

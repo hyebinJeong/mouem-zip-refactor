@@ -74,7 +74,8 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
         // JWT 발급
         return jwtProcessor.generateToken(
                 String.valueOf(user.getUserId()),
-                user.getKakaoId()
+                user.getKakaoId(),
+                user.getRole()
         );
     }
 

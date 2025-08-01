@@ -39,7 +39,6 @@ DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS registry_analysis;
 DROP TABLE IF EXISTS users;
 # SELECT * from users;
-
 -- ============================================
 -- 1. 사용자 관련
 -- ============================================
@@ -48,7 +47,7 @@ CREATE TABLE users (
                        kakao_id VARCHAR(100) UNIQUE NOT NULL,
                        name VARCHAR(50) NOT NULL,
                        email VARCHAR(100),
-                       role VARCHAR(50) DEFAULT 'USER',
+                       role VARCHAR(50) DEFAULT 'ROLE_USER',
                        state boolean DEFAULT TRUE
 );
 

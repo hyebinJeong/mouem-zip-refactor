@@ -29,10 +29,11 @@ public class JwtProcessor {
 // private Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); -- 운영시 사용
 
     // JWT 생성
-    public String generateToken(String subject, String kakaoId) {
+    public String generateToken(String subject, String kakaoId, String role) {
         return Jwts.builder()
                 .setSubject(subject)
                 .claim("kakaoId", kakaoId)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + TOKEN_VALID_MILISECOND))
                 .signWith(key)

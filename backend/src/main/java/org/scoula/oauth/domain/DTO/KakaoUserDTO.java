@@ -13,6 +13,7 @@ public class KakaoUserDTO {
     private String name;
     private String email;
     private boolean state;
+    private String role;
 
     public KakaoUserDTO(String kakaoId, String name, String email, boolean state) {
         this.kakaoId = kakaoId;

@@ -19,9 +19,9 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<KakaoUserDTO> getCurrentUser(Authentication authentication) {
-        String kakaoId = authentication.getName(); // JWT에서 추출된 subject (보통 kakaoId)
+        int userId = Integer.parseInt(authentication.getName());
 
-        KakaoUserDTO user = userMapper.findByKakaoId(kakaoId);
+        KakaoUserDTO user = userMapper.findByUserId(userId);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

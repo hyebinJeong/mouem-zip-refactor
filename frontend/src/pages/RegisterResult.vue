@@ -90,20 +90,44 @@
         </div>
       </div>
     </div>
+    <div class="button-area">
+      <button @click="showModal = true" class="checklist-button">
+        체크리스트로 넘어가기
+      </button>
+    </div>
+
+    <!-- 모달 -->
+    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>체크리스트 작성</h3>
+        </div>
+        <div class="modal-body">
+          <p>체크리스트를 이어서 작성하시겠습니까?</p>
+        </div>
+        <div class="modal-footer">
+          <button @click="goToChecklist" class="confirm-button">예</button>
+          <button @click="goToHome" class="cancel-button">아니오</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import PDFView from '@/components/PDFView.vue';
 import AnalysisCards from '@/components/AnalysisCards.vue';
 import BuddyHelper from '@/components/BuddyHelper.vue';
 import TermViewModal from '@/components/TermViewModal.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute();
+const router = useRouter();
 const result = ref(null);
+const auth = useAuthStore();
 
 const analysisItems = [
   { label: '경매', key: 'auctionInfos' },
@@ -119,12 +143,36 @@ const analysisItems = [
 // 용어 모달 표시 상태
 const showDictionaryModal = ref(false);
 
+// 체크리스트 모달 표시 상태
+const showModal = ref(false);
+
 // 용어모달 열기/닫기 함수
 const openDictionaryModal = () => {
   showDictionaryModal.value = true;
 };
 const closeDictionaryModal = () => {
   showDictionaryModal.value = false;
+};
+
+// 체크리스트 모달 관련 함수
+const closeModal = () => {
+  showModal.value = false;
+};
+
+const goToChecklist = () => {
+  showModal.value = false;
+  router.push({
+    path: '/checklist/checklist',
+    query: {
+      userId: auth.userId,
+      registryId: route.params.registerId,
+    },
+  });
+};
+
+const goToHome = () => {
+  showModal.value = false;
+  router.push('/');
 };
 
 onMounted(async () => {
@@ -147,4 +195,174 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+/* 버튼 영역 - 중앙 정렬 */
+.button-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  margin-top: 30px;
+}
+
+/* 메인 버튼 스타일 */
+.checklist-button {
+  background-color: #1a80e5;
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(26, 128, 229, 0.3);
+  min-width: 200px;
+}
+
+.checklist-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 128, 229, 0.4);
+  background-color: #1570cc;
+}
+
+.checklist-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+/* 모달 콘텐츠 */
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 모달 헤더 */
+.modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+}
+
+/* 모달 바디 */
+.modal-body {
+  padding: 24px;
+  text-align: center;
+}
+
+.modal-body p {
+  margin: 0;
+  font-size: 16px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* 모달 푸터 */
+.modal-footer {
+  padding: 16px 24px 24px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* 확인 버튼 */
+.confirm-button {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.confirm-button:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* 취소 버튼 */
+.cancel-button {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.cancel-button:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+  .modal-content {
+    min-width: 320px;
+    margin: 20px;
+  }
+
+  .checklist-button {
+    padding: 14px 24px;
+    font-size: 16px;
+    min-width: 180px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .confirm-button,
+  .cancel-button {
+    width: 100%;
+  }
+}
+</style>

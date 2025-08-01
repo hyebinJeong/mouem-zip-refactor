@@ -13,8 +13,8 @@ import CheckList from '@/pages/checklist/Checklist.vue';
 import FinalReportPage from '@/pages/FinalReportPage.vue';
 import AgreementPage from '@/pages/AgreementPage.vue';
 import LoginPage from '@/pages/login/LoginPage.vue';
-import ContractListPage from '@/pages/listpages/ContractListPage.vue'
-import ReportListPage from '@/pages/listpages/ReportListPage.vue'
+import ContractListPage from '@/pages/listpages/ContractListPage.vue';
+import ReportListPage from '@/pages/listpages/ReportListPage.vue';
 
 // 카테고리 및 용어 관련 추가
 import CategoryAll from '@/pages/category/CategoryAll.vue';
@@ -34,13 +34,13 @@ import KakaoCallback from '@/pages/login/KakaoCallback.vue';
 const routes = [
   { path: '/', name: 'home', component: HomePage },
   {
-    path: '/safety-check',
+    path: '/safety-check', // 매물 안전성 진단 페이지
     name: 'safety-check',
     component: SafetyDiagnosis,
     meta: { requiresAuth: true },
   },
   {
-    path: '/safety-check/:registerId',
+    path: '/safety-check/:registerId', // 등기부등본 분석 결과 페이지
     name: 'RegisterResult',
     component: RegisterResult,
     meta: { requiresAuth: true },
@@ -151,12 +151,13 @@ const routes = [
   {
     path: '/contract-list',
     name: 'ContractListPage',
-    component: () => import('@/pages/listpages/ContractListPage.vue')
+    component: () => import('@/pages/listpages/ContractListPage.vue'),
   },
 
-  { path: '/report-list',
+  {
+    path: '/report-list',
     name: 'reportList',
-    component: () => import('@/pages/listpages/ReportListPage.vue')
+    component: () => import('@/pages/listpages/ReportListPage.vue'),
   },
 ];
 

@@ -41,46 +41,31 @@
         </span>
         <span class="fw-bold">입니다.</span>
       </div>
-      <!-- 좌우분할 -->
-      <div class="row w-100 align-items-start" style="height: 80vh">
-        <div class="col-6" style="padding: 1rem">
-          <!-- 위험 문구 문단 (상단 고정) -->
+
+      <!-- 좌우분할 → 반응형으로 변경 -->
+      <div class="row w-100 align-items-start analysis-container">
+        <!-- PDF 뷰어 섹션 -->
+        <div class="col-lg-6 col-12 pdf-section">
           <p class="fw-bold fs-5 mb-2" style="color: #151fae">
             어떤 점이 위험한지 하나씩 확인해보세요.
           </p>
-          <div
-            v-if="result?.fileUrl"
-            style="
-              position: sticky;
-              top: 1rem;
-              max-height: calc(80vh - 2rem);
-              overflow-y: auto;
-            "
-          >
+          <div v-if="result?.fileUrl" class="pdf-wrapper">
             <PDFView :pdfUrl="result.fileUrl" />
           </div>
         </div>
-        <!-- 오른쪽 분석: 스크롤 가능 -->
-        <div
-          class="col-6"
-          style="
-            height: 80vh;
-            overflow-y: auto;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-          "
-        >
+
+        <!-- 분석 결과 섹션 -->
+        <div class="col-lg-6 col-12 analysis-section">
           <p class="fw-bold fs-5 mb-2" style="color: #151fae">기본 정보</p>
-          <p style="font-size: 1.25rem">주소: {{ result.address }}</p>
-          <p style="font-size: 1.25rem">
+          <p class="address-info">주소: {{ result.address }}</p>
+          <p class="jeonse-rate-info">
             예상 전세가율:
             <span v-if="result.jeonseRate !== -1"
               >{{ result.jeonseRate }} %</span
             >
             <span v-else style="color: gray">판단 불가</span>
           </p>
-          <div style="flex: 1; overflow-y: auto; margin-top: 1rem">
+          <div class="analysis-cards-wrapper">
             <AnalysisCards
               v-if="result && result.analysis"
               :analysis="result.analysis"
@@ -90,6 +75,7 @@
         </div>
       </div>
     </div>
+
     <div class="button-area">
       <button @click="showModal = true" class="checklist-button">
         체크리스트로 넘어가기
@@ -103,7 +89,7 @@
           <h3>체크리스트 작성</h3>
         </div>
         <div class="modal-body">
-          <p>체크리스트를 이어서 작성하시겠습니까?</p>
+          <p>체크리스트를 작성하러 가시겠습니까?</p>
         </div>
         <div class="modal-footer">
           <button @click="goToChecklist" class="confirm-button">예</button>
@@ -159,6 +145,7 @@ const closeModal = () => {
   showModal.value = false;
 };
 
+// 체크리스트 모달창 예 클릭시 이벤트 함수
 const goToChecklist = () => {
   showModal.value = false;
   router.push({
@@ -170,6 +157,7 @@ const goToChecklist = () => {
   });
 };
 
+// 체크리스트 모달창 아니오 클릭시 이벤트 함수
 const goToHome = () => {
   showModal.value = false;
   router.push('/');
@@ -196,6 +184,171 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* 기본 정보 스타일 */
+.address-info,
+.jeonse-rate-info {
+  font-size: 1.25rem;
+}
+
+/* 반응형 레이아웃 스타일 */
+.analysis-container {
+  min-height: 80vh;
+}
+
+/* 데스크톱 (lg 이상) - 992px 이상 */
+@media (min-width: 992px) {
+  .pdf-section {
+    padding: 1rem;
+    height: 80vh;
+  }
+
+  .pdf-wrapper {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(80vh - 2rem);
+    overflow-y: auto;
+  }
+
+  .analysis-section {
+    height: 80vh;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .analysis-cards-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 1rem;
+  }
+}
+
+/* 태블릿 (md~lg) - 768px ~ 991px */
+@media (max-width: 991.98px) and (min-width: 768px) {
+  .analysis-container {
+    min-height: auto;
+  }
+
+  .pdf-section {
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .pdf-wrapper {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .analysis-section {
+    padding: 1rem;
+  }
+
+  .analysis-cards-wrapper {
+    margin-top: 1rem;
+  }
+
+  .address-info,
+  .jeonse-rate-info {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* 모바일 (sm~md) - 576px ~ 767px */
+@media (max-width: 767.98px) and (min-width: 576px) {
+  .analysis-container {
+    min-height: auto;
+  }
+
+  .pdf-section {
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pdf-wrapper {
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+
+  .analysis-section {
+    padding: 0.75rem;
+  }
+
+  .analysis-cards-wrapper {
+    margin-top: 1rem;
+  }
+
+  .address-info,
+  .jeonse-rate-info {
+    font-size: 1.05rem !important;
+  }
+
+  .checklist-button {
+    padding: 15px 28px;
+    font-size: 17px;
+    min-width: 190px;
+  }
+
+  .modal-content {
+    min-width: 350px;
+    margin: 15px;
+  }
+}
+
+/* 작은 모바일 (xs) - 576px 미만 */
+@media (max-width: 575.98px) {
+  .analysis-container {
+    min-height: auto;
+  }
+
+  .pdf-section,
+  .analysis-section {
+    padding: 0.5rem;
+  }
+
+  .pdf-section {
+    margin-bottom: 1rem;
+  }
+
+  .pdf-wrapper {
+    max-height: 50vh;
+  }
+
+  .analysis-cards-wrapper {
+    margin-top: 0.75rem;
+  }
+
+  .fw-bold.fs-5 {
+    font-size: 1.1rem !important;
+  }
+
+  .address-info,
+  .jeonse-rate-info {
+    font-size: 1rem !important;
+  }
+
+  /* 버튼 및 모달 반응형 */
+  .checklist-button {
+    padding: 14px 24px;
+    font-size: 16px;
+    min-width: 180px;
+  }
+
+  .modal-content {
+    min-width: 320px;
+    margin: 20px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .confirm-button,
+  .cancel-button {
+    width: 100%;
+  }
+}
+
 /* 버튼 영역 - 중앙 정렬 */
 .button-area {
   display: flex;
@@ -343,26 +496,8 @@ onMounted(async () => {
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-/* 반응형 디자인 */
-@media (max-width: 480px) {
-  .modal-content {
-    min-width: 320px;
-    margin: 20px;
-  }
-
-  .checklist-button {
-    padding: 14px 24px;
-    font-size: 16px;
-    min-width: 180px;
-  }
-
-  .modal-footer {
-    flex-direction: column;
-  }
-
-  .confirm-button,
-  .cancel-button {
-    width: 100%;
-  }
+.confirm-button,
+.cancel-button {
+  width: 100%;
 }
 </style>

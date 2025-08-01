@@ -72,7 +72,10 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
         KakaoUserDTO user = userService.loginOrRegister(kakaoUser);
 
         // JWT 발급
-        return jwtProcessor.generateToken(user.getKakaoId());
+        return jwtProcessor.generateToken(
+                String.valueOf(user.getUserId()),
+                user.getKakaoId()
+        );
     }
 
     @Override

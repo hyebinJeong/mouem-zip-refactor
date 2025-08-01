@@ -1,6 +1,15 @@
 <template>
   <div v-if="result && result.analysis !== null" class="list-group">
     <div class="d-flex flex-column align-items-center mt-3 p-3">
+      <div class="text-center mb-4">
+        <p class="fw-bold fs-5 mb-1">
+          올려주신 등기부등본에 대해서 분석했어요.
+        </p>
+        <p class="fw-bold fs-5">
+          <span style="color: #fe5252">위험 요소</span>는 없는지,
+          <span style="color: #1a80e5">꼼꼼히</span> 살펴봤어요.
+        </p>
+      </div>
       <!-- 등급 표시 원형 -->
       <div
         class="rounded-circle border border-4 d-flex align-items-center justify-content-center fw-bold mb-3"
@@ -13,48 +22,71 @@
       >
         {{ result ? result.rating : '로딩중' }}
       </div>
-
+      <BuddyHelper @open-dictionary="openDictionaryModal" />
+      <TermViewModal v-if="showDictionaryModal" @close="closeDictionaryModal" />
       <!-- 등급 설명 -->
-      <p v-if="result" class="text-center text-secondary mb-4">
-        사용자님이 올려주신 등기부등본은
+      <div
+        class="text-center px-4 py-3 mb-4"
+        style="background-color: #f0f6ff; border-radius: 1rem; max-width: 640px"
+      >
+        <span class="fw-bold">사용자님이 올려주신 등기부등본은 </span>
         <span
           :class="{
-            'text-success': result.rating === '보통',
-            'text-danger': result.rating === '위험',
-            'text-primary': result.rating === '양호',
+            'text-success fw-bold': result.rating === '보통',
+            'text-danger fw-bold': result.rating === '위험',
+            'text-primary fw-bold': result.rating === '양호',
           }"
-          class="fw-bold"
         >
           {{ result.rating }} 등급
         </span>
-        입니다.
-      </p>
+        <span class="fw-bold">입니다.</span>
+      </div>
       <!-- 좌우분할 -->
-      <div class="row w-100">
-        <div
-          class="col-6 d-flex justify-content-center align-items-center"
-          style="padding: 1rem"
-        >
-          <!-- PDF 뷰어 -->
+      <div class="row w-100 align-items-start" style="height: 80vh">
+        <div class="col-6" style="padding: 1rem">
+          <!-- 위험 문구 문단 (상단 고정) -->
+          <p class="fw-bold fs-5 mb-2" style="color: #151fae">
+            어떤 점이 위험한지 하나씩 확인해보세요.
+          </p>
           <div
             v-if="result?.fileUrl"
-            class="w-100 mt-4"
-            style="max-width: 64rem"
+            style="
+              position: sticky;
+              top: 1rem;
+              max-height: calc(80vh - 2rem);
+              overflow-y: auto;
+            "
           >
             <PDFView :pdfUrl="result.fileUrl" />
           </div>
         </div>
-        <div class="col-6 p-0">
-          <h3 class="h5 fw-bold mb-4">
-            어떤 점이 위험한지 하나씩 확인해보세요.
-          </h3>
-          <h4>주소: {{ result.address }}</h4>
-          <h4>예상 전세가율: {{ result.jeonseRate }}</h4>
-          <AnalysisCards
-            v-if="result && result.analysis"
-            :analysis="result.analysis"
-            :analysisItems="analysisItems"
-          />
+        <!-- 오른쪽 분석: 스크롤 가능 -->
+        <div
+          class="col-6"
+          style="
+            height: 80vh;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+          "
+        >
+          <p class="fw-bold fs-5 mb-2" style="color: #151fae">기본 정보</p>
+          <p style="font-size: 1.25rem">주소: {{ result.address }}</p>
+          <p style="font-size: 1.25rem">
+            예상 전세가율:
+            <span v-if="result.jeonseRate !== -1"
+              >{{ result.jeonseRate }} %</span
+            >
+            <span v-else style="color: gray">판단 불가</span>
+          </p>
+          <div style="flex: 1; overflow-y: auto; margin-top: 1rem">
+            <AnalysisCards
+              v-if="result && result.analysis"
+              :analysis="result.analysis"
+              :analysisItems="analysisItems"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -62,11 +94,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import PDFView from '@/components/PDFView.vue';
 import AnalysisCards from '@/components/AnalysisCards.vue';
+import BuddyHelper from '@/components/BuddyHelper.vue';
+import TermViewModal from '@/components/TermViewModal.vue';
 
 const route = useRoute();
 const result = ref(null);
@@ -81,6 +115,17 @@ const analysisItems = [
   { label: '전세권설정', key: 'jeonseRightInfos' },
   { label: '가등기', key: 'provisionalRegistrationInfos' },
 ];
+
+// 용어 모달 표시 상태
+const showDictionaryModal = ref(false);
+
+// 용어모달 열기/닫기 함수
+const openDictionaryModal = () => {
+  showDictionaryModal.value = true;
+};
+const closeDictionaryModal = () => {
+  showDictionaryModal.value = false;
+};
 
 onMounted(async () => {
   const registerId = route.params.registerId;

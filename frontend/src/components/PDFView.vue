@@ -1,12 +1,24 @@
 <template>
   <div class="pdf-viewer">
     <canvas ref="canvas"></canvas>
-    <div class="controls">
-      <button @click="prevPage" :disabled="pageNum <= 1">← 이전</button>
-      <span>{{ pageNum }} / {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="pageNum >= totalPages">
-        다음 →
-      </button>
+    <div class="controls-container">
+      <div class="controls-segment">
+        <button
+          @click="prevPage"
+          :disabled="pageNum <= 1"
+          class="segment-button prev-button"
+        >
+          ← 이전
+        </button>
+        <div class="segment-info">{{ pageNum }} / {{ totalPages }}</div>
+        <button
+          @click="nextPage"
+          :disabled="pageNum >= totalPages"
+          class="segment-button next-button"
+        >
+          다음 →
+        </button>
+      </div>
     </div>
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
   </div>
@@ -106,12 +118,60 @@ canvas {
   height: auto;
   background-color: #f9f9f9;
 }
-.controls {
-  margin-top: 12px;
+.controls-container {
   display: flex;
   justify-content: center;
+  width: 100%;
+}
+.controls-segment {
+  display: inline-flex;
+  background: #f2f2f7;
+  border-radius: 12px;
+  padding: 4px;
   align-items: center;
-  gap: 1rem;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e8e8ed;
+}
+.segment-button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #3a3a3c;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 80px;
+}
+.segment-button:hover:not(:disabled) {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #007aff;
+}
+.segment-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.segment-button:disabled {
+  color: #8e8e93;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.segment-info {
+  padding: 12px 20px;
+  font-weight: 600;
+  color: #007aff;
+  font-size: 14px;
+  background: rgba(0, 122, 255, 0.1);
+  border-radius: 8px;
+  min-width: 60px;
+  text-align: center;
+}
+.segment-button:focus {
+  outline: 2px solid #007aff;
+  outline-offset: 2px;
 }
 .error {
   color: red;

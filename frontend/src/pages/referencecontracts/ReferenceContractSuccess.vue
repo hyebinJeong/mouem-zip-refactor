@@ -5,24 +5,24 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const contract = ref({
+  contractName: '',
   lessor: '',
   lessee: '',
   address: '',
-  contractAmount: '',
-  deposit: '',
-  rent: '',
+  landCategory: '',
+  landArea: '',
   structure: '',
+  buildingArea: '',
+  leasePart: '',
+  leaseArea: '',
+  deposit: '',
+  contractAmount: '',
+  rent: '',
   maintenanceFee: '',
   startDate: '',
   endDate: '',
-  special: '',
+  special: [],
 });
-
-const defaultSpecialTerms = [
-  '임대인은 임차인의 대항력 및 확정일자 확보 이전에 해당 부동산에 제3자와의 담보권 설정, 매도, 제3자 점유를 하지 않는다.',
-  '임대인은 계약 체결 당시 해당 주택에 존재하는 모든 선순위 권리와 보증금 정보(선순위 세입자 포함)를 정확히 고지하였으며, 향후 변동 시 즉시 통보한다.',
-  '본 계약은 공인중개사를 통하지 않고 당사자 간 직거래로 체결되었으며, 이에 따라 발생할 수 있는 권리분쟁은 민법 및 주택임대차보호법에 따르기로 한다.',
-];
 
 const mergedSpecialTerms = computed(() => {
   const userSpecials = Array.isArray(contract.value.special)
@@ -30,8 +30,15 @@ const mergedSpecialTerms = computed(() => {
     : contract.value.special
     ? [contract.value.special]
     : [];
-  return [...defaultSpecialTerms, ...userSpecials];
+  return [...userSpecials];
 });
+
+// ✅ 모달 상태
+const showModal = ref(true);
+
+const closeModal = () => {
+  showModal.value = false;
+};
 
 onMounted(() => {
   const stored = sessionStorage.getItem('contractData');
@@ -49,36 +56,85 @@ onMounted(() => {
       <h1><span class="highlight">계약서</span>가 완성되었어요.</h1>
       <p class="sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
 
-      <h2 class="property-title">힐스테이트 팔교엘포레A3BL</h2>
+      <!-- ✅ 계약서 이름 -->
+      <h2 class="property-title">
+        {{ contract.contractName || '계약서 이름이 입력되지 않았습니다' }}
+      </h2>
+
       <hr class="divider" />
 
       <div class="table-box">
         <table class="info-table">
           <tr>
-            <td><strong>임대인 :</strong> {{ contract.lessor }}</td>
-            <td><strong>임차인 :</strong> {{ contract.lessee }}</td>
-          </tr>
-        </table>
-        <hr class="divider full" />
-
-        <table class="info-table">
-          <tr>
-            <td><strong>소재지 :</strong> {{ contract.address }}</td>
-            <td><strong>월세 :</strong> {{ contract.rent }}</td>
-          </tr>
-          <tr>
-            <td><strong>계약금 :</strong> {{ contract.contractAmount }}</td>
-            <td><strong>보증금 :</strong> {{ contract.deposit }}</td>
-          </tr>
-          <tr>
-            <td colspan="2">
-              <strong>임대차 기간 :</strong> {{ contract.startDate }} ~
-              {{ contract.endDate }}
+            <td>
+              <div class="label">임대인(집주인)</div>
+              <div class="value">{{ contract.lessor }}</div>
+            </td>
+            <td>
+              <div class="label">임차인(세입자)</div>
+              <div class="value">{{ contract.lessee }}</div>
             </td>
           </tr>
           <tr>
+            <td>
+              <div class="label">소재지</div>
+              <div class="value">{{ contract.address }}</div>
+            </td>
+            <td>
+              <div class="label">토지 지목</div>
+              <div class="value">{{ contract.landCategory }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">토지 면적</div>
+              <div class="value">{{ contract.landArea }}</div>
+            </td>
+            <td>
+              <div class="label">건물 구조·용도</div>
+              <div class="value">{{ contract.structure }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">건물 면적</div>
+              <div class="value">{{ contract.buildingArea }}</div>
+            </td>
+            <td>
+              <div class="label">임차할 부분</div>
+              <div class="value">{{ contract.leasePart }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">임차할 면적</div>
+              <div class="value">{{ contract.leaseArea }}</div>
+            </td>
+            <td>
+              <div class="label">보증금</div>
+              <div class="value">{{ contract.deposit }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">계약금</div>
+              <div class="value">{{ contract.contractAmount }}</div>
+            </td>
+            <td>
+              <div class="label">잔금</div>
+              <div class="value">{{ contract.rent }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">관리비</div>
+              <div class="value">{{ contract.maintenanceFee }}</div>
+            </td>
             <td colspan="2">
-              <strong>관리비 :</strong> {{ contract.maintenanceFee }}
+              <div class="label">임대차 기간</div>
+              <div class="value">
+                {{ contract.startDate }} ~ {{ contract.endDate }}
+              </div>
             </td>
           </tr>
         </table>
@@ -88,7 +144,6 @@ onMounted(() => {
 
       <div class="special-section">
         <h3>특약 사항</h3>
-
         <p
           v-for="(item, index) in mergedSpecialTerms"
           :key="index"
@@ -96,6 +151,18 @@ onMounted(() => {
         >
           {{ index + 1 }}. {{ item }}
         </p>
+      </div>
+    </div>
+
+    <!-- ✅ 계약서 자동 삭제 안내 모달 -->
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal-content">
+        <h2>📌 계약서 자동 삭제 안내</h2>
+        <p>
+          계약서는 작성일 기준 <strong>50일 후 자동 삭제</strong>됩니다.<br />
+          필요 시 사전 <strong>캡쳐 또는 다운로드</strong>해 주시기 바랍니다.
+        </p>
+        <button class="close-btn" @click="closeModal">확인</button>
       </div>
     </div>
   </div>
@@ -155,9 +222,24 @@ h1 {
 }
 
 .info-table td {
-  padding: 10px;
+  padding: 12px;
   border: none;
   vertical-align: top;
+}
+
+/* ✅ 라벨 / 값 스타일 */
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.value {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-line; /* 줄바꿈 허용 */
 }
 
 .divider {
@@ -191,5 +273,69 @@ h1 {
   border-radius: 8px;
   color: #1e3a8a;
   font-weight: 500;
+}
+
+/* ✅ 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  padding: 32px 24px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #1e3a8a;
+}
+
+.modal-content p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #1d4ed8;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

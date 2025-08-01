@@ -42,4 +42,18 @@ public class AccessController {
 //    public ResponseEntity<?> checkChecklistAccess(@PathVariable Long registerId) {
 //        return ResponseEntity.ok("AUTHORIZED");
 //    }
+
+    // 관리자 페이지 접근 확인
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> checkAdminAccess() {
+        return ResponseEntity.ok("AUTHORIZED");
+    }
+
+    @GetMapping("/category/**")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> checkCategoryAccess() {
+        return ResponseEntity.ok("AUTHORIZED");
+    }
+
 }

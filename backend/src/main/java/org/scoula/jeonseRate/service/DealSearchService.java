@@ -9,8 +9,6 @@ import org.scoula.jeonseRate.enums.HouseTypeCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -103,18 +101,6 @@ public class DealSearchService {
                 })
                 .collect(Collectors.toList());
 
-        // 로그 찍기
-//        System.out.println("입력 건물명: " + buildingName);
-//        System.out.println("필터링 전 매물 수: " + allDeals.size());
-//        System.out.println("지번 필터링 수: " + filteredByJibun.size());
-//        System.out.println("건물명 필터링 최종 수: " + finalFiltered.size());
-//
-//        System.out.println("=== 최종 필터링된 매물 목록 ===");
-//        finalFiltered.forEach(d ->
-//                System.out.println("지번: " + d.getJibun() + ", 아파트명: " + d.getAptNm() + ", 오피스텔명: " + d.getOffiNm() + ", 연립명: " + d.getMhouseNm())
-//        );
-
-
         // 매물이 없다면 판단 보류
         if (finalFiltered.isEmpty()) {
             return Optional.empty();
@@ -129,7 +115,6 @@ public class DealSearchService {
         // DB 저장용: 정수로 반올림
         jeonseRateDTO.setAreaAVGPrice((int) Math.round(avg));
 
-        //System.out.println("유사 조건 매물 평균 매매가: " + roundedAvg + "만원");
         return Optional.of(jeonseRateDTO);
     }
 
@@ -137,7 +122,7 @@ public class DealSearchService {
         if (name == null) return "";
         return name.replaceAll("\\s+", "")                            // 모든 공백 제거
                 .replaceAll("(아파트|오피스텔|연립|주상복합)", "") // 건물유형 제거
-                .toLowerCase();                                    // (선택) 소문자 통일
+                .toLowerCase();
     }
 
     private boolean isSimilarName(String input, String target) {
@@ -183,7 +168,7 @@ public class DealSearchService {
                         .queryParam("numOfRows", "1000")// 최대 1000건까지 요청
                         .build())
                 .retrieve()
-                .bodyToMono(String.class)   // 응답 본문을 문자열로 받음
+                .bodyToMono(String.class)
                 .block();
 
         try {

@@ -82,6 +82,7 @@ const routes = [
   {
     path: '/category',
     component: CategoryAll,
+    meta: { requiresAuth: true, requiresAdmin: true, hideHeader: true },
     children: [
       // 카테고리 관리
       { path: '', name: 'CategoryManager', component: CategoryManager },
@@ -176,6 +177,25 @@ router.beforeEach(async (to, from, next) => {
     if (!auth.isLoggedIn) {
       return next('/login');
     }
+
+    const payload = JSON.parse(atob(auth.token.split('.')[1]));
+
+    // 1) 관리자 전용 페이지
+    if (to.meta.requiresAdmin) {
+      if (payload.role !== 'ROLE_ADMIN') {
+        alert('관리자만 접근 가능한 페이지입니다.');
+        return next('/'); // 일반 회원은 홈으로
+      }
+    }
+    // 2) 회원 전용 페이지
+    else {
+      if (payload.role === 'ROLE_ADMIN') {
+        alert('회원 전용 페이지입니다.');
+        return next('/category'); // 관리자면 카테고리로 보내기
+      }
+    }
+
+    // 3) 백엔드 접근 체크 (선택)
     try {
       await axios.get('/api/check-access' + to.path, {
         headers: { Authorization: `Bearer ${auth.token}` },
@@ -186,7 +206,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  return next(); // 인증 필요 없는 페이지는 그냥 통과
+  return next();
 });
 
 export default router;

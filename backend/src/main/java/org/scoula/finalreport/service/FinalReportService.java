@@ -4,4 +4,5 @@ import org.scoula.finalreport.dto.FinalReportDTO;
 
 public interface FinalReportService {
     FinalReportDTO getFinalReport(Long reportId);
+    Long findReportIdByUserAndRegistry(Long userId, Long registryId);
 }

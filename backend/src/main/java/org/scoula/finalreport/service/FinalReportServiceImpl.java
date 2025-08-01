@@ -22,6 +22,7 @@ public class FinalReportServiceImpl implements FinalReportService {
     @Override
     public FinalReportDTO getFinalReport(Long reportId) {
         FinalReportRawDTO rawDto = finalReportMapper.getFinalReport(reportId);
+
         if (rawDto == null) {
             throw new IllegalArgumentException("해당 리포트를 찾을 수 없습니다.");
         }
@@ -60,5 +61,10 @@ public class FinalReportServiceImpl implements FinalReportService {
                 .checked(checkedList)
                 .checklistRating(rawDto.getChecklistRating())
                 .build();
+    }
+
+    @Override
+    public Long findReportIdByUserAndRegistry(Long userId, Long registryId) {
+        return finalReportMapper.findReportIdByUserAndRegistry(userId, registryId);
     }
 }

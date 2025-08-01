@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.termmanager.mapper.TermmanagerMapper">
+
+    <select id="getAllTerms" resultType="org.scoula.termmanager.domain.TermmanagerVO">
+        SELECT t.term_id AS termId, t.category_id AS categoryId, t.term_name AS termName,
+               t.term_define AS termDefine, t.term_example AS termExample, t.term_caution AS termCaution,
+               c.category_name AS categoryName, c.category_color AS categoryColor
+        FROM term t
+                 LEFT JOIN category c ON t.category_id = c.category_id
+        ORDER BY t.term_id DESC
+    </select>
+
+    <select id="getTermById" parameterType="int" resultType="org.scoula.termmanager.domain.TermmanagerVO">
+        SELECT t.term_id AS termId, t.category_id AS categoryId, t.term_name AS termName,
+               t.term_define AS termDefine, t.term_example AS termExample, t.term_caution AS termCaution,
+               c.category_name AS categoryName, c.category_color AS categoryColor
+        FROM term t
+                 LEFT JOIN category c ON t.category_id = c.category_id
+        WHERE t.term_id = #{termId}
+    </select>
+
+    <insert id="insertTerm" parameterType="org.scoula.termmanager.domain.TermmanagerVO" useGeneratedKeys="true" keyProperty="termId">
+        INSERT INTO term (category_id, term_name, term_define, term_example, term_caution)
+        VALUES (#{categoryId}, #{termName}, #{termDefine}, #{termExample}, #{termCaution})
+    </insert>
+
+    <update id="updateTerm" parameterType="org.scoula.termmanager.domain.TermmanagerVO">
+        UPDATE term
+        SET category_id = #{categoryId},
+            term_name = #{termName},
+            term_define = #{termDefine},
+            term_example = #{termExample},
+            term_caution = #{termCaution}
+        WHERE term_id = #{termId}
+    </update>
+
+    <delete id="deleteTerm" parameterType="int">
+        DELETE FROM term WHERE term_id = #{termId}
+    </delete>
+
+</mapper>

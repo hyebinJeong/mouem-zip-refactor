@@ -19,7 +19,12 @@
     </select>
     <select id="selectByUserId" resultType="org.scoula.register.domain.dto.RegisterDTO">
         SELECT *
-        FROM registry_analysis
-        WHERE user_id = #{userId} AND status = false
+        FROM registry_analysis ra
+        WHERE user_id = #{userId} and status = false
+          AND NOT EXISTS (
+            SELECT 1
+            FROM checklist c
+            WHERE c.registry_id = ra.registry_id
+        )
     </select>
 </mapper>

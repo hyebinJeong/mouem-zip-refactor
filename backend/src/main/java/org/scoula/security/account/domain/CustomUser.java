@@ -23,8 +23,13 @@ public class CustomUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+<<<<<<< Updated upstream
         // 임시 role 지정
         return List.of(new SimpleGrantedAuthority(user.getRole()));
+=======
+        // DB에 저장되어있는 유저 role 가져오기
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+>>>>>>> Stashed changes
     }
 
     @Override

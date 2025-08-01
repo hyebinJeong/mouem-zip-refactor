@@ -39,6 +39,9 @@ DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS registry_analysis;
 DROP TABLE IF EXISTS users;
 # SELECT * from users;
+update users
+set role = 'ROLE_ADMIN'
+WHERE name = '고두환';
 -- ============================================
 -- 1. 사용자 관련
 -- ============================================

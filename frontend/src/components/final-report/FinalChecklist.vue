@@ -36,7 +36,7 @@ const uncheckedItems = computed(() => {
 
 .checkedlist-box {
   width: 100%;
-  max-width: 900px;
+  max-width: 800px;
   background-color: #fffcd4;
   padding: 1rem 1.25rem;
   border-radius: 8px;

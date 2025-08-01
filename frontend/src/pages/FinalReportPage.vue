@@ -69,9 +69,12 @@ const registryKeys = [
 </script>
 
 <template>
-  <div class="FinalReportPage container py-5 text-center" v-if="reportData">
-    <h1>최종 분석이 완료되었어요.</h1>
-    <p class="text-muted">
+  <div
+    class="FinalReportPage container py-5 mb-4 text-center"
+    v-if="reportData"
+  >
+    <h1 class="mb-4">최종 분석이 완료되었어요.</h1>
+    <p class="text-muted mb-4">
       모든 등급은
       <span
         class="text-primary text-decoration-underline"
@@ -82,8 +85,8 @@ const registryKeys = [
       >에 의해 설정된 등급입니다.
     </p>
     <DiagnosisGradeInfoModal :show="showModal" @close="closeModal" />
-    <!-- v-if로 reportData 존재 확인 후 렌더링하여 undefined 방지 -->
 
+    <!-- v-if로 reportData 존재 확인 후 렌더링하여 undefined 방지 -->
     <!-- 등급 -->
     <div class="final-grade-wrap">
       <FinalGrade
@@ -113,7 +116,7 @@ const registryKeys = [
               :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
             />
           </div>
-          <div class="final-jeonse-col">
+          <div class="final-jeonse-col" style="margin-left: 4rem">
             <FinalJeonseCard
               v-if="reportData"
               :salePrice="reportData.expectedSellingPrice"
@@ -133,12 +136,14 @@ const registryKeys = [
       </div>
     </div>
 
-    <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
+    <hr class="my-4 border-top border-secondary-subtle w-75 mt-5" />
 
     <!-- 등기부등본 -->
-    <div class="final-registry-wrap mt-5 mb-4">
-      <h2>{{ reportData.username }}님의 등기부등본을 분석했어요.</h2>
-      <div class="final-analysis-card-wrap" style="margin-bottom: 5rem">
+    <div class="final-registry-wrap mt-5">
+      <h2 class="mb-3">
+        {{ reportData.username }}님의 등기부등본을 분석했어요.
+      </h2>
+      <div class="final-analysis-card-wrap">
         <AnalysisCards
           v-if="reportData.registryAnalysis"
           :analysis="reportData.registryAnalysis"
@@ -153,8 +158,10 @@ const registryKeys = [
     <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
       <div class="final-checklist-inner">
         <div v-if="uncheckedItems.length > 0">
-          <h2>{{ reportData.username }}님이 체크하지 않은 항목이에요.</h2>
-          <p class="mb-4">
+          <h2 class="mb-3">
+            {{ reportData.username }}님이 체크하지 않은 항목이에요.
+          </h2>
+          <p class="mb-5">
             향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.
           </p>
           <FinalChecklist :checked="reportData.checked" />
@@ -184,6 +191,12 @@ const registryKeys = [
 </template>
 
 <style scoped>
+.final-jeonse-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .final-jeonse-col {
   width: 100%;
   max-width: 480px;
@@ -194,11 +207,34 @@ const registryKeys = [
 }
 
 .final-btn-wrap {
-  column-gap: 14rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.final-btn-wrap button {
+  height: 48px;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease-in-out;
+  flex: 1 1 45%;
+  min-width: 130px;
+  max-width: 340px;
+  white-space: nowrap;
+}
+
+.final-btn-wrap button:hover {
+  background-color: #005ac1;
 }
 
 .final-analysis-card-wrap {
-  max-width: 960px;
+  max-width: 880px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -210,8 +246,8 @@ const registryKeys = [
 }
 
 @media (max-width: 768px) {
-  .final-jeonse-col {
-    width: 100% !important;
+  .final-btn-wrap {
+    flex-direction: row;
   }
 }
 </style>

@@ -52,7 +52,6 @@ const props = defineProps({
   display: flex;
   justify-content: center;
   padding: 1rem;
-  margin-bottom: 3rem;
 }
 
 .donut-wrap {

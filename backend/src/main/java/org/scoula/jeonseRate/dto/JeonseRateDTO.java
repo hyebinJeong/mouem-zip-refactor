@@ -10,6 +10,7 @@ import org.scoula.jeonseRate.enums.SafetyGrade;
 @Setter
 @ToString
 public class JeonseRateDTO {
+    private int userId;             // 유저 번호
     private int registerId;         // 등기부등본 번호
     private String address;         // 사용자가 입력한 주소
     private int jeonsePrice;        // 전세 보증금 (단위: 만원)

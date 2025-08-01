@@ -18,13 +18,13 @@ public class CustomUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getKakaoId();
+        return String.valueOf(user.getUserId());
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // 임시 role 지정
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(new SimpleGrantedAuthority(user.getRole()));
     }
 
     @Override

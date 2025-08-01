@@ -24,15 +24,15 @@ const { goToHome, goToMyPage } = useNavigation();
 const reportId = 1;
 const reportData = ref(null);
 
-// 쿼리 파라미터 기반 (만약 path param 방식이면 수정하기)
-// const registryId = Number(route.query.registryId);
+// 쿼리 파라미터 기반
+const registryId = Number(route.query.registryId);
 
-// onMounted(async () => {
-//   if (!registryId || isNaN(registryId)) {
-//     console.warn('유효하지 않은 registryId');
-//     return;
-//   }
-// });
+onMounted(async () => {
+  if (!registryId || isNaN(registryId)) {
+    console.warn('유효하지 않은 registryId');
+    return;
+  }
+});
 
 onMounted(async () => {
   const res = await getFinalReport(reportId);
@@ -49,21 +49,6 @@ onMounted(async () => {
     checked: res?.checked ?? [],
   };
 });
-
-// 임시 목 데이터
-// const reportId = 1;
-// const reportData = ref({
-//   registryRating: '보통',
-//   jeonseRatioRating: '위험',
-//   checklistRating: '안전',
-//   jeonseRatio: 80,
-//   regionAvgJeonseRatio: 75.0,
-//   jeonseDeposit: 28000, // 만원 단위
-//   salePrice: 36000,
-//   username: '버디',
-//   checked: [true, true, false, true, false, true, true, true, false],
-//   // checked: [true, true, true, true, true, true, true, true, true],
-// });
 
 const uncheckedItems = computed(() => {
   return checklistStore.filter(
@@ -153,7 +138,7 @@ const registryKeys = [
     <!-- 등기부등본 -->
     <div class="final-registry-wrap mt-5 mb-4">
       <h2>{{ reportData.username }}님의 등기부등본을 분석했어요.</h2>
-      <div style="margin-bottom: 5rem">
+      <div class="final-analysis-card-wrap" style="margin-bottom: 5rem">
         <AnalysisCards
           v-if="reportData.registryAnalysis"
           :analysis="reportData.registryAnalysis"
@@ -166,15 +151,19 @@ const registryKeys = [
 
     <!-- 체크리스트 -->
     <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
-      <div v-if="uncheckedItems.length > 0">
-        <h2>{{ reportData.username }}님이 체크하지 않은 항목이에요.</h2>
-        <p class="mb-4">향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.</p>
-        <FinalChecklist :checked="reportData.checked" />
-      </div>
-      <div v-else>
-        <h2>
-          {{ reportData.username }}님은 모든 체크리스트 항목을 확인했어요.
-        </h2>
+      <div class="final-checklist-inner">
+        <div v-if="uncheckedItems.length > 0">
+          <h2>{{ reportData.username }}님이 체크하지 않은 항목이에요.</h2>
+          <p class="mb-4">
+            향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.
+          </p>
+          <FinalChecklist :checked="reportData.checked" />
+        </div>
+        <div v-else>
+          <h2>
+            {{ reportData.username }}님은 모든 체크리스트 항목을 확인했어요.
+          </h2>
+        </div>
       </div>
     </div>
     <div class="final-btn-wrap d-flex justify-content-center">
@@ -206,6 +195,18 @@ const registryKeys = [
 
 .final-btn-wrap {
   column-gap: 14rem;
+}
+
+.final-analysis-card-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.final-checklist-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 @media (max-width: 768px) {

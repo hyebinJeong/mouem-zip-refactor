@@ -7,6 +7,7 @@ import org.scoula.finalreport.dto.FinalReportDTO;
 import org.scoula.finalreport.dto.FinalReportRawDTO;
 import org.scoula.finalreport.mapper.FinalReportMapper;
 import org.scoula.finalreport.mapper.FinalReportMapper;
+import org.scoula.register.domain.dto.RegisterAnalysisResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,17 +26,32 @@ public class FinalReportServiceImpl implements FinalReportService {
             throw new IllegalArgumentException("해당 리포트를 찾을 수 없습니다.");
         }
 
+        // 체크리스트 json 파싱 (String -> List<Boolean>)
         List<Boolean> checkedList;
         try {
             checkedList = objectMapper.readValue(rawDto.getChecked(), new TypeReference<>() {});
         } catch (Exception e) {
-            System.out.println("JSON 파싱 실패 문자열: " + rawDto.getChecked());
+            System.out.println("체크리스트 JSON 파싱 실패 문자열: " + rawDto.getChecked());
             throw new RuntimeException("Checklist JSON 파싱 오류", e);
         }
+
+        // 등기부 위험요소 json 파싱 (String -> RegisterAnalysisResponse)
+        RegisterAnalysisResponse registerAnalysis;
+        try {
+            registerAnalysis = objectMapper.readValue(
+                    rawDto.getAnalysisJson(),
+                    RegisterAnalysisResponse.class
+            );
+        } catch (Exception e) {
+            System.out.println("등기부분석 JSON 파싱 실패 문자열: " + rawDto.getAnalysisJson());
+            throw new RuntimeException("등기부 분석 JSON 파싱 오류", e);
+        }
+
 
         return FinalReportDTO.builder()
                 .username(rawDto.getUsername())
                 .registryRating(rawDto.getRegistryRating())
+                .registryAnalysis(registerAnalysis) // 파싱된 등기부등본 위험요소
                 .jeonseRatioRating(rawDto.getJeonseRatioRating())
                 .jeonseRatio(rawDto.getJeonseRatio())
                 .regionAvgJeonseRatio(rawDto.getRegionAvgJeonseRatio())

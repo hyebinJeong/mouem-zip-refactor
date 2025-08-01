@@ -7,6 +7,7 @@ import lombok.Data;
 public class FinalReportRawDTO {
     private String username;
     private String registryRating;
+    private String analysisJson; // 등기부등본 위험요소
     private String jeonseRatioRating;
     private Double jeonseRatio;
     private Double regionAvgJeonseRatio;

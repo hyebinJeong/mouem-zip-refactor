@@ -6,7 +6,10 @@ import FinalGrade from '@/components/final-report/FinalGrade.vue';
 import FinalJeonse from '@/components/final-report/FinalJeonse.vue';
 import FinalChecklist from '@/components/final-report/FinalChecklist.vue';
 import { useNavigation } from '@/composables/final-report/useNavigation';
-import { getFinalReport } from '@/api/finalReport';
+import {
+  getFinalReport,
+  getFinalReportByUserAndRegistry,
+} from '@/api/finalReport';
 import FinalJeonseCard from '@/components/final-report/FinalJeonseCard.vue';
 import checklistStore from '@/stores/checklistStore';
 import AnalysisCards from '@/components/AnalysisCards.vue';
@@ -21,11 +24,15 @@ const closeModal = () => {
 };
 const { goToHome, goToMyPage } = useNavigation();
 
-const reportId = 1;
+// const reportId = 1;
 const reportData = ref(null);
 
 // 쿼리 파라미터 기반
+const userId = Number(route.query.userId);
 const registryId = Number(route.query.registryId);
+
+console.log('넘어온 userId:', userId);
+console.log('넘어온 registryId:', registryId);
 
 onMounted(async () => {
   // 테스트용 코드
@@ -33,14 +40,16 @@ onMounted(async () => {
   console.log('userId:', route.query.userId);
   console.log('registryId:', route.query.registryId);
 
-  if (!registryId || isNaN(registryId)) {
-    console.warn('유효하지 않은 registryId');
+  if (!userId || !registryId || isNaN(userId) || isNaN(registryId)) {
+    console.warn('잘못된 쿼리 파라미터');
     return;
   }
 });
 
 onMounted(async () => {
-  const res = await getFinalReport(reportId);
+  // const res = await getFinalReport(reportId);
+  const res = await getFinalReportByUserAndRegistry(userId, registryId);
+
   reportData.value = {
     registryRating: res?.registryRating ?? '',
     registryAnalysis: res?.registryAnalysis ?? null,

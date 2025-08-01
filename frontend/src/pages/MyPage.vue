@@ -17,6 +17,8 @@ function onKakaoLogout() {
   window.location.href = kakaoAuthUrl2;
 }
 onMounted(async () => {
+  console.log('userId from token:', auth.userId); // userId가 제대로 추출되는지 확인
+
   if (auth.token) {
     const res = await axios.get('/api/user/me', {
       headers: {

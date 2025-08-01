@@ -8,8 +8,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class KakaoUserDTO {
+    private Long userId;
     private String kakaoId;
     private String name;
     private String email;
     private boolean state;
+
+    public KakaoUserDTO(String kakaoId, String name, String email, boolean state) {
+        this.kakaoId = kakaoId;
+        this.name = name;
+        this.email = email;
+        this.state = state;
+    }
 }

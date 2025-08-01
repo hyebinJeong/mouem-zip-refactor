@@ -41,7 +41,7 @@ public class KakaoOAuthController {
 
         kakaoOAuthService.unlinkKakaoAccount(kakaoAccessToken);
 
-        String kakaoId = jwtProcessor.getUsername(jwt);
+        String kakaoId = jwtProcessor.getKakaoId(jwt);
         kakaoOAuthService.softDeleteUser(kakaoId);
 
         return ResponseEntity.ok().build();

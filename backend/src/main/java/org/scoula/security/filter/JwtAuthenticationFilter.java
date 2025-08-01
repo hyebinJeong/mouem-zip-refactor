@@ -28,10 +28,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     private Authentication getAuthentication(String token) {
-        String username = jwtProcessor.getUsername(token);
-        // 디버깅용
-        System.out.println("🔍 JWT에서 추출한 kakaoId = " + username);
-        UserDetails princiapl = userDetailsService.loadUserByUsername(username);
+        String userIdStr = jwtProcessor.getUserId(token);
+
+        UserDetails princiapl = userDetailsService.loadUserByUsername(userIdStr);
         return new UsernamePasswordAuthenticationToken(princiapl, null, princiapl.getAuthorities());
     }
 

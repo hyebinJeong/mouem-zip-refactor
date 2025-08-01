@@ -144,6 +144,7 @@ const submitForm = async () => {
         registerId: registerId,
         address: selectedAddress.value,
         jeonsePrice: jeonsePrice.value,
+        userId: auth.userId,
       }),
     });
     if (!leaseRes.ok) {

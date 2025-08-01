@@ -15,5 +15,5 @@ public class AddressInfoDTO {
     private String jibunAddr;   // 지번 주소
     private String siNm;        // 시도명
     private String bdNm;        // 건물명
-    //private String sggNm;       // 구명
+    private String sggNm;       // 구명
 }

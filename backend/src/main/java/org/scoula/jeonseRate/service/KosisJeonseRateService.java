@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.scoula.jeonseRate.dto.JeonseRateDTO;
 import org.scoula.jeonseRate.enums.HouseTypeCode;
-import org.scoula.jeonseRate.enums.KosisRegionCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -34,13 +33,12 @@ public class KosisJeonseRateService {
 
 
 
-    public List<Map<String, Object>> fetchKosisData(Optional<JeonseRateDTO> averageDealPriceOpt, String sggNm) {
+    public List<Map<String, Object>> fetchKosisData(Optional<JeonseRateDTO> averageDealPriceOpt, String objL2) {
         Optional<String> objL1 = HouseTypeCode.fromName(averageDealPriceOpt.get().getBuildingType());
-        Optional<String> objL2 = KosisRegionCode.findCodeFromRawRegionName(sggNm);
         // KOSIS 매핑 실패 시 판단 보류
-        if (objL1.isEmpty() || objL2.isEmpty()) {
-//            System.out.println("KOSIS 파라미터 매핑 실패 → objL1 또는 objL2 없음");
-            return List.of(); // 빈 리스트 반환
+
+        if (objL1.isEmpty() || objL2 == null || objL2.isBlank()) {
+            return List.of(); // KOSIS 파라미터 매핑 실패
         }
 
         String response = webClient.get()
@@ -63,7 +61,7 @@ public class KosisJeonseRateService {
                 .retrieve()
                 .bodyToMono(byte[].class)
                 .map(bytes -> new String(bytes, Charset.forName("UTF-8")))
-                .doOnNext(raw -> System.out.println("응답 원문 (EUC-KR 해석): " + raw))
+//                .doOnNext(raw -> System.out.println("응답 원문 (EUC-KR 해석): " + raw))
                 .block();
 
         try {

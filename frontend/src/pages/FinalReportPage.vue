@@ -28,6 +28,11 @@ const reportData = ref(null);
 const registryId = Number(route.query.registryId);
 
 onMounted(async () => {
+  // 테스트용 코드
+  console.log('쿼리 파라미터:', route.query);
+  console.log('userId:', route.query.userId);
+  console.log('registryId:', route.query.registryId);
+
   if (!registryId || isNaN(registryId)) {
     console.warn('유효하지 않은 registryId');
     return;

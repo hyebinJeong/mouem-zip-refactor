@@ -4,12 +4,12 @@ import { useRoute } from 'vue-router';
 import DiagnosisGradeInfoModal from '@/components/final-report/DiagnosisGradeInfoModal.vue';
 import FinalGrade from '@/components/final-report/FinalGrade.vue';
 import FinalJeonse from '@/components/final-report/FinalJeonse.vue';
-import FinalRegistry from '@/components/final-report/FinalRegistry.vue';
 import FinalChecklist from '@/components/final-report/FinalChecklist.vue';
 import { useNavigation } from '@/composables/final-report/useNavigation';
 import { getFinalReport } from '@/api/finalReport';
 import FinalJeonseCard from '@/components/final-report/FinalJeonseCard.vue';
 import checklistStore from '@/stores/checklistStore';
+import AnalysisCards from '@/components/AnalysisCards.vue';
 
 const route = useRoute();
 const showModal = ref(false);
@@ -38,6 +38,7 @@ onMounted(async () => {
   const res = await getFinalReport(reportId);
   reportData.value = {
     registryRating: res?.registryRating ?? '',
+    registryAnalysis: res?.registryAnalysis ?? null,
     jeonseRatioRating: res?.jeonseRatioRating ?? '',
     checklistRating: res?.checklistRating ?? '',
     jeonseRatio: res?.jeonseRatio ?? 0,
@@ -69,6 +70,17 @@ const uncheckedItems = computed(() => {
     (_, index) => !reportData.value.checked?.[index]
   );
 });
+
+const registryKeys = [
+  { key: 'mortgageInfos', label: '근저당권' },
+  { key: 'seizureInfos', label: '압류' },
+  { key: 'provisionalSeizureInfos', label: '가압류' },
+  { key: 'auctionInfos', label: '경매' },
+  { key: 'provisionalRegistrationInfos', label: '가등기' },
+  { key: 'injunctionInfos', label: '가처분' },
+  { key: 'jeonseRightInfos', label: '전세권설정' },
+  { key: 'trustInfos', label: '신탁등기' },
+];
 </script>
 
 <template>
@@ -142,7 +154,11 @@ const uncheckedItems = computed(() => {
     <div class="final-registry-wrap mt-5 mb-4">
       <h2>{{ reportData.username }}님의 등기부등본을 분석했어요.</h2>
       <div style="margin-bottom: 5rem">
-        <FinalRegistry />
+        <AnalysisCards
+          v-if="reportData.registryAnalysis"
+          :analysis="reportData.registryAnalysis"
+          :analysisItems="registryKeys"
+        />
       </div>
     </div>
 

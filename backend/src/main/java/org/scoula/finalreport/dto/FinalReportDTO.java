@@ -2,6 +2,7 @@ package org.scoula.finalreport.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import org.scoula.register.domain.dto.RegisterAnalysisResponse;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
 public class FinalReportDTO {
     private String username;
     private String registryRating;
+    private RegisterAnalysisResponse registryAnalysis; // 등기부등본 위험요소
     private String jeonseRatioRating;
     private Double jeonseRatio; // 전세가율
     private Double regionAvgJeonseRatio; // 지역 평균 전세가율

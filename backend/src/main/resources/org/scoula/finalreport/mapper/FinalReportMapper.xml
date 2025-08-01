@@ -11,6 +11,7 @@
         SELECT
             u.name AS username,
             ra.registry_rating AS registryRating,
+            ra.risks AS analysisJson, -- 등기부등본 위험요소 추가
             ja.jeonse_ratio_rating AS jeonseRatioRating,
             ja.jeonse_ratio AS jeonseRatio,
             ja.region_avg_jeonse_ratio AS regionAvgJeonseRatio,

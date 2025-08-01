@@ -30,4 +30,12 @@ public class FinalReportController {
         FinalReportDTO dto = finalReportService.getFinalReport(reportId);
         return ResponseEntity.ok(dto);
     }
+
+    @PostMapping
+    public ResponseEntity<Long> createFinalReport(@RequestParam Long userId,
+                                                  @RequestParam Long registryId) {
+        Long reportId = finalReportService.createFinalReport(userId, registryId);
+        return ResponseEntity.ok(reportId);
+    }
+
 }

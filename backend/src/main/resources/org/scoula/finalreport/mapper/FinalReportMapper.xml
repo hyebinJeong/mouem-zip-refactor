@@ -26,12 +26,20 @@
                  JOIN checklist c ON ra.registry_id = c.registry_id AND fr.user_id = c.user_id
         WHERE fr.report_id = #{reportId}
     </select>
+
     <select id="findReportIdByUserAndRegistry"
-            resultType="java.lang.Long">
+            resultType="long">
         SELECT report_id
         FROM final_report
         WHERE user_id = #{userId}
           AND registry_id = #{registryId}
         LIMIT 1
     </select>
+
+    <!--  받아온 userId, registryId 저장-->
+    <insert id="insertFinalReport" parameterType="org.scoula.finalreport.dto.FinalReportInsertDTO"
+            useGeneratedKeys="true" keyProperty="reportId">
+        INSERT INTO final_report (user_id, registry_id)
+        VALUES (#{userId}, #{registryId});
+    </insert>
 </mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.finalreport.mapper.FinalReportMapper">
+
+    <select id="getFinalReport"
+            parameterType="long"
+            resultType="org.scoula.finalreport.dto.FinalReportRawDTO">
+        SELECT
+            u.name AS username,
+            ra.registry_rating AS registryRating,
+            ja.jeonse_ratio_rating AS jeonseRatioRating,
+            ja.jeonse_ratio AS jeonseRatio,
+            ja.region_avg_jeonse_ratio AS regionAvgJeonseRatio,
+            ja.deposit AS deposit,
+            ja.expected_selling_price AS expectedSellingPrice,
+            c.checked AS checked,
+            c.checklist_rating AS checklistRating
+        FROM final_report fr
+                 JOIN users u ON fr.user_id = u.user_id
+                 JOIN registry_analysis ra ON fr.registry_id = ra.registry_id
+                 JOIN jeonse_analysis ja ON ra.registry_id = ja.registry_id
+                 JOIN checklist c ON ra.registry_id = c.registry_id
+        WHERE fr.report_id = #{reportId}
+    </select>
+</mapper>

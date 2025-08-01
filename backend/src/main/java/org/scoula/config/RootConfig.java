@@ -30,7 +30,8 @@ import javax.sql.DataSource;
         "org.scoula.jeonseRate.mapper",
         "org.scoula.categorymanager.mapper",
         "org.scoula.contract.mapper",
-        "org.scoula.specialclause.mapper"
+        "org.scoula.specialclause.mapper",
+        "org.scoula.finalreport.mapper"
 })
 @ComponentScan(basePackages = {"org.scoula", "org.scoula.oauth.service"})
 @EnableTransactionManagement

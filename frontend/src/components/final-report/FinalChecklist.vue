@@ -18,7 +18,7 @@ const uncheckedItems = computed(() => {
       :key="index"
       class="checkedlist-box p-3 rounded mb-3 text-start"
     >
-      <p class="mb-0">{{ item }}</p>
+      <p class="mb-0" v-html="item"></p>
     </div>
   </div>
 </template>

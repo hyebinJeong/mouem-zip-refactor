@@ -12,17 +12,17 @@ import FinalJeonseCard from '@/components/final-report/FinalJeonseCard.vue';
 import checklistStore from '@/stores/checklistStore';
 
 const route = useRoute();
-// const reportData = ref(null);
 const showModal = ref(false);
-
 const openModal = () => {
   showModal.value = true;
 };
 const closeModal = () => {
   showModal.value = false;
 };
-
 const { goToHome, goToMyPage } = useNavigation();
+
+const reportId = 1;
+const reportData = ref(null);
 
 // 쿼리 파라미터 기반 (만약 path param 방식이면 수정하기)
 // const registryId = Number(route.query.registryId);
@@ -34,34 +34,35 @@ const { goToHome, goToMyPage } = useNavigation();
 //   }
 // });
 
-// 임시 목 데이터
-const reportId = 1;
-const reportData = ref({
-  registryRating: '보통',
-  jeonseRatioRating: '위험',
-  checklistRating: '안전',
-  jeonseRatio: 80,
-  regionAvgJeonseRatio: 75.0,
-  jeonseDeposit: 28000, // 만원 단위
-  salePrice: 36000,
-  username: '버디',
-  checked: [true, true, false, true, false, true, true, true, false],
-  // checked: [true, true, true, true, true, true, true, true, true],
+onMounted(async () => {
+  const res = await getFinalReport(reportId);
+  reportData.value = {
+    registryRating: res?.registryRating ?? '',
+    jeonseRatioRating: res?.jeonseRatioRating ?? '',
+    checklistRating: res?.checklistRating ?? '',
+    jeonseRatio: res?.jeonseRatio ?? 0,
+    regionAvgJeonseRatio: res?.regionAvgJeonseRatio ?? 0,
+    expectedSellingPrice: res?.expectedSellingPrice ?? 0,
+    deposit: res?.deposit ?? 0,
+    username: res?.username ?? '사용자',
+    checked: res?.checked ?? [],
+  };
 });
 
-//   const res = await getFinalReport(reportId);
-//   // 안전하게 받아온 데이터가 없으면 기본값 할당
-//   reportData.value = {
-//     registryRating: res?.registryRating ?? '',
-//     jeonseRatioRating: res?.jeonseRatioRating ?? '',
-//     checklistRating: res?.checklistRating ?? '',
-//     jeonseRatio: res?.jeonseRatio ?? 0,
-//     regionAvgJeonseRatio: res?.regionAvgJeonseRatio ?? 0,
-//     salePrice: res?.salePrice ?? 0,
-//     jeonseDeposit: res?.jeonseDeposit ?? 0,
-//     username: res?.username ?? '사용자',
-//     checked: res?.checked ?? []
-//   };
+// 임시 목 데이터
+// const reportId = 1;
+// const reportData = ref({
+//   registryRating: '보통',
+//   jeonseRatioRating: '위험',
+//   checklistRating: '안전',
+//   jeonseRatio: 80,
+//   regionAvgJeonseRatio: 75.0,
+//   jeonseDeposit: 28000, // 만원 단위
+//   salePrice: 36000,
+//   username: '버디',
+//   checked: [true, true, false, true, false, true, true, true, false],
+//   // checked: [true, true, true, true, true, true, true, true, true],
+// });
 
 const uncheckedItems = computed(() => {
   return checklistStore.filter(
@@ -71,7 +72,7 @@ const uncheckedItems = computed(() => {
 </script>
 
 <template>
-  <div class="FinalReportPage container py-5 text-center">
+  <div class="FinalReportPage container py-5 text-center" v-if="reportData">
     <h1>최종 분석이 완료되었어요.</h1>
     <p class="text-muted">
       모든 등급은
@@ -118,8 +119,8 @@ const uncheckedItems = computed(() => {
           <div class="final-jeonse-col">
             <FinalJeonseCard
               v-if="reportData"
-              :salePrice="reportData.salePrice"
-              :jeonseDeposit="reportData.jeonseDeposit"
+              :salePrice="reportData.expectedSellingPrice"
+              :jeonseDeposit="reportData.deposit"
               :jeonseRatio="reportData.jeonseRatio"
               :jeonseRatioRating="reportData.jeonseRatioRating"
               :username="reportData.username"

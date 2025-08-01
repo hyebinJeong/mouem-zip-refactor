@@ -35,7 +35,6 @@ public class KosisJeonseRateService {
 
     public List<Map<String, Object>> fetchKosisData(Optional<JeonseRateDTO> averageDealPriceOpt, String objL2) {
         Optional<String> objL1 = HouseTypeCode.fromName(averageDealPriceOpt.get().getBuildingType());
-        // KOSIS 매핑 실패 시 판단 보류
 
         if (objL1.isEmpty() || objL2 == null || objL2.isBlank()) {
             return List.of(); // KOSIS 파라미터 매핑 실패
@@ -63,6 +62,7 @@ public class KosisJeonseRateService {
                 .map(bytes -> new String(bytes, Charset.forName("UTF-8")))
 //                .doOnNext(raw -> System.out.println("응답 원문 (EUC-KR 해석): " + raw))
                 .block();
+
 
         try {
             ObjectMapper mapper = new ObjectMapper();

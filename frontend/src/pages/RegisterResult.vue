@@ -12,15 +12,14 @@
       </div>
       <!-- 등급 표시 원형 -->
       <div
-        class="rounded-circle border border-4 d-flex align-items-center justify-content-center fw-bold mb-3"
-        :class="{
-          'border-success text-success': result && result.rating === '보통',
-          'border-danger text-danger': result && result.rating === '위험',
-          'border-primary text-primary': result && result.rating === '양호',
+        class="rounded-circle d-flex align-items-center justify-content-center fw-bold mb-3 donut-thin"
+        :style="{
+          borderColor: gradeColor[result.rating] || '#6c757d',
+          color: gradeColor[result.rating] || '#6c757d',
         }"
         style="width: 10rem; height: 10rem; font-size: 1.5rem"
       >
-        {{ result ? result.rating : '로딩중' }}
+        {{ result.rating }}
       </div>
       <BuddyHelper @open-dictionary="openDictionaryModal" />
       <TermViewModal v-if="showDictionaryModal" @close="closeDictionaryModal" />
@@ -29,17 +28,7 @@
         class="text-center px-4 py-3 mb-4"
         style="background-color: #f0f6ff; border-radius: 1rem; max-width: 640px"
       >
-        <span class="fw-bold">사용자님이 올려주신 등기부등본은 </span>
-        <span
-          :class="{
-            'text-success fw-bold': result.rating === '보통',
-            'text-danger fw-bold': result.rating === '위험',
-            'text-primary fw-bold': result.rating === '양호',
-          }"
-        >
-          {{ result.rating }} 등급
-        </span>
-        <span class="fw-bold">입니다.</span>
+        <span class="fw-bold">{{ getGradeMessage(result.rating) }}</span>
       </div>
 
       <!-- 좌우분할 → 반응형으로 변경 -->
@@ -114,6 +103,7 @@ const route = useRoute();
 const router = useRouter();
 const result = ref(null);
 const auth = useAuthStore();
+const user = ref(null);
 
 const analysisItems = [
   { label: '경매', key: 'auctionInfos' },
@@ -125,6 +115,31 @@ const analysisItems = [
   { label: '전세권설정', key: 'jeonseRightInfos' },
   { label: '가등기', key: 'provisionalRegistrationInfos' },
 ];
+
+// 등급별 색상
+const gradeColor = {
+  안전: '#00AEEF',
+  보통: '#39B54A',
+  주의: '#F7941D',
+  위험: '#ED1C24',
+};
+
+// 등급별 메시지 반환 함수
+const getGradeMessage = (rating) => {
+  const userName = user.value?.name || '사용자';
+  switch (rating) {
+    case '안전':
+      return `${userName}님이 올려주신 등기부등본은 안전합니다.`;
+    case '보통':
+      return `${userName}님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 2년 안에 기재됐던 내역이 있습니다.`;
+    case '주의':
+      return `${userName}님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 1년 안에 기재됐던 내역이 있습니다.`;
+    case '위험':
+      return `${userName}님이 올려주신 등기부등본은 위험합니다.`;
+    default:
+      return '등기부등본을 분석 중입니다...';
+  }
+};
 
 // 용어 모달 표시 상태
 const showDictionaryModal = ref(false);
@@ -166,6 +181,16 @@ const goToHome = () => {
 onMounted(async () => {
   const registerId = route.params.registerId;
   try {
+    // 사용자 정보 가져오기
+    if (auth.token) {
+      const userRes = await axios.get('/api/user/me', {
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+      user.value = userRes.data;
+    }
+
     // 두 개의 API 요청을 병렬로 처리
     const [safetyRes, jeonseRes] = await Promise.all([
       axios.get(`/api/safety-check/${registerId}`),
@@ -178,12 +203,18 @@ onMounted(async () => {
       jeonseRate: jeonseRes.data.jeonseRate,
     };
   } catch (e) {
-    console.error('분석 결과 가져오기 실패:', e);
+    console.error('데이터 가져오기 실패:', e);
   }
 });
 </script>
 
 <style scoped>
+.donut-thin {
+  border-width: 8px;
+  border-style: solid;
+  transition: all 0.3s ease;
+}
+
 /* 기본 정보 스타일 */
 .address-info,
 .jeonse-rate-info {

@@ -42,4 +42,14 @@
         INSERT INTO final_report (user_id, registry_id)
         VALUES (#{userId}, #{registryId});
     </insert>
+
+    <!--  50일 후 레포트 만료   -->
+    <update id="expireOldReports">
+    <![CDATA[
+        UPDATE final_report
+        SET status = FALSE
+        WHERE created_at < NOW() - INTERVAL 50 DAY
+          AND status = TRUE
+        ]]>
+    </update>
 </mapper>

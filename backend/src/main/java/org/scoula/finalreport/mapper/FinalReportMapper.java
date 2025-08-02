@@ -15,8 +15,9 @@ public interface FinalReportMapper {
     Long findReportIdByUserAndRegistry(@Param("userId") Long userId, @Param("registryId") Long registryId);
 
     // userId, registryId 저장
-//    void insertFinalReport(@Param("userId") Long userId, @Param("registryId") Long registryId);
     void insertFinalReport(FinalReportInsertDTO dto);
 
+    // 50일이 지난 리포트의 status를 false로 변경하고, 변경된 레코드 수를 반환
+    int expireOldReports();
 
 }

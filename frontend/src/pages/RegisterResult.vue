@@ -103,6 +103,7 @@ const route = useRoute();
 const router = useRouter();
 const result = ref(null);
 const auth = useAuthStore();
+const user = ref(null);
 
 const analysisItems = [
   { label: '경매', key: 'auctionInfos' },
@@ -125,15 +126,16 @@ const gradeColor = {
 
 // 등급별 메시지 반환 함수
 const getGradeMessage = (rating) => {
+  const userName = user.value?.name || '사용자';
   switch (rating) {
     case '안전':
-      return '사용자님이 올려주신 등기부등본은 안전합니다.';
+      return `${userName}님이 올려주신 등기부등본은 안전합니다.`;
     case '보통':
-      return '사용자님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 2년 안에 기재됐던 내역이 있습니다.';
+      return `${userName}님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 2년 안에 기재됐던 내역이 있습니다.`;
     case '주의':
-      return '사용자님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 1년 안에 기재됐던 내역이 있습니다.';
+      return `${userName}님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 1년 안에 기재됐던 내역이 있습니다.`;
     case '위험':
-      return '사용자님이 올려주신 등기부등본은 위험합니다.';
+      return `${userName}님이 올려주신 등기부등본은 위험합니다.`;
     default:
       return '등기부등본을 분석 중입니다...';
   }
@@ -179,6 +181,16 @@ const goToHome = () => {
 onMounted(async () => {
   const registerId = route.params.registerId;
   try {
+    // 사용자 정보 가져오기
+    if (auth.token) {
+      const userRes = await axios.get('/api/user/me', {
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
+        },
+      });
+      user.value = userRes.data;
+    }
+
     // 두 개의 API 요청을 병렬로 처리
     const [safetyRes, jeonseRes] = await Promise.all([
       axios.get(`/api/safety-check/${registerId}`),
@@ -191,7 +203,7 @@ onMounted(async () => {
       jeonseRate: jeonseRes.data.jeonseRate,
     };
   } catch (e) {
-    console.error('분석 결과 가져오기 실패:', e);
+    console.error('데이터 가져오기 실패:', e);
   }
 });
 </script>

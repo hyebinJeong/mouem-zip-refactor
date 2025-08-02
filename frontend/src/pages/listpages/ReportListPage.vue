@@ -1,23 +1,33 @@
 <script setup>
-import Header from '../../components/Header.vue'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import fileIcon from '@/assets/fileicon.png'
+import Header from '../../components/Header.vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import fileIcon from '@/assets/fileicon.png';
+import { useAuthStore } from '@/stores/auth';
+import axios from 'axios';
 
-const router = useRouter()
+const auth = useAuthStore();
+const router = useRouter();
 
-const reports = ref([
-  { title: '힐스테이트판교엘포레A3BL_리포트', date: '2025-07-14' },
-  { title: '판교풍경채어바니티7단지_리포트', date: '2025-07-12' },
-  { title: '더샵판교포레스트12단지 1206동_리포트', date: '2025-07-12' },
-  { title: '더샵판교포레스트12단지10단지_리포트', date: '2025-07-12' },
-  { title: '판교풍경채어바니티5단지_리포트', date: '2025-07-11' }
-])
+const reports = ref([]);
+
+onMounted(async () => {
+  if (!auth.isLoggedIn) return;
+  const res = await axios.get('/api/reports/list', {
+    params: { userId: auth.userId },
+  });
+  reports.value = res.data.map((item) => ({
+    reportId: item.reportId,
+    title: `${item.registryName}_리포트`,
+    date: new Date(item.createdAt).toISOString().split('T')[0],
+  }));
+});
 
 function onContractClick(item) {
-  console.log('클릭된 레포트:', item.title)
-  // 상세 페이지가 있다면 다음 코드로 이동 가능
-  // router.push({ path: '/contract-detail', query: { title: item.title } })
+  router.push({
+    name: 'finalReportPage',
+    query: { reportId: item.reportId, from: 'myPage' },
+  });
 }
 </script>
 
@@ -25,17 +35,19 @@ function onContractClick(item) {
   <div class="contract-page">
     <main class="content">
       <h2 class="page-title">계약 리스크 분석 리포트 목록</h2>
-      <p class="page-desc">등기부등본 분석, 전세가율 계산, 체크리스트 점수를 반영한 최종 분석 리포트 목록이에요.</p>
+      <p class="page-desc">
+        등기부등본 분석, 전세가율 계산, 체크리스트 점수를 반영한 최종 분석
+        리포트 목록이에요.
+      </p>
       <h2 class="page-subtilte">저장된 리포트 목록</h2>
 
       <ul class="contract-list">
         <li
-            v-for="(item, idx) in reports"
-            :key="idx"
-            class="contract-item clickable"
-            @click="onContractClick(item)"
+          v-for="(item, idx) in reports"
+          :key="idx"
+          class="contract-item clickable"
+          @click="onContractClick(item)"
         >
-
           <div class="icon-box">
             <img :src="fileIcon" alt="file icon" class="file-icon" />
           </div>
@@ -73,7 +85,7 @@ function onContractClick(item) {
   margin-top: 8px;
 }
 
-.page-subtilte{
+.page-subtilte {
   font-size: 18px;
   font-weight: 700;
 }

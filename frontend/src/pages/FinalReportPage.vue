@@ -27,12 +27,9 @@ const { goToHome, goToMyPage } = useNavigation();
 // const reportId = 1;
 const reportData = ref(null);
 
-// 쿼리 파라미터 기반
-const userId = Number(route.query.userId);
-const registryId = Number(route.query.registryId);
-
-console.log('넘어온 userId:', userId);
-console.log('넘어온 registryId:', registryId);
+function downloadPDF() {
+  window.print(); // 브라우저에서 인쇄 창 → PDF 저장 가능
+}
 
 onMounted(async () => {
   // 테스트용 코드
@@ -47,8 +44,26 @@ onMounted(async () => {
 });
 
 onMounted(async () => {
-  // const res = await getFinalReport(reportId);
-  const res = await getFinalReportByUserAndRegistry(userId, registryId);
+  // 쿼리 파라미터 기반
+  const userId = Number(route.query.userId);
+  const registryId = Number(route.query.registryId);
+  const reportId = Number(route.query.reportId);
+
+  console.log('넘어온 userId:', userId);
+  console.log('넘어온 registryId:', registryId);
+
+  let res;
+
+  if (userId && registryId) {
+    // (유저가 직접 userId, registryId로 들어온 경우)
+    res = await getFinalReportByUserAndRegistry(userId, registryId);
+  } else if (reportId) {
+    // 마이페이지에서 reportId만 넘어온 경우 → reportId 기반 단건 조회
+    res = await getFinalReport(reportId);
+  } else {
+    console.error('잘못된 쿼리 파라미터');
+    return;
+  }
 
   reportData.value = {
     registryRating: res?.registryRating ?? '',
@@ -87,7 +102,19 @@ const registryKeys = [
     class="FinalReportPage container py-5 mb-4 text-center"
     v-if="reportData"
   >
-    <h1 class="mb-4">최종 분석이 완료되었어요.</h1>
+    <div class="position-relative mb-4">
+      <h1 class="text-center mb-0">최종 분석이 완료되었어요.</h1>
+
+      <!-- 마이페이지에서 들어왔을 때만 버튼 보이게 -->
+      <button
+        v-if="route.query.from === 'myPage'"
+        class="btn btn-secondary position-absolute top-50 translate-middle-y end-0"
+        @click="downloadPDF"
+      >
+        다운로드
+      </button>
+    </div>
+
     <p class="text-muted mb-4">
       모든 등급은
       <span
@@ -100,7 +127,6 @@ const registryKeys = [
     </p>
     <DiagnosisGradeInfoModal :show="showModal" @close="closeModal" />
 
-    <!-- v-if로 reportData 존재 확인 후 렌더링하여 undefined 방지 -->
     <!-- 등급 -->
     <div class="final-grade-wrap">
       <FinalGrade
@@ -187,6 +213,7 @@ const registryKeys = [
         </div>
       </div>
     </div>
+
     <div class="final-btn-wrap d-flex justify-content-center">
       <button
         class="btn btn-primary px-4 py-2 rounded-3 background-main"

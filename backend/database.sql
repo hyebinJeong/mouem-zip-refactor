@@ -297,3 +297,7 @@ INSERT INTO term (term_name, term_define, term_example, term_caution, category_i
                                                                                        ('계약갱신요구권', '계약 만료 전에 한 번 더 "2년 더 살겠다" 요구할 수 있는 권리. 집주인이 특별 사유 없으면 거절 못함.',
                                                                                         '계약갱신요구권을 행사해 2년 연장했습니다.',
                                                                                         '계약갱신요구권 행사는 기한(6개월~2개월 전)을 지켜야 하며, 거절 사유가 있는 경우 예외가 발생할 수 있습니다.', 4);
+
+-- final_table status 기본값 false 설정
+ALTER TABLE final_report
+    MODIFY COLUMN status BOOLEAN NOT NULL DEFAULT FALSE;

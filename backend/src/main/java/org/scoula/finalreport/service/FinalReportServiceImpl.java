@@ -4,13 +4,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.scoula.finalreport.dto.FinalReportDTO;
+import org.scoula.finalreport.dto.FinalReportInsertDTO;
 import org.scoula.finalreport.dto.FinalReportRawDTO;
 import org.scoula.finalreport.mapper.FinalReportMapper;
 import org.scoula.finalreport.mapper.FinalReportMapper;
 import org.scoula.register.domain.dto.RegisterAnalysisResponse;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class FinalReportServiceImpl implements FinalReportService {
     @Override
     public FinalReportDTO getFinalReport(Long reportId) {
         FinalReportRawDTO rawDto = finalReportMapper.getFinalReport(reportId);
+
         if (rawDto == null) {
             throw new IllegalArgumentException("해당 리포트를 찾을 수 없습니다.");
         }
@@ -61,4 +65,20 @@ public class FinalReportServiceImpl implements FinalReportService {
                 .checklistRating(rawDto.getChecklistRating())
                 .build();
     }
+
+    @Override
+    public Long findReportIdByUserAndRegistry(Long userId, Long registryId) {
+        return finalReportMapper.findReportIdByUserAndRegistry(userId, registryId);
+    }
+    
+    // finalReport에 받아온 userId, registryId 저장
+    @Override
+    public Long createFinalReport(Long userId, Long registryId) {
+        FinalReportInsertDTO dto = new FinalReportInsertDTO();
+        dto.setUserId(userId);
+        dto.setRegistryId(registryId);
+        finalReportMapper.insertFinalReport(dto);
+        return dto.getReportId();
+    }
+
 }

@@ -35,33 +35,36 @@ console.log('넘어온 userId:', userId);
 console.log('넘어온 registryId:', registryId);
 
 onMounted(async () => {
-  // 테스트용 코드
-  console.log('쿼리 파라미터:', route.query);
-  console.log('userId:', route.query.userId);
-  console.log('registryId:', route.query.registryId);
-
   if (!userId || !registryId || isNaN(userId) || isNaN(registryId)) {
     console.warn('잘못된 쿼리 파라미터');
     return;
   }
-});
 
-onMounted(async () => {
-  // const res = await getFinalReport(reportId);
-  const res = await getFinalReportByUserAndRegistry(userId, registryId);
+  try {
+    // final_report에 저장
+    await fetch(`/api/reports?userId=${userId}&registryId=${registryId}`, {
+      method: 'POST',
+    });
 
-  reportData.value = {
-    registryRating: res?.registryRating ?? '',
-    registryAnalysis: res?.registryAnalysis ?? null,
-    jeonseRatioRating: res?.jeonseRatioRating ?? '',
-    checklistRating: res?.checklistRating ?? '',
-    jeonseRatio: res?.jeonseRatio ?? 0,
-    regionAvgJeonseRatio: res?.regionAvgJeonseRatio ?? 0,
-    expectedSellingPrice: res?.expectedSellingPrice ?? 0,
-    deposit: res?.deposit ?? 0,
-    username: res?.username ?? '사용자',
-    checked: res?.checked ?? [],
-  };
+    // report 조회
+    const res = await getFinalReportByUserAndRegistry(userId, registryId);
+
+    // 데이터 바인딩
+    reportData.value = {
+      registryRating: res?.registryRating ?? '',
+      registryAnalysis: res?.registryAnalysis ?? null,
+      jeonseRatioRating: res?.jeonseRatioRating ?? '',
+      checklistRating: res?.checklistRating ?? '',
+      jeonseRatio: res?.jeonseRatio ?? 0,
+      regionAvgJeonseRatio: res?.regionAvgJeonseRatio ?? 0,
+      expectedSellingPrice: res?.expectedSellingPrice ?? 0,
+      deposit: res?.deposit ?? 0,
+      username: res?.username ?? '사용자',
+      checked: res?.checked ?? [],
+    };
+  } catch (error) {
+    console.error('최종 리포트 생성 또는 조회 실패:', error);
+  }
 });
 
 const uncheckedItems = computed(() => {

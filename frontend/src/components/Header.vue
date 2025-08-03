@@ -45,7 +45,7 @@ const showContractGuide = ref(false);
 const goHome = () => router.push('/');
 const goSafetyCheck = () => router.push('/agreement');
 const goChecklist = () => router.push('/checklist');
-const goReferenceContract = () => router.push('/reference-contract');
+const goReferenceContract = () => router.push('/referencecontracts');
 const goReferenceGuidebook = () => router.push('/reference-guidebook');
 const goGlossary = () => router.push('/glossary');
 const goMyPage = () => router.push('/my');

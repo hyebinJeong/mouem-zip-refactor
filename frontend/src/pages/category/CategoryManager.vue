@@ -1,7 +1,6 @@
 <template>
   <div class="p-4" style="background-color: #f7f9fc; min-height: 70vh">
     <div class="d-flex align-items-center mb-3">
-      <button @click="onKakaoLogout" class="btn">임시 로그아웃</button>
       <button
         class="btn btn-link me-2 p-0 arrow-button"
         @click="$router.back()"
@@ -106,21 +105,10 @@ import { useRouter } from 'vue-router';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useAuthStore } from '@/stores/auth';
 
-const auth = useAuthStore();
-
 const router = useRouter();
 const search = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 15;
-// 임시 로그아웃 함수
-const clientId = '88a530611ac6fa5a18f5747f67b6a359';
-const redirectUri = 'http://localhost:8080/';
-
-function onKakaoLogout() {
-  auth.logout();
-  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${redirectUri}`;
-  window.location.href = kakaoAuthUrl;
-}
 
 const categoryStore = useCategoryStore();
 

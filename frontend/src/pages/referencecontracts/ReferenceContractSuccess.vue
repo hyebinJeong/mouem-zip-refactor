@@ -1,8 +1,17 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const route = useRoute();
+const auth = useAuthStore();
+
+onMounted(() => {
+  const contractId = route.params.id || route.query.id;
+  console.log('contractId:', contractId); // 여기에 찍힘
+});
 
 const contract = ref({
   contractName: '',
@@ -40,12 +49,57 @@ const closeModal = () => {
   showModal.value = false;
 };
 
-onMounted(() => {
-  const stored = sessionStorage.getItem('contractData');
-  if (stored) {
-    contract.value = JSON.parse(stored);
-  } else {
-    router.replace({ name: 'reference-contract' });
+onMounted(async () => {
+  try {
+    // DB에서 조회
+    const contractId = route.params.id || route.query.id;
+    if (contractId) {
+      console.log('contractId 확인:', contractId); // 디버깅용
+      const res = await axios.get(`/api/contract/${contractId}`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      const data = res.data;
+      console.log('status:', res.status); // 디버깅용
+      console.log('백엔드 응답:', res.data); // 디버깅용
+
+      contract.value = {
+        contractName: data.contractName,
+        lessor: data.lessorName,
+        lessee: data.lesseeName,
+        address: data.address,
+        landCategory: data.landCategory,
+        landArea: data.landArea,
+        structure: data.buildingUsage,
+        buildingArea: data.buildingArea,
+        leasePart: data.leasedPart,
+        leaseArea: data.leasedArea,
+        deposit: data.deposit,
+        contractAmount: data.downPayment,
+        rent: data.balance,
+        maintenanceFee: data.maintenanceCost,
+        startDate: data.leaseStart,
+        endDate: data.leaseEnd,
+        special: data.specialClauseTexts || [],
+      };
+
+      mergedSpecialTerms.value = [...(data.specialClauseTexts || [])];
+
+      // 세션 스토리지에 저장 (기존방식)
+    } else {
+      const stored = sessionStorage.getItem('contractData');
+      if (stored) {
+        contract.value = JSON.parse(stored);
+        mergedSpecialTerms.value = contract.value.special || [];
+      } else {
+        router.replace({ name: 'ReferenceContract' });
+      }
+    }
+  } catch (error) {
+    console.error(
+      '계약서 조회 실패:',
+      error.response?.status,
+      error.response?.data
+    );
   }
 });
 </script>

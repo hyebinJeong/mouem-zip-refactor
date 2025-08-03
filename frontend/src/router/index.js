@@ -53,9 +53,22 @@ const routes = [
     meta: { hideHeader: true, requiresAuth: true },
   },
   {
-    path: '/reference-contract',
-    name: 'reference-contract',
-    component: ReferenceContract,
+    path: '/referencecontracts',
+    children: [
+      {
+        path: '',
+        name: 'ReferenceContract',
+        component: () =>
+          import('@/pages/referencecontracts/ReferenceContract.vue'),
+      },
+      {
+        path: 'success/:id', // ✅ 상대 경로 + params
+        name: 'ReferenceContractSuccess',
+        component: () =>
+          import('@/pages/referencecontracts/ReferenceContractSuccess.vue'),
+        props: true, // 필요 시 id를 props로도 받을 수 있음
+      },
+    ],
   },
   {
     path: '/reference-guidebook',

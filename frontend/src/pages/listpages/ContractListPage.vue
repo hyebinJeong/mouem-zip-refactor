@@ -1,21 +1,37 @@
 <script setup>
-import Header from '../../components/Header.vue'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import fileIcon from '@/assets/fileicon.png'
+import Header from '../../components/Header.vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import fileIcon from '@/assets/fileicon.png';
+import { useAuthStore } from '@/stores/auth';
+import axios from 'axios';
+import { onMounted } from 'vue';
 
-const router = useRouter()
+const router = useRouter();
+const auth = useAuthStore();
+const contracts = ref([]);
 
-const contracts = ref([
-  { title: '힐스테이트판교엘포레A3BL', date: '2025-07-15' },
-  { title: '판교풍경채어바니티7단지', date: '2025-07-13' },
-  { title: '더샵판교포레스트12단지 1206동', date: '2025-07-12' }
-])
+onMounted(async () => {
+  if (!auth.isLoggedIn) return;
+
+  const res = await axios.get('/api/contract/list', {
+    headers: { Authorization: `Bearer ${auth.token}` },
+  });
+
+  contracts.value = res.data.map((item) => ({
+    contractId: item.contractId,
+    title: item.contractName,
+    date: item.createdAt
+      ? new Date(item.createdAt).toISOString().split('T')[0]
+      : '',
+  }));
+});
 
 function onContractClick(item) {
-  console.log('클릭된 계약서:', item.title)
-  // 상세 페이지가 있다면 다음 코드로 이동 가능
-  // router.push({ path: '/contract-detail', query: { title: item.title } })
+  router.push({
+    name: 'ReferenceContractSuccess',
+    query: { id: item.contractId },
+  });
 }
 </script>
 
@@ -23,17 +39,13 @@ function onContractClick(item) {
   <div class="contract-page">
     <main class="content">
       <h2 class="page-title">참고용 계약서 목록</h2>
-      <p class="page-desc">참고용 계약서 목록이에요.</p>
-      <h2 class="page-subtilte">저장된 계약서 목록</h2>
-
       <ul class="contract-list">
         <li
-            v-for="(item, idx) in contracts"
-            :key="idx"
-            class="contract-item clickable"
-            @click="onContractClick(item)"
+          v-for="(item, idx) in contracts"
+          :key="idx"
+          class="contract-item clickable"
+          @click="onContractClick(item)"
         >
-
           <div class="icon-box">
             <img :src="fileIcon" alt="file icon" class="file-icon" />
           </div>
@@ -71,7 +83,7 @@ function onContractClick(item) {
   margin-top: 8px;
 }
 
-.page-subtilte{
+.page-subtilte {
   font-size: 18px;
   font-weight: 700;
 }

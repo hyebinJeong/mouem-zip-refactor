@@ -50,9 +50,8 @@ public class TabulaController {
 
             // 위험 등급 평가
             RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response);
-            boolean status = false;
 
-            int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, status, uploadedFileName);
+            int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, uploadedFileName);
 
             return ResponseEntity.ok(registerId);
         } catch (Exception e) {

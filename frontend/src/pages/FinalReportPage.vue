@@ -13,41 +13,98 @@ import {
 import FinalJeonseCard from '@/components/final-report/FinalJeonseCard.vue';
 import checklistStore from '@/stores/checklistStore';
 import AnalysisCards from '@/components/AnalysisCards.vue';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const route = useRoute();
 const showModal = ref(false);
-const openModal = () => {
-  showModal.value = true;
-};
-const closeModal = () => {
-  showModal.value = false;
-};
-const { goToHome, goToMyPage } = useNavigation();
-
-// const reportId = 1;
 const reportData = ref(null);
 
-// 쿼리 파라미터 기반
-const userId = Number(route.query.userId);
-const registryId = Number(route.query.registryId);
+const openModal = () => (showModal.value = true);
+const closeModal = () => (showModal.value = false);
+const { goToHome, goToMyPage } = useNavigation();
 
-console.log('넘어온 userId:', userId);
-console.log('넘어온 registryId:', registryId);
+// 체크리스트 미체크 항목 계산
+const uncheckedItems = computed(() => {
+  return checklistStore.filter(
+    (_, index) => !reportData.value?.checked?.[index]
+  );
+});
 
+// 등기부 분석 항목
+const registryKeys = [
+  { key: 'mortgageInfos', label: '근저당권' },
+  { key: 'seizureInfos', label: '압류' },
+  { key: 'provisionalSeizureInfos', label: '가압류' },
+  { key: 'auctionInfos', label: '경매' },
+  { key: 'provisionalRegistrationInfos', label: '가등기' },
+  { key: 'injunctionInfos', label: '가처분' },
+  { key: 'jeonseRightInfos', label: '전세권설정' },
+  { key: 'trustInfos', label: '신탁등기' },
+];
+
+// PDF 다운로드 (페이지 분할)
+function downloadPDF() {
+  const pdfArea = document.getElementById('pdf-area');
+  if (!pdfArea) return;
+
+  html2canvas(pdfArea, { scale: 2 }).then((canvas) => {
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // 첫 페이지
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // 남은 부분 페이지 추가
+    while (heightLeft > 0) {
+      position -= pageHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save('FinalReport.pdf');
+  });
+}
+
+// 데이터 로드
 onMounted(async () => {
-  if (!userId || !registryId || isNaN(userId) || isNaN(registryId)) {
-    console.warn('잘못된 쿼리 파라미터');
-    return;
-  }
+  const userId = Number(route.query.userId);
+  const registryId = Number(route.query.registryId);
+  const reportId = Number(route.query.reportId);
+
+  console.log('쿼리 파라미터:', route.query);
+  console.log('넘어온 userId:', userId);
+  console.log('넘어온 registryId:', registryId);
 
   try {
-    // final_report에 저장
-    await fetch(`/api/reports?userId=${userId}&registryId=${registryId}`, {
-      method: 'POST',
-    });
+    let res;
 
-    // report 조회
-    const res = await getFinalReportByUserAndRegistry(userId, registryId);
+    if (userId && registryId) {
+      // final_report에 저장 (없으면 생성)
+      await fetch(`/api/reports?userId=${userId}&registryId=${registryId}`, {
+        method: 'POST',
+      });
+
+      // 저장 후 조회
+      res = await getFinalReportByUserAndRegistry(userId, registryId);
+    } else if (reportId) {
+      // 마이페이지에서 reportId만 넘어온 경우
+      res = await getFinalReport(reportId);
+    } else {
+      console.warn('잘못된 쿼리 파라미터');
+      return;
+    }
 
     // 데이터 바인딩
     reportData.value = {
@@ -66,23 +123,6 @@ onMounted(async () => {
     console.error('최종 리포트 생성 또는 조회 실패:', error);
   }
 });
-
-const uncheckedItems = computed(() => {
-  return checklistStore.filter(
-    (_, index) => !reportData.value.checked?.[index]
-  );
-});
-
-const registryKeys = [
-  { key: 'mortgageInfos', label: '근저당권' },
-  { key: 'seizureInfos', label: '압류' },
-  { key: 'provisionalSeizureInfos', label: '가압류' },
-  { key: 'auctionInfos', label: '경매' },
-  { key: 'provisionalRegistrationInfos', label: '가등기' },
-  { key: 'injunctionInfos', label: '가처분' },
-  { key: 'jeonseRightInfos', label: '전세권설정' },
-  { key: 'trustInfos', label: '신탁등기' },
-];
 </script>
 
 <template>
@@ -90,106 +130,122 @@ const registryKeys = [
     class="FinalReportPage container py-5 mb-4 text-center"
     v-if="reportData"
   >
-    <h1 class="mb-4">최종 분석이 완료되었어요.</h1>
-    <p class="text-muted mb-4">
-      모든 등급은
-      <span
-        class="text-primary text-decoration-underline"
-        role="button"
-        style="cursor: pointer"
-        @click="openModal"
-        >판정기준</span
-      >에 의해 설정된 등급입니다.
-    </p>
-    <DiagnosisGradeInfoModal :show="showModal" @close="closeModal" />
+    <div class="position-relative mb-4">
+      <h1 class="text-center mb-0">최종 분석이 완료되었어요.</h1>
 
-    <!-- v-if로 reportData 존재 확인 후 렌더링하여 undefined 방지 -->
-    <!-- 등급 -->
-    <div class="final-grade-wrap">
-      <FinalGrade
-        v-if="reportData"
-        :registry="reportData.registryRating"
-        :jeonse="reportData.jeonseRatioRating"
-        :checklist="reportData.checklistRating"
-      />
+      <!-- 마이페이지에서 들어왔을 때만 버튼 보이게 -->
+      <button
+        v-if="route.query.from === 'myPage'"
+        class="btn btn-secondary position-absolute top-50 translate-middle-y end-0"
+        @click="downloadPDF"
+      >
+        다운로드
+      </button>
     </div>
 
-    <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
+    <!-- PDF에 담길 영역 -->
+    <div id="pdf-area">
+      <p class="text-muted mb-4">
+        모든 등급은
+        <span
+          class="text-primary text-decoration-underline"
+          role="button"
+          style="cursor: pointer"
+          @click="openModal"
+          >판정기준</span
+        >에 의해 설정된 등급입니다.
+      </p>
+      <DiagnosisGradeInfoModal :show="showModal" @close="closeModal" />
 
-    <!-- 전세가율 -->
-    <div class="final-jeonse-wrap mt-5 mb-4">
-      <div v-if="reportData.jeonseRatioRating !== '판단보류'">
-        <h2 style="margin-bottom: 2rem">
-          {{ reportData.username }}님의 전세가율을 분석했어요.
-        </h2>
-        <div
-          class="d-flex flex-column flex-md-row justify-content-center align-items-end"
-          style="max-width: 960px; margin: 0 auto; height: auto"
-        >
-          <div class="final-jeonse-col" style="width: 100%; max-width: 480px">
-            <FinalJeonse
-              v-if="reportData"
-              :jeonseRatio="reportData.jeonseRatio"
-              :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
-            />
-          </div>
-          <div class="final-jeonse-col" style="margin-left: 4rem">
-            <FinalJeonseCard
-              v-if="reportData"
-              :salePrice="reportData.expectedSellingPrice"
-              :jeonseDeposit="reportData.deposit"
-              :jeonseRatio="reportData.jeonseRatio"
-              :jeonseRatioRating="reportData.jeonseRatioRating"
-              :username="reportData.username"
-            />
-          </div>
-        </div>
-      </div>
-      <div v-else>
-        <h2>
-          {{ reportData.username }}님의 전세가율은 판단보류 등급으로, 분석이
-          어려워요.
-        </h2>
-      </div>
-    </div>
-
-    <hr class="my-4 border-top border-secondary-subtle w-75 mt-5" />
-
-    <!-- 등기부등본 -->
-    <div class="final-registry-wrap mt-5">
-      <h2 class="mb-3">
-        {{ reportData.username }}님의 등기부등본을 분석했어요.
-      </h2>
-      <div class="final-analysis-card-wrap">
-        <AnalysisCards
-          v-if="reportData.registryAnalysis"
-          :analysis="reportData.registryAnalysis"
-          :analysisItems="registryKeys"
+      <!-- 등급 -->
+      <div class="final-grade-wrap">
+        <FinalGrade
+          v-if="reportData"
+          :registry="reportData.registryRating"
+          :jeonse="reportData.jeonseRatioRating"
+          :checklist="reportData.checklistRating"
         />
       </div>
-    </div>
 
-    <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
+      <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
-    <!-- 체크리스트 -->
-    <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
-      <div class="final-checklist-inner">
-        <div v-if="uncheckedItems.length > 0">
-          <h2 class="mb-3">
-            {{ reportData.username }}님이 체크하지 않은 항목이에요.
+      <!-- 전세가율 -->
+      <div class="final-jeonse-wrap mt-5 mb-4">
+        <div v-if="reportData.jeonseRatioRating !== '판단보류'">
+          <h2 style="margin-bottom: 2rem">
+            {{ reportData.username }}님의 전세가율을 분석했어요.
           </h2>
-          <p class="mb-5">
-            향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.
-          </p>
-          <FinalChecklist :checked="reportData.checked" />
+          <div
+            class="d-flex flex-column flex-md-row justify-content-center align-items-end"
+            style="max-width: 960px; margin: 0 auto; height: auto"
+          >
+            <div class="final-jeonse-col" style="width: 100%; max-width: 480px">
+              <FinalJeonse
+                v-if="reportData"
+                :jeonseRatio="reportData.jeonseRatio"
+                :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
+              />
+            </div>
+            <div class="final-jeonse-col" style="margin-left: 4rem">
+              <FinalJeonseCard
+                v-if="reportData"
+                :salePrice="reportData.expectedSellingPrice"
+                :jeonseDeposit="reportData.deposit"
+                :jeonseRatio="reportData.jeonseRatio"
+                :jeonseRatioRating="reportData.jeonseRatioRating"
+                :username="reportData.username"
+              />
+            </div>
+          </div>
         </div>
         <div v-else>
           <h2>
-            {{ reportData.username }}님은 모든 체크리스트 항목을 확인했어요.
+            {{ reportData.username }}님의 전세가율은 판단보류 등급으로, 분석이
+            어려워요.
           </h2>
         </div>
       </div>
+
+      <hr class="my-4 border-top border-secondary-subtle w-75 mt-5" />
+
+      <!-- 등기부등본 -->
+      <div class="final-registry-wrap mt-5">
+        <h2 class="mb-3">
+          {{ reportData.username }}님의 등기부등본을 분석했어요.
+        </h2>
+        <div class="final-analysis-card-wrap">
+          <AnalysisCards
+            v-if="reportData.registryAnalysis"
+            :analysis="reportData.registryAnalysis"
+            :analysisItems="registryKeys"
+          />
+        </div>
+      </div>
+
+      <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
+
+      <!-- 체크리스트 -->
+      <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
+        <div class="final-checklist-inner">
+          <div v-if="uncheckedItems.length > 0">
+            <h2 class="mb-3">
+              {{ reportData.username }}님이 체크하지 않은 항목이에요.
+            </h2>
+            <p class="mb-5">
+              향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.
+            </p>
+            <FinalChecklist :checked="reportData.checked" />
+          </div>
+          <div v-else>
+            <h2>
+              {{ reportData.username }}님은 모든 체크리스트 항목을 확인했어요.
+            </h2>
+          </div>
+        </div>
+      </div>
     </div>
+    <!-- PDF 영역 끝 -->
+
     <div class="final-btn-wrap d-flex justify-content-center">
       <button
         class="btn btn-primary px-4 py-2 rounded-3 background-main"

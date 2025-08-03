@@ -62,7 +62,7 @@ CREATE TABLE registry_analysis (
                                    registry_name VARCHAR(100) NOT NULL,  -- 등기부등본 이름
                                    registry_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL, -- 등기부등본 등급
                                    analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
-                                   status BOOLEAN NOT NULL,
+                                   status BOOLEAN NOT NULL DEFAULT TRUE,
                                    file_name VARCHAR(100) NOT NULL,
                                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );

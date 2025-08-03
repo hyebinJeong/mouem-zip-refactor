@@ -2,12 +2,18 @@ package org.scoula.finalreport.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.scoula.finalreport.dto.FinalReportDTO;
+import org.scoula.finalreport.dto.FinalReportRawDTO;
+import org.scoula.finalreport.dto.FinalReportSummaryDTO;
 import org.scoula.finalreport.service.FinalReportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @RestController
-@RequestMapping("api/reports")
+@RequestMapping("/api/reports")
 @RequiredArgsConstructor
 public class FinalReportController {
 
@@ -36,6 +42,11 @@ public class FinalReportController {
                                                   @RequestParam Long registryId) {
         Long reportId = finalReportService.createFinalReport(userId, registryId);
         return ResponseEntity.ok(reportId);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<FinalReportSummaryDTO>> getReportList(@RequestParam Long userId) {
+        return ResponseEntity.ok(finalReportService.getReportListByUserId(userId));
     }
 
 }

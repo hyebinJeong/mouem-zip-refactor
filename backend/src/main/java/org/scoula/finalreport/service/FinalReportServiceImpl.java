@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.scoula.finalreport.dto.FinalReportDTO;
 import org.scoula.finalreport.dto.FinalReportInsertDTO;
 import org.scoula.finalreport.dto.FinalReportRawDTO;
+import org.scoula.finalreport.dto.FinalReportSummaryDTO;
 import org.scoula.finalreport.mapper.FinalReportMapper;
 import org.scoula.finalreport.mapper.FinalReportMapper;
 import org.scoula.register.domain.dto.RegisterAnalysisResponse;
@@ -79,6 +80,11 @@ public class FinalReportServiceImpl implements FinalReportService {
         dto.setRegistryId(registryId);
         finalReportMapper.insertFinalReport(dto);
         return dto.getReportId();
+    }
+
+    @Override
+    public List<FinalReportSummaryDTO> getReportListByUserId(Long userId) {
+        return finalReportMapper.getReportListByUserId(userId);
     }
 
 }

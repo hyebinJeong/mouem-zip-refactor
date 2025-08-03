@@ -52,4 +52,20 @@
           AND status = TRUE
         ]]>
     </update>
+
+    <select id="getReportListByUserId"
+            parameterType="long"
+            resultType="org.scoula.finalreport.dto.FinalReportSummaryDTO">
+        SELECT fr.report_id AS reportId,
+               fr.registry_id AS registryId,
+               ra.registry_name AS registryName,
+               ra.registry_rating AS registryRating,
+               fr.created_at AS createdAt
+        FROM final_report fr
+                 JOIN registry_analysis ra ON fr.registry_id = ra.registry_id
+        WHERE fr.user_id = #{userId}
+          AND fr.status = TRUE
+        ORDER BY fr.created_at DESC
+    </select>
+
 </mapper>

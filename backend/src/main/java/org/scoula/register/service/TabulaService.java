@@ -9,6 +9,7 @@ import org.scoula.register.domain.RegistryRating;
 import org.scoula.register.domain.dto.RegisterAnalysisResponse;
 import org.scoula.register.domain.dto.RegisterDTO;
 import org.scoula.register.mapper.RegisterMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import technology.tabula.*;
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
@@ -54,7 +55,7 @@ public class TabulaService {
     }
 
     // 등기부등본 테이블에 저장
-    public int saveAnalysis(int userId, String address, RegisterAnalysisResponse response, String registryName, RegistryRating registryRating, boolean status, String fileName) throws Exception {
+    public int saveAnalysis(int userId, String address, RegisterAnalysisResponse response, String registryName, RegistryRating registryRating, String fileName) throws Exception {
         String risks = objectMapper.writeValueAsString(response);
 
         RegisterDTO dto = new RegisterDTO();
@@ -63,7 +64,6 @@ public class TabulaService {
         dto.setRisks(risks);
         dto.setRegistryName(registryName);
         dto.setRegistryRating(registryRating);
-        dto.setStatus(status);
         dto.setFileName(fileName);
 
         registerMapper.insertRegister(dto);
@@ -80,8 +80,14 @@ public class TabulaService {
         return objectMapper.readValue(dto.getRisks(), RegisterAnalysisResponse.class);
     }
 
-    // 유저 번호로 분석된 등기부 목록 찾기(삭제상태 false인 목록만)
+    // 유저 번호로 분석된 등기부 목록 찾기(상태 true인 목록만)
     public List<RegisterDTO> findByUserId(Integer userId) {
         return registerMapper.selectByUserId(userId);
+    }
+    
+    // 50일 이상 지난 등기부 분석 기록 비활성화
+    @Scheduled(cron = "0 0 3 * * *")    // 매일 새벽 3시에 실행
+    public void disableOldRegistryStatus() {
+        registerMapper.updateOldRegistryStatus();
     }
 }

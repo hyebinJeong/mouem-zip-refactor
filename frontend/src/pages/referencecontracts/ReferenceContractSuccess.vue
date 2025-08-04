@@ -3,6 +3,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const router = useRouter();
 const route = useRoute();
@@ -102,21 +104,71 @@ onMounted(async () => {
     );
   }
 });
-</script>
 
+// PDF 다운로드 (페이지 분할)
+function downloadPDF() {
+  const pdfArea = document.getElementById('pdf-area');
+  if (!pdfArea) return;
+
+  html2canvas(pdfArea, { scale: 2 }).then((canvas) => {
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // 첫 페이지
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // 남은 부분 페이지 추가
+    while (heightLeft > 0) {
+      position -= pageHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`${contract.value.contractName || '계약서'}.pdf`);
+  });
+}
+</script>
 <template>
   <div class="page-wrapper">
-    <div class="container">
-      <h1><span class="highlight">계약서</span>가 완성되었어요.</h1>
-      <p class="sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
+    <div class="container" id="pdf-area">
+      <!-- PDF 영역 -->
 
-      <!-- ✅ 계약서 이름 -->
-      <h2 class="property-title">
-        {{ contract.contractName || '계약서 이름이 입력되지 않았습니다' }}
-      </h2>
+      <!-- 상단 안내 문구 (화면에서는 숨기기) -->
+      <div v-show="false" class="hidden-header">
+        <h1><span class="highlight">계약서</span>가 완성되었어요.</h1>
+        <p class="sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
+      </div>
+
+      <!-- 계약서 제목 + 다운로드 버튼 -->
+      <div class="title-with-button">
+        <h2 class="property-title">
+          {{ contract.contractName || '계약서 이름이 입력되지 않았습니다' }}
+        </h2>
+
+        <!-- 리스트에서 들어온 경우만 다운로드 버튼 표시 -->
+        <button
+          v-if="route.query.from === 'list'"
+          class="btn-download"
+          @click="downloadPDF"
+        >
+          다운로드
+        </button>
+      </div>
 
       <hr class="divider" />
 
+      <!-- 계약서 내용 -->
       <div class="table-box">
         <table class="info-table">
           <tr>
@@ -196,6 +248,7 @@ onMounted(async () => {
 
       <hr class="divider" />
 
+      <!-- ✅ 특약사항 -->
       <div class="special-section">
         <h3>특약 사항</h3>
         <p
@@ -391,5 +444,36 @@ h1 {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.title-with-button {
+  display: flex;
+  justify-content: center; /* 기본은 가운데 */
+  align-items: center;
+  position: relative;
+  margin: 20px 0;
+}
+
+.title-with-button {
+  display: flex;
+  justify-content: center; /* 제목은 가운데 */
+  align-items: center;
+  position: relative;
+  margin: 20px 0;
+}
+
+.btn-download {
+  position: absolute;
+  right: 0; /* 오른쪽 배치 */
+  background-color: #2563eb;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+}
+.btn-download:hover {
+  background-color: #1d4ed8;
 }
 </style>

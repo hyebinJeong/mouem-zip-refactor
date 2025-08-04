@@ -73,7 +73,9 @@ function downloadPDF() {
       heightLeft -= pageHeight;
     }
 
-    pdf.save('FinalReport.pdf');
+    pdf.save(
+      `${reportData.value.username || '사용자'}_최종리포트_${dateStr}.pdf`
+    );
   });
 }
 

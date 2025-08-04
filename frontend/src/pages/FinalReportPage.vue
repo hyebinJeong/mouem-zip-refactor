@@ -206,8 +206,10 @@ onMounted(async () => {
         <div v-else>
           <h2>
             {{ reportData.username }}님의 전세가율은
-            <span class="text-secondary">판단보류 등급</span>으로, 분석이
-            어려워요.
+            <br class="mobile-only-break" />
+            <span class="text-secondary no-break fw-semibold"
+              >판단보류 등급</span
+            >으로, 분석이 어려워요.
           </h2>
         </div>
       </div>
@@ -237,6 +239,7 @@ onMounted(async () => {
           <div v-if="uncheckedItems.length > 0">
             <h2 class="mb-3">
               {{ reportData.username }}님이
+              <br class="mobile-only-break" />
               <span class="main-color fw-semibold">체크하지 않은 항목</span
               >이에요.
             </h2>
@@ -331,9 +334,27 @@ onMounted(async () => {
   color: #1a80e5;
 }
 
+.mobile-only-break {
+  display: none;
+}
+
+.no-break {
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .final-btn-wrap {
-    flex-direction: row;
+    gap: 1rem;
+    flex-wrap: nowrap;
+  }
+
+  .final-btn-wrap button {
+    min-width: 120px;
+    flex: 1 1 auto;
+  }
+
+  .mobile-only-break {
+    display: block;
   }
 }
 </style>

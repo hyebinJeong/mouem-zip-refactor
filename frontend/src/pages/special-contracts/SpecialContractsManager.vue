@@ -14,7 +14,7 @@
 
     <!-- 검색창 -->
     <div class="mb-3 d-flex justify-content-end">
-      <div class="input-group" style="width: 25%">
+      <div class="input-group" style="width: 35%">
         <input
           type="text"
           class="form-control rounded-pill"

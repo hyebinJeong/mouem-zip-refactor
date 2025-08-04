@@ -1,4 +1,3 @@
-<!-- src/views/term/TermAdd.vue -->
 <template>
   <div class="p-4" style="background-color: #f7f9fc; min-height: 70vh">
     <div class="d-flex align-items-center mb-3">
@@ -15,55 +14,60 @@
       <div class="mb-3">
         <label class="form-label fw-semibold">단어</label>
         <input
-          v-model="term_name"
+          v-model="termName"
           type="text"
           class="form-control"
           placeholder="단어를 입력해주세요."
+          required
         />
       </div>
 
       <div class="mb-3">
         <label class="form-label fw-semibold">정의</label>
         <input
-          v-model="term_define"
+          v-model="termDefine"
           type="text"
           class="form-control"
           placeholder="정의를 입력해주세요."
+          required
         />
       </div>
 
       <div class="mb-3">
         <label class="form-label fw-semibold">예시</label>
         <input
-          v-model="term_example"
+          v-model="termExample"
           type="text"
           class="form-control"
           placeholder="예시를 입력해주세요."
+          required
         />
       </div>
 
       <div class="mb-3">
         <label class="form-label fw-semibold">주의</label>
         <input
-          v-model="term_caution"
+          v-model="termCaution"
           type="text"
           class="form-control"
           placeholder="주의사항을 입력해주세요."
+          required
         />
       </div>
 
       <div class="mb-3">
         <label class="form-label fw-semibold">카테고리</label>
-        <select v-model="category_id" class="form-select">
+        <select v-model="categoryId" class="form-select" required>
           <option disabled value="">카테고리를 선택하세요.</option>
           <option
             v-for="category in categories"
-            :key="category.category_id"
-            :value="category.category_id"
+            :key="category.categoryId"
+            :value="category.categoryId"
           >
-            {{ category.category_name }}
+            {{ category.categoryName }}
           </option>
         </select>
+
       </div>
 
       <div class="text-end mt-4">
@@ -79,36 +83,56 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useTermStore } from '@/stores/termStore';
+import axios from 'axios';
 
 const router = useRouter();
-const term_name = ref('');
-const term_define = ref('');
-const term_example = ref('');
-const term_caution = ref('');
-const category_id = ref('');
+const termStore = useTermStore();
+
+const termName = ref('');
+const termDefine = ref('');
+const termExample = ref('');
+const termCaution = ref('');
+const categoryId = ref('');
 const categories = ref([]);
 
 const goBack = () => {
-  router.back(); // 🔄 뒤로가기
+  router.back();
 };
 
-const submitForm = () => {
-  // 여기에 API 요청 작성
-  console.log({
-    term_name: term_name.value,
-    term_define: term_define.value,
-    term_example: term_example.value,
-    term_caution: term_caution.value,
-    category_id: category_id.value,
-  });
-  goBack();
+const submitForm = async () => {
+  if (
+    !termName.value ||
+    !termDefine.value ||
+    !termExample.value ||
+    !termCaution.value ||
+    !categoryId.value
+  ) {
+    alert('모든 필드를 입력해주세요.');
+    return;
+  }
+
+  try {
+    await termStore.addTerm({
+      termName: termName.value,
+      termDefine: termDefine.value,
+      termExample: termExample.value,
+      termCaution: termCaution.value,
+      categoryId: categoryId.value,
+    });
+    goBack();
+  } catch (error) {
+    alert('용어 추가 중 오류가 발생했습니다.');
+    console.error(error);
+  }
 };
 
-onMounted(() => {
-  // API로 카테고리 목록 불러오기 예시
-  categories.value = [
-    { category_id: 1, category_name: '전세권 / 안전장치' },
-    { category_id: 2, category_name: '계약' },
-  ];
+onMounted(async () => {
+  try {
+    const res = await axios.get('/api/category-manager'); // 엔드포인트 확인
+    categories.value = res.data;
+  } catch (error) {
+    console.error('카테고리 로딩 실패:', error);
+  }
 });
 </script>

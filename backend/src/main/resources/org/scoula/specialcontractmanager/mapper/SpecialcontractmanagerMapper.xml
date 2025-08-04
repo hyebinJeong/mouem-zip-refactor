@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.specialcontractmanager.mapper.SpecialcontractmanagerMapper">
+
+    <resultMap id="SpecialcontractmanagerResult" type="org.scoula.specialcontractmanager.domain.SpecialcontractmanagerVO">
+        <id property="specialClauseId" column="special_clause_id" />
+        <result property="category" column="category" />
+        <result property="importance" column="importance" />
+        <result property="importanceColor" column="importance_color" />
+        <result property="description" column="description" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="SpecialcontractmanagerResult">
+        SELECT * FROM special_clause ORDER BY special_clause_id
+    </select>
+
+    <select id="selectById" parameterType="int" resultMap="SpecialcontractmanagerResult">
+        SELECT * FROM special_clause WHERE special_clause_id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="org.scoula.specialcontractmanager.domain.SpecialcontractmanagerVO" useGeneratedKeys="true" keyProperty="specialClauseId">
+        INSERT INTO special_clause (category, importance, importance_color, description)
+        VALUES (#{category}, #{importance}, #{importanceColor}, #{description})
+    </insert>
+
+    <update id="update" parameterType="org.scoula.specialcontractmanager.domain.SpecialcontractmanagerVO">
+        UPDATE special_clause
+        SET category = #{category},
+            importance = #{importance},
+            importance_color = #{importanceColor},
+            description = #{description}
+        WHERE special_clause_id = #{specialClauseId}
+    </update>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM special_clause WHERE special_clause_id = #{id}
+    </delete>
+
+</mapper>

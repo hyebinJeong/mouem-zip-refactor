@@ -19,16 +19,24 @@
         WHERE registry_id = #{registryId}
     </select>
     <!-- 유저별 미체크된 등기부목록 조회 -->
+    <!--
+<select id="selectByUserId" resultType="org.scoula.register.domain.dto.RegisterDTO">
+    SELECT *
+    FROM registry_analysis ra
+    WHERE user_id = #{userId} and status = true
+      AND NOT EXISTS (
+        SELECT 1
+        FROM checklist c
+        WHERE c.registry_id = ra.registry_id
+    )
+</select>
+-->
     <select id="selectByUserId" resultType="org.scoula.register.domain.dto.RegisterDTO">
         SELECT *
-        FROM registry_analysis ra
-        WHERE user_id = #{userId} and status = true
-          AND NOT EXISTS (
-            SELECT 1
-            FROM checklist c
-            WHERE c.registry_id = ra.registry_id
-        )
+        FROM registry_analysis
+        WHERE user_id = #{userId}
     </select>
+
     <!-- 50일 이상 지난 등기부 status 비활성화 -->
     <update id="updateOldRegistryStatus">
         <![CDATA[

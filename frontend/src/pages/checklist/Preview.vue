@@ -25,7 +25,6 @@
             <td>{{ item.registryName }}</td>
             <td>{{ item.createdAt }}</td>
             <td class="expires-text">{{ item.expiresIn }}</td>
-
           </tr>
           </tbody>
         </table>
@@ -52,52 +51,47 @@ import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const properties = ref([]);
-const auth = useAuthStore();
 
+const auth = useAuthStore();
+const userId = auth.userId || null; // 로그인하지 않은 경우 null
 //const userId = 1;
 
 onMounted(async () => {
-  const userId = auth.userId;
+  if (!userId) return; // userId 없으면 요청 안함
 
   try {
     const registryRes = await axios.get(`http://localhost:8080/api/registry/user/${userId}`);
     const registryList = registryRes.data;
 
-    const checklistRes = await axios.get(`http://localhost:8080/api/checklist/user/${userId}`);
-    const completedRegistryIds = checklistRes.data.map(item => Number(item.registryId));
-
     const today = new Date();
 
-    properties.value = registryList
-        .filter(item => !completedRegistryIds.includes(Number(item.registryId)))
-        .map(item => {
-          const createdDate = new Date(item.analysisDate);
-          const diffTime = createdDate.getTime() + 50 * 24 * 60 * 60 * 1000 - today.getTime();
-          const remainingDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    properties.value = registryList.map(item => {
+      const createdDate = new Date(item.analysisDate);
+      const diffTime = createdDate.getTime() + 50 * 24 * 60 * 60 * 1000 - today.getTime();
+      const remainingDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
-          return {
-            registryId: item.registryId,
-            registryName: item.registryName,
-            createdAt: createdDate.toLocaleDateString('ko-KR'),
-            expiresIn: remainingDays > 0 ? `${remainingDays}일 후에 만료됩니다.` : '만료되었습니다',
-            userId: userId,
-          };
-        });
+      return {
+        registryId: item.registryId,
+        registryName: item.registryName,
+        createdAt: createdDate.toLocaleDateString('ko-KR'),
+        expiresIn: remainingDays > 0 ? `${remainingDays}일 후에 만료됩니다.` : '',
+        userId: userId,
+      };
+    });
   } catch (error) {
     console.error('데이터 불러오기 실패:', error);
   }
 });
 
 function goToChecklist() {
-  router.push('/checklist/nondiagnosis');
+  router.push('/checklist/checklist');
 }
 
 function handleRowClick(item) {
   router.push({
     path: '/checklist/checklist',
     query: {
-      //userId:userId,
-      userId: auth.userId,
+      userId: userId,
       registryId: item.registryId,
     },
   });

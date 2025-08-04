@@ -90,6 +90,11 @@ const prevSlide = () => {
 const checked = ref(Array(checklistItems.length).fill(false))
 
 const goNext = async () => {
+  // registryId가 없는 경우: 매물 없이 체크리스트만 본 사용자
+  if (!registryId) {
+    router.push('/')
+    return
+  }
 
   const payload = {
     userId,
@@ -115,7 +120,6 @@ const goNext = async () => {
         registryId
       }
     })
-
 
   } catch (e) {
     console.error(e)

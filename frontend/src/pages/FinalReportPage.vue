@@ -156,6 +156,9 @@ onMounted(async () => {
           role="button"
           style="cursor: pointer"
           @click="openModal"
+          aria-label="등급 판정 기준 안내 모달 열기"
+          aria-haspopup="dialog"
+          aria-controls="diagnosis-grade-info-modal"
           >판정기준</span
         >에 의해 설정된 등급입니다.
       </p>
@@ -164,7 +167,6 @@ onMounted(async () => {
       <!-- 등급 -->
       <div class="final-grade-wrap">
         <FinalGrade
-          v-if="reportData"
           :registry="reportData.registryRating"
           :jeonse="reportData.jeonseRatioRating"
           :checklist="reportData.checklistRating"
@@ -174,9 +176,13 @@ onMounted(async () => {
       <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
       <!-- 전세가율 -->
-      <div class="final-jeonse-wrap mt-5 mb-4">
+      <div
+        class="final-jeonse-wrap mt-5 mb-4"
+        role="region"
+        aria-labelledby="jeonse-title"
+      >
         <div v-if="reportData.jeonseRatioRating !== '판단보류'">
-          <h2 style="margin-bottom: 2rem">
+          <h2 style="margin-bottom: 2rem" id="jeonse-title">
             {{ reportData.username }}님의
             <span class="main-color fw-semibold">전세가율</span>을 분석했어요.
           </h2>
@@ -186,14 +192,12 @@ onMounted(async () => {
           >
             <div class="final-jeonse-col" style="width: 100%; max-width: 480px">
               <FinalJeonse
-                v-if="reportData"
                 :jeonseRatio="reportData.jeonseRatio"
                 :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
               />
             </div>
             <div class="final-jeonse-col" style="margin-left: 4rem">
               <FinalJeonseCard
-                v-if="reportData"
                 :salePrice="reportData.expectedSellingPrice"
                 :jeonseDeposit="reportData.deposit"
                 :jeonseRatio="reportData.jeonseRatio"
@@ -217,8 +221,12 @@ onMounted(async () => {
       <hr class="my-4 border-top border-secondary-subtle w-75 mt-5" />
 
       <!-- 등기부등본 -->
-      <div class="final-registry-wrap mt-5">
-        <h2 class="mb-3">
+      <div
+        class="final-registry-wrap mt-5"
+        role="region"
+        aria-labelledby="registry-title"
+      >
+        <h2 class="mb-3" id="registry-title">
           {{ reportData.username }}님의
           <span class="main-color fw-semibold">등기부등본</span>을 분석했어요.
         </h2>
@@ -234,10 +242,15 @@ onMounted(async () => {
       <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
       <!-- 체크리스트 -->
-      <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
+      <div
+        class="final-checklist-wrap mt-5 mb-3"
+        style="margin: 6rem 0"
+        role="region"
+        aria-labelledby="checklist-title"
+      >
         <div class="final-checklist-inner">
           <div v-if="uncheckedItems.length > 0">
-            <h2 class="mb-3">
+            <h2 class="mb-3" id="checklist-title">
               {{ reportData.username }}님이
               <br class="mobile-only-break" />
               <span class="main-color fw-semibold">체크하지 않은 항목</span
@@ -246,7 +259,10 @@ onMounted(async () => {
             <p class="mb-5">
               향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.
             </p>
-            <FinalChecklist :checked="reportData.checked" />
+            <FinalChecklist
+              v-if="uncheckedItems.length > 0"
+              :checked="reportData.checked"
+            />
           </div>
           <div v-else>
             <h2>

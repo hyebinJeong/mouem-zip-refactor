@@ -3,14 +3,7 @@ import { onMounted } from 'vue';
 import DonutChart from './charts/DonutChart.vue';
 import axios from 'axios';
 import { ref } from 'vue';
-
-const gradeColor = {
-  안전: '#00AEEF',
-  보통: '#39B54A',
-  주의: '#F7941D',
-  위험: '#ED1C24',
-  판단보류: '#6C757D',
-};
+import { getGradeColor } from '@/composables/final-report/useGradeColor';
 
 const props = defineProps({
   registry: { type: String, default: '' },
@@ -25,21 +18,21 @@ const props = defineProps({
       <div class="donut-item" v-if="registry">
         <DonutChart
           :grade="registry"
-          :color="gradeColor[registry] || '#ddd'"
+          :color="getGradeColor(registry) || '#ddd'"
           label="등기부등본"
         />
       </div>
       <div class="donut-item" v-if="jeonse">
         <DonutChart
           :grade="jeonse"
-          :color="gradeColor[jeonse] || '#ddd'"
+          :color="getGradeColor(jeonse) || '#ddd'"
           label="전세가율"
         />
       </div>
       <div class="donut-item" v-if="checklist">
         <DonutChart
           :grade="checklist"
-          :color="gradeColor[checklist] || '#ddd'"
+          :color="getGradeColor(checklist) || '#ddd'"
           label="체크리스트"
         />
       </div>

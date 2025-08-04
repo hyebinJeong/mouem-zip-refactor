@@ -59,7 +59,14 @@
       />
     </div>
 
-    <button class="submit-btn" @click="submitForm">분석 시작하기</button>
+    <button
+      class="submit-btn"
+      :disabled="isSubmitting"
+      :class="{ disabled: isSubmitting }"
+      @click="handleClick"
+    >
+      {{ isSubmitting ? '분석 중...' : '분석 시작하기' }}
+    </button>
   </div>
 </template>
 
@@ -77,6 +84,7 @@ const jibunAddress = ref('');
 const jeonsePrice = ref('');
 const file = ref(null);
 const registryName = ref('');
+const isSubmitting = ref(false);
 
 const openPostcode = () => {
   new window.daum.Postcode({
@@ -97,6 +105,19 @@ const openPostcode = () => {
 
 const handleFileUpload = (event) => {
   file.value = event.target.files[0];
+};
+
+const handleClick = async () => {
+  if (isSubmitting.value) return;
+  isSubmitting.value = true;
+
+  try {
+    await submitForm();
+  } catch (e) {
+    alert('분석 실패: ' + e.message);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const submitForm = async () => {
@@ -279,5 +300,9 @@ label {
   margin-top: 20px;
   box-sizing: border-box;
   outline: none;
+}
+.submit-btn.disabled {
+  pointer-events: none;
+  opacity: 0.6;
 }
 </style>

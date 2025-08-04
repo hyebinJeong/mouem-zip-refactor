@@ -112,6 +112,7 @@ CREATE TABLE final_report (
 -- 6. 계약서 작성 테이블
 -- ============================================
 CREATE TABLE contract (
+                          contract_id INT AUTO_INCREMENT PRIMARY KEY, -- 계약서 번호 (PK)
                           user_id INT,                                -- 유저 ID (FK)
                           contract_name VARCHAR(100) NOT NULL,        -- 계약서 이름
                           lessor_name VARCHAR(20) NOT NULL,           -- 임대인 성명
@@ -147,13 +148,13 @@ CREATE TABLE special_clause (
 -- ============================================
 -- 8. 계약서 작성 특약
 -- ============================================
-CREATE TABLE contract_special_clause (
-                                         contract_id INT,                  -- 계약서 번호
-                                         special_clause_id INT,            -- 특약번호
-                                         PRIMARY KEY (contract_id, special_clause_id),
-                                         FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
-                                         FOREIGN KEY (special_clause_id) REFERENCES special_clause(special_clause_id)
-);
+# CREATE TABLE contract_special_clause (
+#                                          contract_id INT,                  -- 계약서 번호
+#                                          special_clause_id INT,            -- 특약번호
+#                                          PRIMARY KEY (contract_id, special_clause_id),
+#                                          FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
+#                                          FOREIGN KEY (special_clause_id) REFERENCES special_clause(special_clause_id)
+# );
 
 -- ============================================
 -- 9. 카테고리

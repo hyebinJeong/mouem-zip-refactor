@@ -19,6 +19,7 @@ import jsPDF from 'jspdf';
 const route = useRoute();
 const showModal = ref(false);
 const reportData = ref(null);
+const isLoadingPDF = ref(false); // ✅ 로딩 상태 추가
 
 const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
@@ -43,18 +44,23 @@ const registryKeys = [
   { key: 'trustInfos', label: '신탁등기' },
 ];
 
-// PDF 다운로드 (페이지 분할)
-function downloadPDF() {
+// ✅ PDF 다운로드 (로딩 처리 추가)
+async function downloadPDF() {
   const pdfArea = document.getElementById('pdf-area');
   if (!pdfArea) return;
 
-  html2canvas(pdfArea, { scale: 2 }).then((canvas) => {
+  isLoadingPDF.value = true; // 로딩 시작
+
+  try {
+    // 파일명용 날짜 문자열
+    const dateStr = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+
+    const canvas = await html2canvas(pdfArea, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
@@ -76,7 +82,11 @@ function downloadPDF() {
     pdf.save(
       `${reportData.value.username || '사용자'}_최종리포트_${dateStr}.pdf`
     );
-  });
+  } catch (e) {
+    console.error('PDF 생성 오류:', e);
+  } finally {
+    isLoadingPDF.value = false; // 로딩 종료
+  }
 }
 
 // 데이터 로드
@@ -84,10 +94,6 @@ onMounted(async () => {
   const userId = Number(route.query.userId);
   const registryId = Number(route.query.registryId);
   const reportId = Number(route.query.reportId);
-
-  console.log('쿼리 파라미터:', route.query);
-  console.log('넘어온 userId:', userId);
-  console.log('넘어온 registryId:', registryId);
 
   try {
     let res;
@@ -142,9 +148,20 @@ onMounted(async () => {
         v-if="route.query.from === 'myPage'"
         class="btn btn-secondary position-absolute top-50 translate-middle-y end-0"
         @click="downloadPDF"
+        :disabled="isLoadingPDF"
       >
-        다운로드
+        {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
       </button>
+    </div>
+
+    <!-- ✅ PDF 생성 중일 때 로딩 오버레이 -->
+    <div
+      v-if="isLoadingPDF"
+      class="loading-overlay d-flex justify-content-center align-items-center"
+    >
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
     </div>
 
     <!-- PDF에 담길 영역 -->
@@ -292,6 +309,17 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* ✅ 로딩 오버레이 스타일 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 9999;
+}
+
 .final-jeonse-wrap {
   display: flex;
   flex-direction: column;

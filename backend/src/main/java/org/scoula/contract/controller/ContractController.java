@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,8 +20,23 @@ public class ContractController {
     private final ContractService contractService;
     private final JwtProcessor jwtProcessor;
     @PostMapping
-    public void saveContract(@RequestBody ContractDTO contractDTO) {
-        contractService.saveContractWithClauses(contractDTO);
+    public ResponseEntity<?> saveContract(@RequestBody ContractDTO contractDTO, HttpServletRequest request) {
+        try {
+            String token = request.getHeader("Authorization").replace("Bearer ", "");
+            int userId = Integer.parseInt(jwtProcessor.getUserId(token));
+            contractDTO.setUserId(userId); // ✅ JWT로 세팅
+
+            if (contractDTO.getSpecialClauses() == null) {
+                contractDTO.setSpecialClauses(new ArrayList<>()); // ✅ null 방어
+            }
+
+            contractService.saveContract(contractDTO);
+            return ResponseEntity.ok(contractDTO.getContractId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("계약서 저장 실패");
+        }
+
     }
 
     @GetMapping("/list")

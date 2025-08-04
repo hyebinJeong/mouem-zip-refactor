@@ -70,6 +70,10 @@
 
         <div class="checklist-preview">
           <h3 class="sub-title">사전체크용으로 체크리스트만 확인할 수도 있어요.</h3>
+          <p class="small-text">
+            매물 진단 후 체크리스트를 완성하면 정확한 안전 등급을 제공해드려요.<br />
+            아래 버튼은 진단 없이 체크리스트만 미리 볼 수있어요.
+          </p>
           <div class="text-button-wrapper">
             <button @click="goToChecklist" class="text-button">
               체크리스트 확인하러가기
@@ -230,12 +234,12 @@ function goToAgreement() {
 }
 
 .blue-button2 {
-  background-color: #FFDE59;
+  background-color: #1a80e5;
   width: 288px;
   height: 59px;
-  border: 5px solid #1a80e5;
-  font-size: 14px;
-  color: #000000;
+  border: none;
+  font-size: 17px;
+  color: #fff;
   font-weight: 600;
   margin-bottom: 30px;
   border-radius: 8px;
@@ -249,7 +253,7 @@ function goToAgreement() {
 }
 
 .expires-text {
-  color: #1a80e5; /* 파란색 */
+  color: #1a80e5;
   font-weight: 500;
 }
 .disabled-row {

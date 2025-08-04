@@ -12,6 +12,7 @@
           <tr>
             <th>진단 매물</th>
             <th>생성일</th>
+            <th>남은 기간</th>
           </tr>
           </thead>
           <tbody>
@@ -21,8 +22,10 @@
               @click="handleRowClick(item)"
               class="clickable-row"
           >
-            <td>{{ item.address }}</td>
+            <td>{{ item.registryName }}</td>
             <td>{{ item.createdAt }}</td>
+            <td class="expires-text">{{ item.expiresIn }}</td>
+
           </tr>
           </tbody>
         </table>
@@ -30,9 +33,7 @@
 
       <h2 class="main-title">사전 체크용으로 체크리스트만 확인할래요</h2>
 
-      <p class="small-text">
-        안전 등급 분석에 포함되지 않고, 확인만 가능해요.
-      </p>
+      <p class="small-text">안전 등급 분석에 포함되지 않고, 확인만 가능해요.</p>
 
       <div class="button-wrapper">
         <button @click="goToChecklist" class="blue-button">
@@ -44,48 +45,64 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
 
-const router = useRouter()
-const properties = ref([])
+const router = useRouter();
+const properties = ref([]);
+const auth = useAuthStore();
 
-// userId는 나중에 JWT 토큰에서 추출할 예정
-const userId = 1
+//const userId = 1;
 
 onMounted(async () => {
+  const userId = auth.userId;
+
   try {
-    const response = await axios.get(`http://localhost:8080/api/registry/user/${userId}`)
-    properties.value = response.data.map(item => ({
-      registryId: item.registryId, // ✅ registry_id 추가
-      address: item.address,
-      createdAt: new Date(item.analysisDate).toLocaleDateString('ko-KR')
-    }))
+    const registryRes = await axios.get(`http://localhost:8080/api/registry/user/${userId}`);
+    const registryList = registryRes.data;
+
+    const checklistRes = await axios.get(`http://localhost:8080/api/checklist/user/${userId}`);
+    const completedRegistryIds = checklistRes.data.map(item => Number(item.registryId));
+
+    const today = new Date();
+
+    properties.value = registryList
+        .filter(item => !completedRegistryIds.includes(Number(item.registryId)))
+        .map(item => {
+          const createdDate = new Date(item.analysisDate);
+          const diffTime = createdDate.getTime() + 50 * 24 * 60 * 60 * 1000 - today.getTime();
+          const remainingDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+          return {
+            registryId: item.registryId,
+            registryName: item.registryName,
+            createdAt: createdDate.toLocaleDateString('ko-KR'),
+            expiresIn: remainingDays > 0 ? `${remainingDays}일 후에 만료됩니다.` : '만료되었습니다',
+            userId: userId,
+          };
+        });
   } catch (error) {
-    console.error('매물 정보를 불러오는 중 오류 발생:', error)
+    console.error('데이터 불러오기 실패:', error);
   }
-})
+});
 
 function goToChecklist() {
-  router.push('/checklist/nondiagnosis')
+  router.push('/checklist/nondiagnosis');
 }
 
 function handleRowClick(item) {
-  const userId = 1; // JWT에서 추출 예정
-
   router.push({
     path: '/checklist/checklist',
     query: {
-      userId: userId,
-      registryId: item.registryId
-    }
-  })
+      //userId:userId,
+      userId: auth.userId,
+      registryId: item.registryId,
+    },
+  });
 }
-
-
 </script>
-
 
 <style scoped>
 .wrapper {
@@ -157,7 +174,7 @@ function handleRowClick(item) {
 }
 
 .blue-button {
-  background-color: #1A80E5;
+  background-color: #1a80e5;
   width: 288px;
   height: 59px;
   font-size: 14px;
@@ -172,4 +189,10 @@ function handleRowClick(item) {
 .blue-button:hover {
   background-color: #2563eb;
 }
+
+.expires-text {
+  color: #1a80e5; /* 파란색 */
+  font-weight: 500;
+}
+
 </style>

@@ -56,6 +56,7 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const userId = Number(route.query.userId)
+//const userId = 1
 const registryId = Number(route.query.registryId)
 
 // 용어 모달 표시 상태
@@ -107,7 +108,14 @@ const goNext = async () => {
 
     if (!res.ok) throw new Error('전송 실패')
     alert('체크리스트 저장 완료!')
-    router.push('/next-page')
+    router.push({
+      path: '/final-report',
+      query: {
+        userId,
+        registryId
+      }
+    })
+
 
   } catch (e) {
     console.error(e)

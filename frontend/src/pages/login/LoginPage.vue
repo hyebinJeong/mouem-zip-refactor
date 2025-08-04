@@ -33,10 +33,20 @@ function goToMain() {
   justify-content: center;
   height: 100vh;
   font-family: 'Pretendard', sans-serif;
+  padding: 20px;
+  max-width: 100%;
 }
 .logo {
-  width: 200px;
+  width: 646px;
+  max-width: 90vw;
+  height: auto;
   margin-bottom: 20px;
+}
+.login-container p {
+  font-size: 26px;
+  max-width: 1042px;
+  text-align: center;
+  margin-bottom: 30px;
 }
 .highlight {
   color: #007bff;
@@ -45,17 +55,37 @@ function goToMain() {
 .kakao-btn {
   background-color: #fee500;
   border: none;
-  padding: 12px 24px;
-  font-weight: bold;
-  font-size: 16px;
+  padding: 0;
+  width: 453px;
+  height: 86px;
   border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+}
+.kakao-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .skip {
   margin-top: 10px;
   color: gray;
   font-size: 12px;
+}
+
+/* 반응형 처리 */
+@media (max-width: 768px) {
+  .logo {
+    width: 60vw;
+  }
+  .login-container p {
+    font-size: 18px;
+    max-width: 90vw;
+  }
+  .kakao-btn {
+    width: 80vw;
+    height: 60px;
+  }
 }
 </style>

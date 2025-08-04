@@ -22,11 +22,7 @@ public class AddressService {
     @Value("${juso.api.key}")
     private String jusoApiKey;
 
-    /**
-     * 사용자가 입력한 키워드(주소)를 기반으로 주소 정보 조회
-     * @param keyword 도로명 주소 또는 지번 주소
-     * @return 법정동코드(admCd)와 지번(jibun)을 포함한 AddressInfoDTO 반환
-     */
+    // 사용자가 입력한 키워드(주소)를 기반으로 주소 정보 조회(법정동 코드, 지번, 건물명)
     public AddressInfoDTO lookupAddress(String keyword) {
 
         String response = jusoWebClient.get()
@@ -42,23 +38,22 @@ public class AddressService {
                 .bodyToMono(String.class)
                 .block();
 
-//        System.out.println("AddressSerivce파일 - JUSO 응답: " + response);
-
         JSONObject json = new JSONObject(response)
                 .getJSONObject("results")
                 .getJSONArray("juso")
                 .getJSONObject(0);
 
-        String admCd = json.getString("admCd");       // 법정동 코드
-        String lnbrMnnm = json.getString("lnbrMnnm"); // 지번 본번 (예: "595")
-        String lnbrSlno = json.getString("lnbrSlno"); // 지번 부번 (예: "28")
+        String admCd = json.getString("admCd");               // 법정동 코드
+        String lnbrMnnm = json.getString("lnbrMnnm");         // 지번 본번 (예: "595")
+        String lnbrSlno = json.getString("lnbrSlno");         // 지번 부번 (예: "28")
+        String bdNm = json.optString("bdNm", "");  // 건물명 (없으면 빈 문자열)
 
         // 부번이 0이면 생략, 아니면 "본번-부번" 형태로 조합
         String jibun = lnbrSlno.equals("0") ? lnbrMnnm : lnbrMnnm + "-" + lnbrSlno;
 
-        //String sggNm = json.getString("sggNm");
+        String sggNm = json.getString("sggNm");
         String siNm = json.getString("siNm");
 
-        return new AddressInfoDTO(admCd, jibun, siNm);
+        return new AddressInfoDTO(admCd, jibun, siNm, bdNm, sggNm);
     }
 }

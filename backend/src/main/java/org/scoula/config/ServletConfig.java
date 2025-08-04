@@ -12,7 +12,7 @@ import org.springframework.web.servlet.view.JstlView;
 @EnableWebMvc
 @ComponentScan(basePackages = {
         "org.scoula",
-        "org.scoula.oauth.controller"
+        "org.scoula.oauth.controller",
 })
 public class ServletConfig implements WebMvcConfigurer {
 

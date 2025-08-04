@@ -45,6 +45,9 @@
               특약사항 관리
             </router-link>
           </li>
+          <li>
+            <button @click="onKakaoLogout" class="btn">임시 로그아웃</button>
+          </li>
         </ul>
       </div>
 
@@ -58,6 +61,17 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+// 임시 로그아웃 함수
+const auth = useAuthStore();
+const clientId = '88a530611ac6fa5a18f5747f67b6a359';
+const redirectUri = 'http://localhost:8080/';
+
+function onKakaoLogout() {
+  auth.logout();
+  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${redirectUri}`;
+  window.location.href = kakaoAuthUrl;
+}
 
 const route = useRoute();
 

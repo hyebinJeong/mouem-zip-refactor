@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- resources/mapper/contract/ContractMapper.xml -->
+<mapper namespace="org.scoula.contract.mapper.ContractMapper">
+
+    <insert id="insertContract" useGeneratedKeys="true" keyProperty="contractId">
+        INSERT INTO contract (
+            user_id, contract_name, lessor_name, lessee_name,
+            address, land_category, land_area, building_usage,
+            building_area, leased_part, leased_area,
+            deposit, down_payment, balance, maintenance_cost,
+            lease_start, lease_end
+        ) VALUES (
+                     #{userId}, #{contractName}, #{lessorName}, #{lesseeName},
+                     #{address}, #{landCategory}, #{landArea}, #{buildingUsage},
+                     #{buildingArea}, #{leasedPart}, #{leasedArea},
+                     #{deposit}, #{downPayment}, #{balance}, #{maintenanceCost},
+                     #{leaseStart}, #{leaseEnd}
+                 )
+    </insert>
+
+    <!-- 목록 조회 -->
+    <select id="selectContractsByUserId" resultType="org.scoula.contract.domain.ContractDTO">
+        SELECT contract_id AS contractId,
+               user_id AS userId,
+               contract_name AS contractName,
+               created_at AS createdAt
+        FROM contract
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectContractById" resultType="org.scoula.contract.domain.ContractDTO">
+        SELECT c.contract_id AS contractId,
+               c.user_id AS userId,
+               c.contract_name AS contractName,
+               c.lessor_name AS lessorName,
+               c.lessee_name AS lesseeName,
+               c.address,
+               c.land_category AS landCategory,
+               c.land_area AS landArea,
+               c.building_usage AS buildingUsage,
+               c.building_area AS buildingArea,
+               c.leased_part AS leasedPart,
+               c.leased_area AS leasedArea,
+               c.deposit,
+               c.down_payment AS downPayment,
+               c.balance,
+               c.maintenance_cost AS maintenanceCost,
+               c.lease_start AS leaseStart,
+               c.lease_end AS leaseEnd
+        FROM contract c
+        WHERE c.contract_id = #{contractId}
+    </select>
+
+    <!-- 특약 조회 -->
+    <select id="selectSpecialClausesByContractId" resultType="string">
+        SELECT sc.description
+        FROM contract_special_clause csc
+                 JOIN special_clause sc ON csc.special_clause_id = sc.special_clause_id
+        WHERE csc.contract_id = #{contractId}
+    </select>
+
+</mapper>
+
+

@@ -26,12 +26,12 @@ async function goToAnalysis() {
 
   try {
     //  로그인 상태라면 백엔드 권한 확인
-    await axios.get('/api/check-access/safety-check', {
+    await axios.get('/api/check-access/agreement', {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
 
     // 200 OK면 진단 페이지로 이동
-    router.push('/safety-check');
+    router.push('/agreement');
   } catch (err) {
     console.error('접근 권한 없음:', err);
     router.push('/login'); // 인증 실패 시 로그인 페이지로 이동

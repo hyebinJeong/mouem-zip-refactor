@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.scoula.finalreport.mapper.FinalReportMapper">
+
+    <select id="getFinalReport"
+            parameterType="long"
+            resultType="org.scoula.finalreport.dto.FinalReportRawDTO">
+        SELECT
+            u.name AS username,
+            ra.registry_rating AS registryRating,
+            ra.risks AS analysisJson, -- 등기부등본 위험요소 추가
+            ja.jeonse_ratio_rating AS jeonseRatioRating,
+            ja.jeonse_ratio AS jeonseRatio,
+            ja.region_avg_jeonse_ratio AS regionAvgJeonseRatio,
+            ja.deposit AS deposit,
+            ja.expected_selling_price AS expectedSellingPrice,
+            c.checked AS checked,
+            c.checklist_rating AS checklistRating
+        FROM final_report fr
+                 JOIN users u ON fr.user_id = u.user_id
+                 JOIN registry_analysis ra ON fr.registry_id = ra.registry_id
+                 JOIN jeonse_analysis ja ON ra.registry_id = ja.registry_id
+                 JOIN checklist c ON ra.registry_id = c.registry_id AND fr.user_id = c.user_id
+        WHERE fr.report_id = #{reportId}
+    </select>
+
+    <select id="findReportIdByUserAndRegistry"
+            resultType="long">
+        SELECT report_id
+        FROM final_report
+        WHERE user_id = #{userId}
+          AND registry_id = #{registryId}
+        LIMIT 1
+    </select>
+
+    <!--  받아온 userId, registryId 저장-->
+    <insert id="insertFinalReport" parameterType="org.scoula.finalreport.dto.FinalReportInsertDTO"
+            useGeneratedKeys="true" keyProperty="reportId">
+        INSERT INTO final_report (user_id, registry_id)
+        VALUES (#{userId}, #{registryId});
+    </insert>
+
+    <!--  50일 후 레포트 만료   -->
+    <update id="expireOldReports">
+    <![CDATA[
+        UPDATE final_report
+        SET status = FALSE
+        WHERE created_at < NOW() - INTERVAL 50 DAY
+          AND status = TRUE
+        ]]>
+    </update>
+
+    <select id="getReportListByUserId"
+            parameterType="long"
+            resultType="org.scoula.finalreport.dto.FinalReportSummaryDTO">
+        SELECT fr.report_id AS reportId,
+               fr.registry_id AS registryId,
+               ra.registry_name AS registryName,
+               ra.registry_rating AS registryRating,
+               fr.created_at AS createdAt
+        FROM final_report fr
+                 JOIN registry_analysis ra ON fr.registry_id = ra.registry_id
+        WHERE fr.user_id = #{userId}
+          AND fr.status = TRUE
+        ORDER BY fr.created_at DESC
+    </select>
+
+</mapper>

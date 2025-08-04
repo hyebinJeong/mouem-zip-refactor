@@ -13,6 +13,8 @@ import CheckList from '@/pages/checklist/Checklist.vue';
 import FinalReportPage from '@/pages/FinalReportPage.vue';
 import AgreementPage from '@/pages/AgreementPage.vue';
 import LoginPage from '@/pages/login/LoginPage.vue';
+import ContractListPage from '@/pages/listpages/ContractListPage.vue';
+import ReportListPage from '@/pages/listpages/ReportListPage.vue';
 
 // 카테고리 및 용어 관련 추가
 import CategoryAll from '@/pages/category/CategoryAll.vue';
@@ -31,29 +33,42 @@ import KakaoCallback from '@/pages/login/KakaoCallback.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
-
   {
-    path: '/safety-check',
+    path: '/safety-check', // 매물 안전성 진단 페이지
     name: 'safety-check',
     component: SafetyDiagnosis,
     meta: { requiresAuth: true },
   },
   {
-    path: '/safety-check/:registerId',
+    path: '/safety-check/:registerId', // 등기부등본 분석 결과 페이지
     name: 'RegisterResult',
     component: RegisterResult,
+    meta: { requiresAuth: true },
   },
   { path: '/checklist', name: 'preview', component: Preview },
   {
     path: '/agreement', // 면책고지 경로
     name: 'AgreementPage',
     component: AgreementPage,
-    meta: { hideHeader: true },
+    meta: { hideHeader: true, requiresAuth: true },
   },
   {
-    path: '/reference-contract',
-    name: 'reference-contract',
-    component: ReferenceContract,
+    path: '/referencecontracts',
+    children: [
+      {
+        path: '',
+        name: 'ReferenceContract',
+        component: () =>
+          import('@/pages/referencecontracts/ReferenceContract.vue'),
+      },
+      {
+        path: 'success/:id', // ✅ 상대 경로 + params
+        name: 'ReferenceContractSuccess',
+        component: () =>
+          import('@/pages/referencecontracts/ReferenceContractSuccess.vue'),
+        props: true, // 필요 시 id를 props로도 받을 수 있음
+      },
+    ],
   },
   {
     path: '/reference-guidebook',
@@ -61,7 +76,7 @@ const routes = [
     component: GuidebookPage,
   },
   { path: '/glossary', name: 'glossary', component: GlossaryBook },
-  { path: '/my', name: 'my', component: MyPage },
+  { path: '/my', name: 'my', component: MyPage, meta: { requiresAuth: true } },
   {
     path: '/checklist/nondiagnosis',
     name: 'nondiagnosis',
@@ -80,6 +95,7 @@ const routes = [
   {
     path: '/category',
     component: CategoryAll,
+    meta: { requiresAuth: true, requiresAdmin: true, hideHeader: true },
     children: [
       // 카테고리 관리
       { path: '', name: 'CategoryManager', component: CategoryManager },
@@ -145,6 +161,18 @@ const routes = [
     name: 'finalReportPage',
     component: FinalReportPage,
   },
+
+  {
+    path: '/contract-list',
+    name: 'ContractListPage',
+    component: () => import('@/pages/listpages/ContractListPage.vue'),
+  },
+
+  {
+    path: '/report-list',
+    name: 'reportList',
+    component: () => import('@/pages/listpages/ReportListPage.vue'),
+  },
 ];
 
 const router = createRouter({
@@ -162,6 +190,25 @@ router.beforeEach(async (to, from, next) => {
     if (!auth.isLoggedIn) {
       return next('/login');
     }
+
+    const payload = JSON.parse(atob(auth.token.split('.')[1]));
+
+    // 1) 관리자 전용 페이지
+    if (to.meta.requiresAdmin) {
+      if (payload.role !== 'ROLE_ADMIN') {
+        alert('관리자만 접근 가능한 페이지입니다.');
+        return next('/'); // 일반 회원은 홈으로
+      }
+    }
+    // 2) 회원 전용 페이지
+    else {
+      if (payload.role === 'ROLE_ADMIN') {
+        alert('회원 전용 페이지입니다.');
+        return next('/category'); // 관리자면 카테고리로 보내기
+      }
+    }
+
+    // 3) 백엔드 접근 체크 (선택)
     try {
       await axios.get('/api/check-access' + to.path, {
         headers: { Authorization: `Bearer ${auth.token}` },
@@ -172,7 +219,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  return next(); // 인증 필요 없는 페이지는 그냥 통과
+  return next();
 });
 
 export default router;

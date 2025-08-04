@@ -1,7 +1,6 @@
 package org.scoula.jeonseRate.enums;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * KOSIS API에서 사용하는 지역(objL2) 코드 Enum
@@ -55,33 +54,36 @@ public enum KosisRegionCode {
     }
 
     /**
-     * 사용자가 입력한 시/도명(rawName)을 KOSIS 기준으로 맞추기 (예: "서울특별시" → "서울")
+     * KOSIS 통계 API에서 사용하는 지역 이름(예: "서울", "경기")과
+     * 사용자 주소 또는 법정동 코드에서 추출한 행정구역명(예: "서울특별시")을 매핑하기 위해 사용
      */
     public static String normalizeName(String rawName) {
         if (rawName == null) return null;
-        return rawName.replace("특별시", "")
-                .replace("광역시", "")
-                .replace("자치시", "")
-                .replace("특별자치도", "")
-                .replace("도", "")
+        return rawName
+                .replace("서울특별시", "서울")
+                .replace("부산광역시", "부산")
+                .replace("대구광역시", "대구")
+                .replace("인천광역시", "인천")
+                .replace("광주광역시", "광주")
+                .replace("대전광역시", "대전")
+                .replace("울산광역시", "울산")
+                .replace("세종특별자치시", "세종")
+                .replace("경기도", "경기")
+                .replace("강원도", "강원")
+                .replace("충청북도", "충북")
+                .replace("충청남도", "충남")
+                .replace("전라북도", "전북")
+                .replace("전라남도", "전남")
+                .replace("경상북도", "경북")
+                .replace("경상남도", "경남")
+                .replace("제주특별자치도", "제주")
                 .trim();
     }
 
-    /**
-     * 시도명을 기반으로 enum 객체 찾기
-     */
+    // 시도명을 기반으로 enum 객체 찾기
     public static Optional<KosisRegionCode> fromName(String name) {
         return Arrays.stream(values())
                 .filter(r -> r.name.equals(name))
                 .findFirst();
     }
-
-    /**
-     * 지역 코드(a7, b1 등)를 기반으로 enum 객체 찾기
-     */
-//    public static Optional<KosisRegionCode> fromCode(String code) {
-//        return Arrays.stream(values())
-//                .filter(r -> r.code.equals(code))
-//                .findFirst();
-//    }
 }

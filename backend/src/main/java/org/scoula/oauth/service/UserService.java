@@ -17,9 +17,14 @@ public class UserService {
 
         if (user == null) {
             userMapper.insertUser(kakaoUser);
-            return kakaoUser; // 새로 저장한 유저 반환
+            return userMapper.findByKakaoId(kakaoUser.getKakaoId()); // 새로 저장한 유저 반환
+        }else {
+            if (!user.isState()) {
+                // 소프트딜리트 상태 → 복구 처리
+                userMapper.reactivateUser(kakaoUser.getKakaoId());
+                return userMapper.findByKakaoId(kakaoUser.getKakaoId());
+            }
+            return user; // 기존 유저 반환
         }
-
-        return user; // 기존 유저 반환
     }
 }

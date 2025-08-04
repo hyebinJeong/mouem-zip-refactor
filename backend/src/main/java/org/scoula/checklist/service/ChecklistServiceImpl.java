@@ -59,4 +59,10 @@ public class ChecklistServiceImpl implements ChecklistService {
         return "안전";
     }
 
+    @Override
+    public List<ChecklistDTO> findByUserId(int userId) {
+        return mapper.findByUserId(userId);
+    }
+
+
 }

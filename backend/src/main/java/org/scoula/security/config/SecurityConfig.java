@@ -97,12 +97,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()//경로별접근권한설정
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers(HttpMethod.POST, "/api/oauth/**").permitAll() // 카카오 로그인 api는 허용
+                .antMatchers(HttpMethod.POST, "/api/oauth/**").permitAll()    // 카카오 로그인 api는 허용
                 .antMatchers("/", "/index.html", "/oauth/callback/kakao").permitAll()
-                .antMatchers("/api/check-access/**").hasRole("USER")       // 유저 전용 API 보호
-                .antMatchers("/admin/**").hasRole("ADMIN")                 // 관리자 API 보호
-//                .anyRequest().denyAll();                                   // 그 외 요청은 거부
-                .anyRequest().permitAll();                                  // 임시 개발용으로 api 모두 허용
+                .antMatchers("/api/check-access/admin").hasRole("ADMIN")      // 관리자 접근 체크
+                .antMatchers("/api/check-access/category/**").hasRole("ADMIN")
+                .antMatchers("/api/check-access/**").hasRole("USER")          // 유저 전용 API 보호
+                .anyRequest().permitAll();                                      // 임시 개발용으로 api 모두 허용
 
         http.cors();
 

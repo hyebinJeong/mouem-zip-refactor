@@ -40,7 +40,8 @@
           style="display: none"
         />
         <span>{{
-          file?.name || '여기를 눌러 파일을 선택하거나 첨부할 파일을 끌어다 놓으세요'
+          file?.name ||
+          '여기를 눌러 파일을 선택하거나 첨부할 파일을 끌어다 놓으세요'
         }}</span>
       </div>
     </div>
@@ -63,10 +64,12 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '@/stores/auth';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const auth = useAuthStore();
 
 const selectedAddress = ref('');
 const roadAddress = ref('');
@@ -113,6 +116,7 @@ const submitForm = async () => {
   }
 
   const formData = new FormData();
+  formData.append('userId', auth.userId);
   formData.append('file', file.value);
   formData.append('address', selectedAddress.value);
   formData.append('jeonsePrice', jeonsePrice.value);
@@ -140,6 +144,7 @@ const submitForm = async () => {
         registerId: registerId,
         address: selectedAddress.value,
         jeonsePrice: jeonsePrice.value,
+        userId: auth.userId,
       }),
     });
     if (!leaseRes.ok) {
@@ -203,7 +208,7 @@ label {
 .address-box {
   display: flex;
   gap: 10px;
-  width: 100%; 
+  width: 100%;
 }
 .address-box input {
   flex: 1;
@@ -226,8 +231,8 @@ label {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: textfield;
-  box-sizing: border-box; 
-  outline: none; 
+  box-sizing: border-box;
+  outline: none;
 }
 .upload-box {
   border: 2px dashed #ccc;

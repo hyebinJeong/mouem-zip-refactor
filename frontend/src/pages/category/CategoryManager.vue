@@ -103,6 +103,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const search = ref('');

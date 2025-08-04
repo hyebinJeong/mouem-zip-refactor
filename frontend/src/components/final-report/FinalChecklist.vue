@@ -18,19 +18,39 @@ const uncheckedItems = computed(() => {
       :key="index"
       class="checkedlist-box p-3 rounded mb-3 text-start"
     >
-      <p class="mb-0">{{ item }}</p>
+      <p class="mb-0" v-html="item"></p>
     </div>
   </div>
 </template>
 
 <style scoped>
 .FinalChecklist {
-  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   margin: 0 auto;
+  padding: 0 1rem;
+  max-width: 960px;
 }
 
 .checkedlist-box {
+  width: 100%;
+  max-width: 800px;
   background-color: #fffcd4;
-  width: 45vw;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #fef08a;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .checkedlist-box {
+    max-width: 95vw;
+    padding: 1rem;
+  }
 }
 </style>

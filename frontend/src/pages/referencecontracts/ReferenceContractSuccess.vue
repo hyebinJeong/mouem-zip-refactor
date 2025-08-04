@@ -1,28 +1,39 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const router = useRouter();
+const route = useRoute();
+const auth = useAuthStore();
+
+onMounted(() => {
+  const contractId = route.params.id || route.query.id;
+  console.log('contractId:', contractId); // 여기에 찍힘
+});
 
 const contract = ref({
+  contractName: '',
   lessor: '',
   lessee: '',
   address: '',
-  contractAmount: '',
-  deposit: '',
-  rent: '',
+  landCategory: '',
+  landArea: '',
   structure: '',
+  buildingArea: '',
+  leasePart: '',
+  leaseArea: '',
+  deposit: '',
+  contractAmount: '',
+  rent: '',
   maintenanceFee: '',
   startDate: '',
   endDate: '',
-  special: '',
+  special: [],
 });
-
-const defaultSpecialTerms = [
-  '임대인은 임차인의 대항력 및 확정일자 확보 이전에 해당 부동산에 제3자와의 담보권 설정, 매도, 제3자 점유를 하지 않는다.',
-  '임대인은 계약 체결 당시 해당 주택에 존재하는 모든 선순위 권리와 보증금 정보(선순위 세입자 포함)를 정확히 고지하였으며, 향후 변동 시 즉시 통보한다.',
-  '본 계약은 공인중개사를 통하지 않고 당사자 간 직거래로 체결되었으며, 이에 따라 발생할 수 있는 권리분쟁은 민법 및 주택임대차보호법에 따르기로 한다.',
-];
 
 const mergedSpecialTerms = computed(() => {
   const userSpecials = Array.isArray(contract.value.special)
@@ -30,55 +41,206 @@ const mergedSpecialTerms = computed(() => {
     : contract.value.special
     ? [contract.value.special]
     : [];
-  return [...defaultSpecialTerms, ...userSpecials];
+  return [...userSpecials];
 });
 
-onMounted(() => {
-  const stored = sessionStorage.getItem('contractData');
-  if (stored) {
-    contract.value = JSON.parse(stored);
-  } else {
-    router.replace({ name: 'reference-contract' });
+// ✅ 모달 상태
+const showModal = ref(true);
+
+const closeModal = () => {
+  showModal.value = false;
+};
+
+onMounted(async () => {
+  try {
+    // DB에서 조회
+    const contractId = route.params.id || route.query.id;
+    if (contractId) {
+      console.log('contractId 확인:', contractId); // 디버깅용
+      const res = await axios.get(`/api/contract/${contractId}`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      const data = res.data;
+      console.log('status:', res.status); // 디버깅용
+      console.log('백엔드 응답:', res.data); // 디버깅용
+
+      contract.value = {
+        contractName: data.contractName,
+        lessor: data.lessorName,
+        lessee: data.lesseeName,
+        address: data.address,
+        landCategory: data.landCategory,
+        landArea: data.landArea,
+        structure: data.buildingUsage,
+        buildingArea: data.buildingArea,
+        leasePart: data.leasedPart,
+        leaseArea: data.leasedArea,
+        deposit: data.deposit,
+        contractAmount: data.downPayment,
+        rent: data.balance,
+        maintenanceFee: data.maintenanceCost,
+        startDate: data.leaseStart,
+        endDate: data.leaseEnd,
+        special: data.specialClauseTexts || [],
+      };
+
+      mergedSpecialTerms.value = [...(data.specialClauseTexts || [])];
+
+      // 세션 스토리지에 저장 (기존방식)
+    } else {
+      const stored = sessionStorage.getItem('contractData');
+      if (stored) {
+        contract.value = JSON.parse(stored);
+        mergedSpecialTerms.value = contract.value.special || [];
+      } else {
+        router.replace({ name: 'ReferenceContract' });
+      }
+    }
+  } catch (error) {
+    console.error(
+      '계약서 조회 실패:',
+      error.response?.status,
+      error.response?.data
+    );
   }
 });
-</script>
 
+// PDF 다운로드 (페이지 분할)
+function downloadPDF() {
+  const pdfArea = document.getElementById('pdf-area');
+  if (!pdfArea) return;
+
+  html2canvas(pdfArea, { scale: 2 }).then((canvas) => {
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // 첫 페이지
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // 남은 부분 페이지 추가
+    while (heightLeft > 0) {
+      position -= pageHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`${contract.value.contractName || '계약서'}.pdf`);
+  });
+}
+</script>
 <template>
   <div class="page-wrapper">
-    <div class="container">
-      <h1><span class="highlight">계약서</span>가 완성되었어요.</h1>
-      <p class="sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
+    <div class="container" id="pdf-area">
+      <!-- PDF 영역 -->
 
-      <h2 class="property-title">힐스테이트 팔교엘포레A3BL</h2>
+      <!-- 상단 안내 문구 (화면에서는 숨기기) -->
+      <div v-show="false" class="hidden-header">
+        <h1><span class="highlight">계약서</span>가 완성되었어요.</h1>
+        <p class="sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
+      </div>
+
+      <!-- 계약서 제목 + 다운로드 버튼 -->
+      <div class="title-with-button">
+        <h2 class="property-title">
+          {{ contract.contractName || '계약서 이름이 입력되지 않았습니다' }}
+        </h2>
+
+        <!-- 리스트에서 들어온 경우만 다운로드 버튼 표시 -->
+        <button
+          v-if="route.query.from === 'list'"
+          class="btn-download"
+          @click="downloadPDF"
+        >
+          다운로드
+        </button>
+      </div>
+
       <hr class="divider" />
 
+      <!-- 계약서 내용 -->
       <div class="table-box">
         <table class="info-table">
           <tr>
-            <td><strong>임대인 :</strong> {{ contract.lessor }}</td>
-            <td><strong>임차인 :</strong> {{ contract.lessee }}</td>
-          </tr>
-        </table>
-        <hr class="divider full" />
-
-        <table class="info-table">
-          <tr>
-            <td><strong>소재지 :</strong> {{ contract.address }}</td>
-            <td><strong>월세 :</strong> {{ contract.rent }}</td>
-          </tr>
-          <tr>
-            <td><strong>계약금 :</strong> {{ contract.contractAmount }}</td>
-            <td><strong>보증금 :</strong> {{ contract.deposit }}</td>
-          </tr>
-          <tr>
-            <td colspan="2">
-              <strong>임대차 기간 :</strong> {{ contract.startDate }} ~
-              {{ contract.endDate }}
+            <td>
+              <div class="label">임대인(집주인)</div>
+              <div class="value">{{ contract.lessor }}</div>
+            </td>
+            <td>
+              <div class="label">임차인(세입자)</div>
+              <div class="value">{{ contract.lessee }}</div>
             </td>
           </tr>
           <tr>
+            <td>
+              <div class="label">소재지</div>
+              <div class="value">{{ contract.address }}</div>
+            </td>
+            <td>
+              <div class="label">토지 지목</div>
+              <div class="value">{{ contract.landCategory }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">토지 면적</div>
+              <div class="value">{{ contract.landArea }}</div>
+            </td>
+            <td>
+              <div class="label">건물 구조·용도</div>
+              <div class="value">{{ contract.structure }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">건물 면적</div>
+              <div class="value">{{ contract.buildingArea }}</div>
+            </td>
+            <td>
+              <div class="label">임차할 부분</div>
+              <div class="value">{{ contract.leasePart }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">임차할 면적</div>
+              <div class="value">{{ contract.leaseArea }}</div>
+            </td>
+            <td>
+              <div class="label">보증금</div>
+              <div class="value">{{ contract.deposit }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">계약금</div>
+              <div class="value">{{ contract.contractAmount }}</div>
+            </td>
+            <td>
+              <div class="label">잔금</div>
+              <div class="value">{{ contract.rent }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">관리비</div>
+              <div class="value">{{ contract.maintenanceFee }}</div>
+            </td>
             <td colspan="2">
-              <strong>관리비 :</strong> {{ contract.maintenanceFee }}
+              <div class="label">임대차 기간</div>
+              <div class="value">
+                {{ contract.startDate }} ~ {{ contract.endDate }}
+              </div>
             </td>
           </tr>
         </table>
@@ -86,9 +248,9 @@ onMounted(() => {
 
       <hr class="divider" />
 
+      <!-- ✅ 특약사항 -->
       <div class="special-section">
         <h3>특약 사항</h3>
-
         <p
           v-for="(item, index) in mergedSpecialTerms"
           :key="index"
@@ -96,6 +258,18 @@ onMounted(() => {
         >
           {{ index + 1 }}. {{ item }}
         </p>
+      </div>
+    </div>
+
+    <!-- ✅ 계약서 자동 삭제 안내 모달 -->
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal-content">
+        <h2>📌 계약서 자동 삭제 안내</h2>
+        <p>
+          계약서는 작성일 기준 <strong>50일 후 자동 삭제</strong>됩니다.<br />
+          필요 시 사전 <strong>캡쳐 또는 다운로드</strong>해 주시기 바랍니다.
+        </p>
+        <button class="close-btn" @click="closeModal">확인</button>
       </div>
     </div>
   </div>
@@ -155,9 +329,24 @@ h1 {
 }
 
 .info-table td {
-  padding: 10px;
+  padding: 12px;
   border: none;
   vertical-align: top;
+}
+
+/* ✅ 라벨 / 값 스타일 */
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.value {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-line; /* 줄바꿈 허용 */
 }
 
 .divider {
@@ -191,5 +380,100 @@ h1 {
   border-radius: 8px;
   color: #1e3a8a;
   font-weight: 500;
+}
+
+/* ✅ 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  padding: 32px 24px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #1e3a8a;
+}
+
+.modal-content p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #1d4ed8;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.title-with-button {
+  display: flex;
+  justify-content: center; /* 기본은 가운데 */
+  align-items: center;
+  position: relative;
+  margin: 20px 0;
+}
+
+.title-with-button {
+  display: flex;
+  justify-content: center; /* 제목은 가운데 */
+  align-items: center;
+  position: relative;
+  margin: 20px 0;
+}
+
+.btn-download {
+  position: absolute;
+  right: 0; /* 오른쪽 배치 */
+  background-color: #2563eb;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+}
+.btn-download:hover {
+  background-color: #1d4ed8;
 }
 </style>

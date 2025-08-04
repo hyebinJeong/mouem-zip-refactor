@@ -9,8 +9,6 @@ import org.scoula.jeonseRate.enums.HouseTypeCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +45,7 @@ public class DealSearchService {
      * @param recentMonths 조회 대상 월 목록
      * @return 유사 매물 평균 매매가 (단위: 만원)
      */
-    public Optional<JeonseRateDTO> getDealAmount(String lawdCode, String jibun , List<String> recentMonths) {
+    public Optional<JeonseRateDTO> getDealAmount(String lawdCode, String jibun ,String buildingName, List<String> recentMonths) {
         JeonseRateDTO jeonseRateDTO = new JeonseRateDTO();
         List<DealDTO> allDeals = new ArrayList<>();
 
@@ -84,25 +82,32 @@ public class DealSearchService {
 
         // 모든 유형에서 매물이 없다면 판단 보류
         if (allDeals.isEmpty()) {
-//            System.out.println("모든 유형에서 실거래 매물 없음 → 판단 보류");
             return Optional.empty();
         }
 
-        // 지번과 같은 매물 필터링
-        List<DealDTO> filtered = allDeals.stream()
+        // 1차 필터: 지번 기준
+        List<DealDTO> filteredByJibun = allDeals.stream()
                 .filter(d -> d.getJibun() != null && d.getJibun().equals(jibun))
                 .collect(Collectors.toList());
 
-//        System.out.println("📌 [매매가 조회] 검색 지번: " + jibun + ", 조회 매물 수: " + allDeals.size());
+        // 2차 필터: 건물명 기준 (있을 경우만)
+        List<DealDTO> finalFiltered = filteredByJibun.stream()
+                .filter(d -> {
+                    if (buildingName == null || buildingName.isBlank()) return true;
+
+                    return isSimilarName(buildingName, d.getAptNm()) ||
+                            isSimilarName(buildingName, d.getOffiNm()) ||
+                            isSimilarName(buildingName, d.getMhouseNm());
+                })
+                .collect(Collectors.toList());
 
         // 매물이 없다면 판단 보류
-        if (filtered.isEmpty()) {
-//            System.out.println("같은 지번 매물 없음 → 판단 보류");
+        if (finalFiltered.isEmpty()) {
             return Optional.empty();
         }
 
         // 평균 매매가 계산 (단위: 만원)
-        double avg = filtered.stream()
+        double avg = finalFiltered.stream()
                 .mapToDouble(d -> Double.parseDouble(d.getDealAmount().replace(",", "")))
                 .average()
                 .orElse(0);
@@ -110,8 +115,21 @@ public class DealSearchService {
         // DB 저장용: 정수로 반올림
         jeonseRateDTO.setAreaAVGPrice((int) Math.round(avg));
 
-        //System.out.println("유사 조건 매물 평균 매매가: " + roundedAvg + "만원");
         return Optional.of(jeonseRateDTO);
+    }
+
+    private String normalize(String name) {
+        if (name == null) return "";
+        return name.replaceAll("\\s+", "")                            // 모든 공백 제거
+                .replaceAll("(아파트|오피스텔|연립|주상복합)", "") // 건물유형 제거
+                .toLowerCase();
+    }
+
+    private boolean isSimilarName(String input, String target) {
+        if (input == null || target == null) return false;
+        String normalizedInput = normalize(input);
+        String normalizedTarget = normalize(target);
+        return normalizedInput.contains(normalizedTarget) || normalizedTarget.contains(normalizedInput);
     }
 
     /**
@@ -124,12 +142,10 @@ public class DealSearchService {
                     dto.getResponse().getBody() == null ||
                     dto.getResponse().getBody().getItems() == null ||
                     dto.getResponse().getBody().getItems().getItem() == null) {
-                //System.out.println("실거래 응답에서 items가 비어 있음 → 빈 리스트 반환");
                 return List.of();
             }
             return dto.getResponse().getBody().getItems().getItem();
         } catch (Exception e) {
-//            System.out.println("응답 파싱 실패 → 빈 리스트 반환");
             return List.of();
         }
     }
@@ -152,10 +168,8 @@ public class DealSearchService {
                         .queryParam("numOfRows", "1000")// 최대 1000건까지 요청
                         .build())
                 .retrieve()
-                .bodyToMono(String.class)   // 응답 본문을 문자열로 받음
+                .bodyToMono(String.class)
                 .block();
-
-//        System.out.println("매물->" + response);
 
         try {
             return objectMapper.readValue(response, DealResponseDTO.class);

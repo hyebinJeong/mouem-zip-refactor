@@ -8,7 +8,11 @@
         <div class="menu-item" @click="goSafetyCheck">매물 안전성 진단</div>
         <div class="menu-item" @click="goChecklist">체크리스트</div>
 
-        <div class="menu-item dropdown" @mouseenter="showContractGuide = true" @mouseleave="showContractGuide = false">
+        <div
+          class="menu-item dropdown"
+          @mouseenter="showContractGuide = true"
+          @mouseleave="showContractGuide = false"
+        >
           계약 가이드
           <ul class="dropdown-list" v-show="showContractGuide">
             <li @click.stop="goReferenceContract">참고계약서 작성</li>
@@ -17,32 +21,34 @@
         </div>
 
         <div class="menu-item" @click="goGlossary">용어해설집</div>
-        <button class="mypage" :style="{ color: fontColor }" @click="goMyPage">마이페이지</button>
+        <button class="mypage" :style="{ color: fontColor }" @click="goMyPage">
+          마이페이지
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { defineProps } from 'vue'
-import logo from '@/assets/homebuddylogo.png'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { defineProps } from 'vue';
+import logo from '@/assets/homebuddylogo.png';
 
 const props = defineProps({
-  fontColor: String
-})
+  fontColor: String,
+});
 
-const router = useRouter()
-const showContractGuide = ref(false)
+const router = useRouter();
+const showContractGuide = ref(false);
 
-const goHome = () => router.push('/')
-const goSafetyCheck = () => router.push('/safety-check')
-const goChecklist = () => router.push('/checklist')
-const goReferenceContract = () => router.push('/reference-contract')
-const goReferenceGuidebook = () => router.push('/reference-guidebook')
-const goGlossary = () => router.push('/glossary')
-const goMyPage = () => router.push('/my')
+const goHome = () => router.push('/');
+const goSafetyCheck = () => router.push('/agreement');
+const goChecklist = () => router.push('/checklist');
+const goReferenceContract = () => router.push('/referencecontracts');
+const goReferenceGuidebook = () => router.push('/reference-guidebook');
+const goGlossary = () => router.push('/glossary');
+const goMyPage = () => router.push('/my');
 </script>
 
 <style scoped>
@@ -72,7 +78,7 @@ const goMyPage = () => router.push('/my')
   cursor: pointer;
 }
 
-.logo-wrapper:hover{
+.logo-wrapper:hover {
   transform: scale(1.03);
   transition: transform 0.3s ease;
 }
@@ -94,7 +100,7 @@ const goMyPage = () => router.push('/my')
 .menu-item {
   position: relative;
   font-weight: bolder;
-  font-size:20px;
+  font-size: 20px;
   font-family: Regular;
   height: 2.5em;
   display: flex;
@@ -118,7 +124,7 @@ const goMyPage = () => router.push('/my')
   padding: 0;
   list-style: none;
   z-index: 10;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   overflow: hidden;
 }

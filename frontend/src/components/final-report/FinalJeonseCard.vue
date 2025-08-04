@@ -1,4 +1,7 @@
 <script setup>
+import { getGradeColor } from '@/composables/final-report/useGradeColor';
+import { computed } from 'vue';
+
 const props = defineProps({
   salePrice: Number,
   jeonseDeposit: Number,
@@ -6,6 +9,8 @@ const props = defineProps({
   jeonseRatioRating: String,
   username: String,
 });
+
+const gradeColorStyle = computed(() => getGradeColor(props.jeonseRatioRating));
 </script>
 
 <template>
@@ -20,13 +25,14 @@ const props = defineProps({
         <p>예상 전세가율 : {{ (jeonseRatio || 0).toLocaleString() }}%</p>
       </div>
     </div>
-    <p class="mt-5">
+    <h5 class="mt-5">
       <span>{{ username }}님의 전세가율은 </span>
       <span
-        ><span class="fw-bold">{{ jeonseRatioRating }}</span
-        >등급입니다.</span
+        ><span class="fw-bold" :style="{ color: gradeColorStyle }"
+          >{{ jeonseRatioRating }}등급</span
+        >입니다.</span
       >
-    </p>
+    </h5>
   </div>
 </template>
 

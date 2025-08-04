@@ -45,8 +45,8 @@
               특약사항 관리
             </router-link>
           </li>
-          <li>
-            <button @click="onKakaoLogout" class="btn">임시 로그아웃</button>
+          <li class="nav-item mb-2">
+            <button @click="onKakaoLogout" class="nav-link logout-button">로그아웃</button>
           </li>
         </ul>
       </div>
@@ -92,6 +92,23 @@ const isActive = (path) => {
   font-weight: bold;
   color: #007bff;
   /* background-color: #e9f0ff; */
+  border-radius: 5px;
+}
+/* 로그아웃 버튼 스타일 */
+.logout-button {
+  background: none;
+  border: none;
+  color: #dc3545; /* Bootstrap 빨간색 */
+  padding: 0.5rem 1rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  font-weight: bold;
+  color: #fff;
+  background-color: #dc3545;
   border-radius: 5px;
 }
 </style>

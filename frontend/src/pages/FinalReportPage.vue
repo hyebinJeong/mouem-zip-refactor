@@ -133,7 +133,9 @@ onMounted(async () => {
     v-if="reportData"
   >
     <div class="position-relative mb-4">
-      <h1 class="text-center mb-0">최종 분석이 완료되었어요.</h1>
+      <h1 class="text-center mb-0">
+        <span class="main-color fw-semibold">최종 분석</span>이 완료되었어요.
+      </h1>
 
       <!-- 마이페이지에서 들어왔을 때만 버튼 보이게 -->
       <button
@@ -175,7 +177,8 @@ onMounted(async () => {
       <div class="final-jeonse-wrap mt-5 mb-4">
         <div v-if="reportData.jeonseRatioRating !== '판단보류'">
           <h2 style="margin-bottom: 2rem">
-            {{ reportData.username }}님의 전세가율을 분석했어요.
+            {{ reportData.username }}님의
+            <span class="main-color fw-semibold">전세가율</span>을 분석했어요.
           </h2>
           <div
             class="d-flex flex-column flex-md-row justify-content-center align-items-end"
@@ -202,7 +205,8 @@ onMounted(async () => {
         </div>
         <div v-else>
           <h2>
-            {{ reportData.username }}님의 전세가율은 판단보류 등급으로, 분석이
+            {{ reportData.username }}님의 전세가율은
+            <span class="text-secondary">판단보류 등급</span>으로, 분석이
             어려워요.
           </h2>
         </div>
@@ -213,7 +217,8 @@ onMounted(async () => {
       <!-- 등기부등본 -->
       <div class="final-registry-wrap mt-5">
         <h2 class="mb-3">
-          {{ reportData.username }}님의 등기부등본을 분석했어요.
+          {{ reportData.username }}님의
+          <span class="main-color fw-semibold">등기부등본</span>을 분석했어요.
         </h2>
         <div class="final-analysis-card-wrap">
           <AnalysisCards
@@ -231,7 +236,9 @@ onMounted(async () => {
         <div class="final-checklist-inner">
           <div v-if="uncheckedItems.length > 0">
             <h2 class="mb-3">
-              {{ reportData.username }}님이 체크하지 않은 항목이에요.
+              {{ reportData.username }}님이
+              <span class="main-color fw-semibold">체크하지 않은 항목</span
+              >이에요.
             </h2>
             <p class="mb-5">
               향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.
@@ -318,6 +325,10 @@ onMounted(async () => {
   max-width: 960px;
   margin: 0 auto;
   padding: 0 1rem;
+}
+
+.main-color {
+  color: #1a80e5;
 }
 
 @media (max-width: 768px) {

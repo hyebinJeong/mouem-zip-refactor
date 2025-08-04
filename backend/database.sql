@@ -105,7 +105,7 @@ CREATE TABLE final_report (
                               status BOOLEAN NOT NULL DEFAULT TRUE,
                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
                               FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
-                              CONSTRAINT uq_user_registry UNIQUE (user_id, registry_id) -- 중복 데이터 제거
+                              CONSTRAINT uq_user_registry UNIQUE (user_id, registry_id) -- user_id와 registry_id 조합의 중복 저장 방지
 );
 
 -- ============================================

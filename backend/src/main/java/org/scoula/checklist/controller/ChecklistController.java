@@ -23,13 +23,4 @@ public class ChecklistController {
         return "체크리스트 저장 완료";
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getChecklistByUserId(@PathVariable int userId) {
-        try {
-            List<ChecklistDTO> list = checklistService.findByUserId(userId);
-            return ResponseEntity.ok(list);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
 }

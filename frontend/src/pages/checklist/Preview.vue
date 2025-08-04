@@ -19,12 +19,17 @@
           <tr
               v-for="(item, index) in properties"
               :key="index"
-              @click="handleRowClick(item)"
-              class="clickable-row"
+              @click="!isExpired(item) && handleRowClick(item)"
+              :class="{ 'clickable-row': !isExpired(item), 'disabled-row': isExpired(item) }"
           >
-            <td>{{ item.registryName }}</td>
+          <td>{{ item.registryName }}</td>
             <td>{{ item.createdAt }}</td>
-            <td class="expires-text">{{ item.expiresIn }}</td>
+            <td
+                class="expires-text"
+                :style="{ color: isExpired(item) ? '#999' : '#1a80e5' }"
+            >
+              {{ item.expiresIn }}
+            </td>
           </tr>
           </tbody>
         </table>
@@ -74,7 +79,7 @@ onMounted(async () => {
         registryId: item.registryId,
         registryName: item.registryName,
         createdAt: createdDate.toLocaleDateString('ko-KR'),
-        expiresIn: remainingDays > 0 ? `${remainingDays}일 후에 만료됩니다.` : '',
+        expiresIn: remainingDays > 0 ? `${remainingDays}일 후에 만료됩니다.` : '만료되었습니다.',
         userId: userId,
       };
     });
@@ -96,6 +101,11 @@ function handleRowClick(item) {
     },
   });
 }
+
+function isExpired(item) {
+  return item.expiresIn === '만료되었습니다.';
+}
+
 </script>
 
 <style scoped>
@@ -187,6 +197,15 @@ function handleRowClick(item) {
 .expires-text {
   color: #1a80e5; /* 파란색 */
   font-weight: 500;
+}
+.disabled-row {
+  color: #999;
+  background-color: #ffffff;
+  cursor: not-allowed;
+}
+
+.disabled-row:hover {
+  background-color: #ffffff !important;
 }
 
 </style>

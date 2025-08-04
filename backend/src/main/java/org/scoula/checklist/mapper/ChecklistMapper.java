@@ -13,7 +13,4 @@ public interface ChecklistMapper {
                          @Param("userId") int userId,
                          @Param("checkedJson") String checkedJson,
                          @Param("checklistRating") String checklistRating);
-
-    List<ChecklistDTO> findByUserId(@Param("userId") int userId);
-
 }

@@ -90,20 +90,52 @@ public class LeaseDiagnosisController {
         double jeonseRate = ((double) jeonse / averageDealPrice) * 100; // 전세가율
         int roundedJeonseRate = (int) Math.round(jeonseRate);           // 전세가율 반올림하여 정수 처리
 
-        // 8. KOSIS에서 시/구 기준 전세가율 조회
-        String objL2 = KosisRegionDistrictCode.findBySiDoAndSgg(addressInfo.getSiNm(), addressInfo.getSggNm())
-                .map(code -> code.getCode()) // 구 단위 지역 코드가 있으면 사용
-                .orElseGet(() ->
-                        KosisRegionCode.findCodeFromRawRegionName(addressInfo.getSiNm())
-                                .orElse(null) // 없으면 시도 단위 코드 사용
-                );
+        // 8. KOSIS 지역 코드 조회: 구 → 시 fallback 구조
+        Optional<String> guCodeOpt = KosisRegionDistrictCode.findBySiDoAndSgg(addressInfo.getSiNm(), addressInfo.getSggNm())
+                .map(KosisRegionDistrictCode::getCode);
 
-        if (objL2 == null) {
-            return ResponseEntity.badRequest().body("해당 지역의 KOSIS 지역 코드를 찾을 수 없습니다.");
+        Optional<String> siCodeOpt = KosisRegionCode.findCodeFromRawRegionName(addressInfo.getSiNm());
+
+        List<Map<String, Object>> kosisData = Collections.emptyList();
+
+        // 8-1. 구 단위 코드 먼저 시도
+        if (guCodeOpt.isPresent()) {
+            kosisData = kosisJeonseRateService.fetchKosisData(averageDealPriceOpt, guCodeOpt.get());
         }
 
-        // 9. KOSIS에서 해당 지역 평균 전세가율 조회
-        List<Map<String, Object>> kosisData = kosisJeonseRateService.fetchKosisData(averageDealPriceOpt, objL2);
+        // 8-2. 구 코드 결과가 없으면 시도 단위로 fallback
+        if ((kosisData == null || kosisData.isEmpty()) && siCodeOpt.isPresent()) {
+            kosisData = kosisJeonseRateService.fetchKosisData(averageDealPriceOpt, siCodeOpt.get());
+        }
+
+        // 8-3. 둘 다 없으면 판단보류 처리
+        if (kosisData == null || kosisData.isEmpty()) {
+            SafetyGrade grade = SafetyGrade.판단보류;
+
+            JeonseAnalysisVO vo = new JeonseAnalysisVO();
+            vo.setRegistryId(registerId);
+            vo.setUserId(request.getUserId());
+            vo.setExpectedSellingPrice(averageDealPrice);
+            vo.setDeposit(jeonse);
+            vo.setJeonseRatio(roundedJeonseRate);
+            vo.setRegionAvgJeonseRatio(-1);
+            vo.setJeonseRatioRating(grade);
+            jeonseAnalysisMapper.insertJeonseAnalysis(vo);
+
+            return ResponseEntity.ok(Map.of(
+                    "status", "NO_KOSIS_DATA",
+                    "message", "KOSIS 통계 데이터를 찾을 수 없습니다.",
+                    "grade", grade.name(),
+                    "jeonsePrice", jeonse,
+                    "expectedSalePrice", averageDealPrice,
+                    "jeonseRate", roundedJeonseRate,
+                    "avgKosisRate", -1,
+                    "deviation", -1,
+                    "admCd", addressInfo.getAdmCd(),
+                    "jibunAddr", addressInfo.getJibunAddr()
+            ));
+        }
+
 
         double avgKosisRate = kosisData.stream()
                 .map(m -> Double.parseDouble(m.get("DT").toString()))

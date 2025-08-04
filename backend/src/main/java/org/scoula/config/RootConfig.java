@@ -30,6 +30,8 @@ import javax.sql.DataSource;
         "org.scoula.checklist.mapper",
         "org.scoula.jeonseRate.mapper",
         "org.scoula.categorymanager.mapper",
+        "org.scoula.termmanager.mapper",
+        "org.scoula.specialcontractmanager.mapper",
         "org.scoula.contract.mapper",
         "org.scoula.specialclause.mapper",
         "org.scoula.finalreport.mapper"

@@ -12,7 +12,7 @@
 
     <!-- 검색창 -->
     <div class="mb-3 d-flex justify-content-end">
-      <div class="input-group" style="width: 25%">
+      <div class="input-group" style="width: 35%">
         <input
           type="text"
           class="form-control rounded-pill"
@@ -34,18 +34,18 @@
       <tbody>
         <tr
           v-for="term in paginatedTerms"
-          :key="term.term_id"
-          @click="goToEdit(term.term_id)"
+          :key="term.termId"
+          @click="goToEdit(term.termId)"
           style="cursor: pointer"
         >
-          <td>{{ term.term_name }}</td>
-          <td>{{ truncateText(term.term_define, 30) }}</td>
+          <td>{{ term.termName }}</td>
+          <td>{{ truncateText(term.termDefine, 30) }}</td>
           <td>
             <span
               class="badge"
-              :style="{ backgroundColor: term.category_color, color: '#000' }"
+              :style="{ backgroundColor: term.categoryColor, color: '#000' }"
             >
-              {{ term.category_name }}
+              {{ term.categoryName }}
             </span>
           </td>
         </tr>
@@ -97,66 +97,29 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useTermStore } from '@/stores/termStore';
 
 const router = useRouter();
 const search = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 15;
 
-const terms = ref([
-  {
-    term_id: 1,
-    term_name: '가압류/가처분',
-    term_define: '상대방 재산을 미리 묶어두는 조치에요.',
-    category_name: '전세계약과 금융관련',
-    category_color: '#B7FFAC',
-  },
-  {
-    term_id: 2,
-    term_name: '임차권',
-    term_define: '임차인이 집을 일정 기간 점유할 수 있는 권리에요.',
-    category_name: '전세 권리 보호',
-    category_color: '#9FE4FF',
-  },
-  {
-    term_id: 3,
-    term_name: '전입신고',
-    term_define: '임차인이 실제 거주함을 신고하는 절차입니다.',
-    category_name: '전세 계약 기간 및 갱신',
-    category_color: '#E5E4FD',
-  },
-  {
-    term_id: 4,
-    term_name: '확정일자',
-    term_define: '계약서 날짜를 법적으로 인정받기 위한 절차입니다.',
-    category_name: '전세 계약 기간 및 갱신',
-    category_color: '#F9FFC1',
-  },
-  {
-    term_id: 5,
-    term_name: '우선변제권',
-    term_define: '보증금을 우선적으로 돌려받을 수 있는 권리입니다.',
-    category_name: '전세 권리 보호',
-    category_color: '#DDF1FC',
-  },
-  {
-    term_id: 6,
-    term_name: '중개사 보장',
-    term_define: '중개사가 책임지고 계약을 보장하는 제도입니다.',
-    category_name: '전세 권리 보호',
-    category_color: '#FDE2E2',
-  },
-]);
+const termStore = useTermStore();
 
-const filteredTerms = computed(() =>
-  terms.value.filter(
+onMounted(() => {
+  termStore.fetchTerms();
+});
+
+const filteredTerms = computed(() => {
+  const terms = Array.isArray(termStore.terms) ? termStore.terms : [];
+  return terms.filter(
     (term) =>
-      term.term_name.includes(search.value) ||
-      term.term_define.includes(search.value)
-  )
-);
+      term.termName?.includes(search.value) ||
+      term.termDefine?.includes(search.value)
+  );
+});
 
 const totalPages = computed(() =>
   Math.ceil(filteredTerms.value.length / itemsPerPage)
@@ -168,6 +131,7 @@ const paginatedTerms = computed(() => {
 });
 
 const truncateText = (text, maxLength) => {
+  if (!text) return '';
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 };
 

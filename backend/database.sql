@@ -102,9 +102,10 @@ CREATE TABLE final_report (
                               user_id INT,
                               registry_id INT,
                               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                              status BOOLEAN NOT NULL,
+                              status BOOLEAN NOT NULL DEFAULT TRUE,
                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-                              FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE
+                              FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
+                              CONSTRAINT uq_user_registry UNIQUE (user_id, registry_id) -- 중복 데이터 제거
 );
 
 -- ============================================
@@ -298,6 +299,3 @@ INSERT INTO term (term_name, term_define, term_example, term_caution, category_i
                                                                                         '계약갱신요구권을 행사해 2년 연장했습니다.',
                                                                                         '계약갱신요구권 행사는 기한(6개월~2개월 전)을 지켜야 하며, 거절 사유가 있는 경우 예외가 발생할 수 있습니다.', 4);
 
--- final_table status 기본값 true 설정
-ALTER TABLE final_report
-    MODIFY COLUMN status BOOLEAN NOT NULL DEFAULT TRUE;

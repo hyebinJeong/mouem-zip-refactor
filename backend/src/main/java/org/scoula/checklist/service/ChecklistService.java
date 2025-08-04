@@ -6,7 +6,4 @@ import java.util.List;
 
 public interface ChecklistService {
     void saveChecklist(ChecklistDTO dto);
-
-    List<ChecklistDTO> findByUserId(int userId);
-
 }

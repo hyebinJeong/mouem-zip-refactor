@@ -38,6 +38,9 @@ const mergedSpecialTerms = ref([]);
 const showModal = ref(true);
 const closeModal = () => (showModal.value = false);
 
+// ✅ PDF 로딩 상태
+const isLoadingPDF = ref(false);
+
 onMounted(async () => {
   try {
     const contractId = route.params.id || route.query.id;
@@ -81,15 +84,18 @@ onMounted(async () => {
   }
 });
 
-function downloadPDF() {
+async function downloadPDF() {
   const pdfArea = document.getElementById('pdf-area');
   if (!pdfArea) return;
+
+  isLoadingPDF.value = true; // ✅ 로딩 시작
 
   // PDF 제외 요소 숨김
   const excludes = document.querySelectorAll('.exclude-pdf');
   excludes.forEach((el) => (el.style.visibility = 'hidden'));
 
-  html2canvas(pdfArea, { scale: 2 }).then((canvas) => {
+  try {
+    const canvas = await html2canvas(pdfArea, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
 
@@ -114,15 +120,28 @@ function downloadPDF() {
     }
 
     pdf.save(`${contract.value.contractName || '계약서'}.pdf`);
-
+  } catch (e) {
+    console.error('PDF 생성 오류:', e);
+  } finally {
     // 캡처 후 다시 보이게
     excludes.forEach((el) => (el.style.visibility = 'visible'));
-  });
+    isLoadingPDF.value = false; // ✅ 로딩 종료
+  }
 }
 </script>
 
 <template>
   <div class="page-wrapper">
+    <!-- ✅ PDF 생성 중일 때 로딩 오버레이 -->
+    <div
+      v-if="isLoadingPDF"
+      class="loading-overlay d-flex justify-content-center align-items-center"
+    >
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
     <div class="container" id="pdf-area">
       <div class="title-with-button">
         <h2 class="property-title">
@@ -133,8 +152,9 @@ function downloadPDF() {
           v-if="route.query.from === 'myPage'"
           class="btn-download exclude-pdf"
           @click="downloadPDF"
+          :disabled="isLoadingPDF"
         >
-          다운로드
+          {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
         </button>
       </div>
 
@@ -247,7 +267,17 @@ function downloadPDF() {
 </template>
 
 <style scoped>
-/* 스타일은 기존 그대로 사용 가능 */
+/* ✅ 로딩 오버레이 스타일 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 3000;
+}
+
 .page-wrapper {
   display: flex;
   justify-content: center;

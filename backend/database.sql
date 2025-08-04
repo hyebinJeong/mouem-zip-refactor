@@ -64,7 +64,7 @@ CREATE TABLE registry_analysis (
                                    analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
                                    status BOOLEAN NOT NULL DEFAULT TRUE,
                                    file_name VARCHAR(100) NOT NULL,
-                                   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                                   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- ============================================
@@ -78,8 +78,8 @@ CREATE TABLE jeonse_analysis (
                                  jeonse_ratio DECIMAL(5,2) NOT NULL,        -- 전세가율
                                  region_avg_jeonse_ratio DECIMAL(5,2) NOT NULL, -- 지역 평균 전세가율
                                  jeonse_ratio_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
-                                 FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
-                                 FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                                 FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id),
+                                 FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- ============================================
@@ -90,8 +90,8 @@ CREATE TABLE checklist (
                            user_id INT,
                            checked TEXT NOT NULL,               -- 체크 여부 전체 JSON으로 저장
                            checklist_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
-                           FOREIGN KEY (user_id) REFERENCES users(user_id)  ON DELETE CASCADE,
-                           FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE
+                           FOREIGN KEY (user_id) REFERENCES users(user_id),
+                           FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id)
 );
 
 -- ============================================
@@ -103,8 +103,8 @@ CREATE TABLE final_report (
                               registry_id INT,
                               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                               status BOOLEAN NOT NULL DEFAULT TRUE,
-                              FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-                              FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
+                              FOREIGN KEY (user_id) REFERENCES users(user_id),
+                              FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id),
                               CONSTRAINT uq_user_registry UNIQUE (user_id, registry_id) -- user_id와 registry_id 조합의 중복 저장 방지
 );
 
@@ -131,7 +131,7 @@ CREATE TABLE contract (
                           lease_start DATE NOT NULL,                 -- 임대 시작일
                           lease_end DATE NOT NULL,                   -- 임대 종료일
                           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,                  -- 생성일
-                          FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                          FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- ============================================
@@ -152,8 +152,8 @@ CREATE TABLE contract_special_clause (
                                          contract_id INT,                  -- 계약서 번호
                                          special_clause_id INT,            -- 특약번호
                                          PRIMARY KEY (contract_id, special_clause_id),
-                                         FOREIGN KEY (contract_id) REFERENCES contract(contract_id) ON DELETE CASCADE,
-                                         FOREIGN KEY (special_clause_id) REFERENCES special_clause(special_clause_id) ON DELETE CASCADE
+                                         FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
+                                         FOREIGN KEY (special_clause_id) REFERENCES special_clause(special_clause_id)
 );
 
 -- ============================================
@@ -176,20 +176,8 @@ CREATE TABLE term(
                      term_define VARCHAR(255) NOT NULL,             -- 용어 정의
                      term_example VARCHAR(255) NOT NULL,            -- 용어예시
                      term_caution VARCHAR(255) NOT NULL,            -- 용어 주의
-                     FOREIGN KEY (category_id) REFERENCES category(category_id) ON DELETE CASCADE
+                     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
-
-# -- ============================================
-# -- 11. 등기부등본 PDF 저장
-# -- ============================================
-# CREATE TABLE register_pdf (
-#                               pdf_id INT PRIMARY KEY AUTO_INCREMENT,        -- pdf번호
-#                               user_id INT,                         -- 유저번호
-#                               file_name VARCHAR(255) NOT NULL,              -- 파일이름
-#                               file_url VARCHAR(255) NOT NULL,               -- 파일url
-#                               upload_date DATE NOT NULL,                    -- 업로드 시간
-#                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-# );
 
 -- 테스트용 코드
 # 카테고리

@@ -132,7 +132,7 @@ CREATE TABLE contract (
                           lease_end DATE NOT NULL,                    -- 임대 종료일
                           special_clauses JSON NOT NULL,              -- 특약 전체 (배열/JSON으로 저장)
                           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                          FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                          FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 # ============================================
 # 7. 특약

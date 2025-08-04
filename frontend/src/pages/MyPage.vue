@@ -60,7 +60,10 @@ onMounted(async () => {
             const diffMs = expireDate - today;
             const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-            remainingDays = diffDays > 0 ? `${diffDays}일 남음` : '만료됨';
+            remainingDays =
+              diffDays > 0
+                ? `${diffDays}일 후에 만료됩니다.`
+                : '만료되었습니다.';
           }
 
           return {

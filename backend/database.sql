@@ -112,31 +112,30 @@ CREATE TABLE final_report (
 -- 6. 계약서 작성 테이블
 -- ============================================
 CREATE TABLE contract (
-                          contract_id INT AUTO_INCREMENT PRIMARY KEY, -- 계약서 번호 (PK)
-                          user_id INT,                      -- 유저 ID (FK)
-                          contract_name VARCHAR(100) NOT NULL,       -- 계약서 이름
-                          lessor_name VARCHAR(20) NOT NULL,          -- 임대인 성명
-                          lessee_name VARCHAR(20) NOT NULL,          -- 임차인 성명
-                          address VARCHAR(255) NOT NULL,             -- 소재지
-                          land_category VARCHAR(100) NOT NULL,       -- 토지 지목
-                          land_area DECIMAL(10,2) NOT NULL,          -- 토지 면적
-                          building_usage VARCHAR(100) NOT NULL,      -- 건물 구조/용도
-                          building_area DECIMAL(10,2) NOT NULL,      -- 건물 면적
-                          leased_part VARCHAR(100) NOT NULL,         -- 임차한 부분
-                          leased_area DECIMAL(10,2) NOT NULL,        -- 임차한 면적
-                          deposit BIGINT NOT NULL,                   -- 보증금
-                          down_payment BIGINT NOT NULL,              -- 계약금
-                          balance BIGINT NOT NULL,                   -- 잔금
-                          maintenance_cost INT NOT NULL,             -- 관리비
-                          lease_start DATE NOT NULL,                 -- 임대 시작일
-                          lease_end DATE NOT NULL,                   -- 임대 종료일
-                          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,                  -- 생성일
-                          FOREIGN KEY (user_id) REFERENCES users(user_id)
+                          user_id INT,                                -- 유저 ID (FK)
+                          contract_name VARCHAR(100) NOT NULL,        -- 계약서 이름
+                          lessor_name VARCHAR(20) NOT NULL,           -- 임대인 성명
+                          lessee_name VARCHAR(20) NOT NULL,           -- 임차인 성명
+                          address VARCHAR(255) NOT NULL,              -- 소재지
+                          land_category VARCHAR(100) NOT NULL,        -- 토지 지목
+                          land_area DECIMAL(10,2) NOT NULL,           -- 토지 면적
+                          building_usage VARCHAR(100) NOT NULL,       -- 건물 구조/용도
+                          building_area DECIMAL(10,2) NOT NULL,       -- 건물 면적
+                          leased_part VARCHAR(100) NOT NULL,          -- 임차한 부분
+                          leased_area DECIMAL(10,2) NOT NULL,         -- 임차한 면적
+                          deposit BIGINT NOT NULL,                    -- 보증금
+                          down_payment BIGINT NOT NULL,               -- 계약금
+                          balance BIGINT NOT NULL,                    -- 잔금
+                          maintenance_cost INT NOT NULL,              -- 관리비
+                          lease_start DATE NOT NULL,                  -- 임대 시작일
+                          lease_end DATE NOT NULL,                    -- 임대 종료일
+                          special_clauses JSON NOT NULL,              -- 특약 전체 (배열/JSON으로 저장)
+                          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                          FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
-
--- ============================================
--- 7. 특약
--- ============================================
+# ============================================
+# 7. 특약
+# ============================================
 CREATE TABLE special_clause (
                                 special_clause_id INT PRIMARY KEY AUTO_INCREMENT,  -- 특약번호(pk)
                                 category VARCHAR(50) NOT NULL,                     -- 특약분류

@@ -1,11 +1,14 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 
 const router = useRouter();
+const auth = useAuthStore();
 
-const contractName = ref(''); // ✅ 계약서 이름
+// 폼 데이터
+const contractName = ref('');
 const lessor = ref('');
 const lessee = ref('');
 const address = ref('');
@@ -23,9 +26,10 @@ const buildingArea = ref('');
 const leasePart = ref('');
 const leaseArea = ref('');
 
+// 세션스토리지 저장/복원
 function saveContractToSession() {
   const contractData = {
-    contractName: contractName.value, // ✅ 저장
+    contractName: contractName.value,
     lessor: lessor.value,
     lessee: lessee.value,
     address: address.value,
@@ -46,6 +50,7 @@ function saveContractToSession() {
   sessionStorage.setItem('contractData', JSON.stringify(contractData));
 }
 
+// 새로고침 감지
 const isHardReload = () => {
   const navType = performance.getEntriesByType('navigation')[0]?.type;
   return navType === 'reload' || navType === 'navigate';
@@ -56,6 +61,7 @@ onMounted(() => {
   const contractData = sessionStorage.getItem('contractData');
 
   if (isHardReload() && !fromSpecialPage) {
+    // 초기화
     contractName.value = '';
     lessor.value = '';
     lessee.value = '';
@@ -73,7 +79,6 @@ onMounted(() => {
     buildingArea.value = '';
     leasePart.value = '';
     leaseArea.value = '';
-
     sessionStorage.removeItem('contractData');
     sessionStorage.removeItem('selectedClauses');
   } else if (contractData) {
@@ -100,6 +105,7 @@ onMounted(() => {
     leaseArea.value = data.leaseArea || '';
   }
 
+  // 특약 선택 합치기
   const selected = JSON.parse(
     sessionStorage.getItem('selectedClauses') || '[]'
   );
@@ -113,6 +119,7 @@ onMounted(() => {
   sessionStorage.removeItem('fromSpecialPage');
 });
 
+// 입력 감시해서 세션에 저장
 watch(
   [
     contractName,
@@ -137,18 +144,16 @@ watch(
   { deep: true }
 );
 
-const addSpecialTerm = () => {
-  special.value.push('');
-};
+// 특약 입력 제어
+const addSpecialTerm = () => special.value.push('');
 const removeSpecialTerm = (index) => {
-  if (special.value.length > 1) {
-    special.value.splice(index, 1);
-  } else {
-    special.value = [''];
-  }
+  if (special.value.length > 1) special.value.splice(index, 1);
+  else special.value = [''];
 };
 
+// ✅ 제출 로직
 const onSubmit = async () => {
+  // 필수 입력 검증
   const requiredFields = [
     contractName.value,
     lessor.value,
@@ -167,12 +172,12 @@ const onSubmit = async () => {
     leasePart.value,
     leaseArea.value,
   ];
-
   if (requiredFields.some((field) => !field || field.trim() === '')) {
     alert('모든 필수 항목을 입력해주세요.');
     return;
   }
 
+  // 특약 최소 1개
   const validSpecials = special.value.filter(
     (term) => term && term.trim() !== ''
   );
@@ -182,23 +187,8 @@ const onSubmit = async () => {
   }
 
   try {
-    const selected = JSON.parse(
-      sessionStorage.getItem('selectedClauses') || '[]'
-    );
-
-    const specialClauseIds = selected
-      .map((clause) => clause.id)
-      .filter((id) => id !== null && id !== undefined);
-
-    const writtenClauses = special.value.filter(
-      (term) =>
-        term &&
-        term.trim() !== '' &&
-        !selected.some((clause) => clause.text === term)
-    );
-
+    // ✅ 백엔드 DTO와 맞춘 payload
     const payload = {
-      userId: 1, // 임시
       contractName: contractName.value,
       lessorName: lessor.value,
       lesseeName: lessee.value,
@@ -215,22 +205,28 @@ const onSubmit = async () => {
       maintenanceCost: parseInt(maintenanceFee.value),
       leaseStart: startDate.value,
       leaseEnd: endDate.value,
-      specialClauseIds: specialClauseIds,
-      specialClauseTexts: writtenClauses,
+      specialClauses: validSpecials, // ✅ JSON 배열
     };
 
-    await axios.post('/api/contract', payload);
+    const res = await axios.post('/api/contract', payload, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+
     alert('계약서가 저장되었습니다.');
+    const contractId = res.data; // 백엔드에서 생성된 contractId 반환
+    router.push({
+      name: 'ReferenceContractSuccess',
+      query: { id: contractId, from: 'list' },
+    });
   } catch (err) {
     console.error('계약서 저장 중 오류 발생:', err);
     alert('저장에 실패했습니다.');
   }
 
-  // 기존 동작은 그대로 유지
   saveContractToSession();
-  router.push({ name: 'ReferenceContractSuccess' });
 };
 
+// 특약 예시 페이지 이동
 const goToSpecialPage = () => {
   sessionStorage.setItem('fromSpecialPage', 'true');
   router.push({ name: 'SpecialContractsRecommendation' });

@@ -10,5 +10,4 @@ public interface ContractMapper {
     void insertContract(ContractDTO contract);
     List<ContractDTO> selectContractsByUserId(int userId);
     ContractDTO selectContractById(int contractId);
-    List<String> selectSpecialClausesByContractId(int contractId);
 }

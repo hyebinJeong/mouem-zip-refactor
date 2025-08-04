@@ -65,7 +65,7 @@ const props = defineProps({
 @media (max-width: 768px) {
   .donut-wrap {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1rem 1rem;
   }
 }
 </style>

@@ -54,13 +54,23 @@ const gradeList = [
   <div
     v-if="show"
     class="DiagnosisModalPage d-flex justify-content-center align-items-center bg-dark bg-opacity-50 position-fixed top-0 start-0 w-100"
+    id="diagnosis-grade-info-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    aria-describedby="modal-desc"
   >
     <div
       class="diagnosis-box bg-white rounded-4 shadow-sm p-4 d-flex flex-column"
     >
-      <h1 class="fs-4 fw-bold text-center mb-3 my-2">진단 등급 판정 기준</h1>
+      <h1 class="fs-4 fw-bold text-center mb-3 my-2" id="modal-title">
+        진단 등급 판정 기준
+      </h1>
 
-      <div class="diagnosis-content flex-grow-1 overflow-auto px-1 py-2">
+      <div
+        class="diagnosis-content flex-grow-1 overflow-auto px-1 py-2"
+        id="modal-desc"
+      >
         <div
           v-for="(grade, index) in gradeList"
           :key="index"

@@ -289,6 +289,9 @@ INSERT INTO term (term_name, term_define, term_example, term_caution, category_i
 
 
 
+
+
+
 -- 특약 예시 데이터
 INSERT INTO special_clause (category, importance, importance_color, description) VALUES
 -- 중요 (빨강)

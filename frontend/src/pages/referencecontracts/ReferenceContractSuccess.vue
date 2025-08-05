@@ -35,8 +35,8 @@ const contract = ref({
 const mergedSpecialTerms = ref([]);
 
 // ✅ 모달 상태
-const showModal = ref(true);
-const closeModal = () => (showModal.value = false);
+//const showModal = ref(true);
+//const closeModal = () => (showModal.value = false);
 
 // ✅ PDF 로딩 상태
 const isLoadingPDF = ref(false);
@@ -283,7 +283,7 @@ async function downloadPDF() {
       </div>
     </div>
 
-    <!-- ✅ 모달 -->
+    <!-- ✅ 모달 
     <div v-if="showModal" class="modal-overlay exclude-pdf">
       <div class="modal-content">
         <h2>📌 계약서 자동 삭제 안내</h2>
@@ -293,7 +293,7 @@ async function downloadPDF() {
         </p>
         <button class="close-btn" @click="closeModal">확인</button>
       </div>
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -377,7 +377,7 @@ async function downloadPDF() {
   line-height: 1.6;
   margin-bottom: 10px;
 }
-/* 모달 스타일 */
+/* 모달 스타일 
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -398,7 +398,7 @@ async function downloadPDF() {
   width: 90%;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
+}*/
 .close-btn {
   background: #2563eb;
   color: white;

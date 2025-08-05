@@ -54,29 +54,28 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSpecialContractsStore } from '@/stores/specialContractsStore';
 
-const store = useSpecialContractsStore();
 const router = useRouter();
+const store = useSpecialContractsStore();
 
 const category = ref('');
 const importance = ref('');
 const description = ref('');
-const importance_color = ref('');
 
-// 중요도 → 색상 코드 매핑
+// 중요도에 따른 색상 코드 매핑
 const importanceColorMap = {
   높음: '#FF0000',
   중간: '#FFA500',
   낮음: '#00FF00',
 };
 
-// 중요도 값이 바뀔때, 중요도 색상 자동 설정
-watch(importance, (newVal) => {
-  importance_color.value = importanceColorMap[newVal] || '';
-});
+// computed로 색상 코드 계산
+const importanceColor = computed(
+  () => importanceColorMap[importance.value] || ''
+);
 
 const goBack = () => {
   router.back();
@@ -88,16 +87,20 @@ const submitForm = async () => {
     return;
   }
 
-  const importance_color = importanceColorMap[importance.value];
-  console.log('importance_color:', importance_color);
-
-  await store.addContract({
+  const newContract = {
     category: category.value,
     importance: importance.value,
-    importance_color: importance_color.value,
+    importanceColor: importanceColor.value, // 카멜케이스 적용
     description: description.value,
-  });
+  };
 
-  router.push('/category/special');
+  try {
+    console.log('제출할 데이터:', newContract);
+    await store.addContract(newContract);
+    router.push('/category/special');
+  } catch (error) {
+    console.error('특약사항 추가 실패:', error);
+    alert('특약사항 추가 중 오류가 발생했습니다.');
+  }
 };
 </script>

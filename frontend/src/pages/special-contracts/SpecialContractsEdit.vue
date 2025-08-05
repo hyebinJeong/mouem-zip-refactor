@@ -56,13 +56,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useSpecialContractsStore } from '@/stores/specialContractsStore';
 
-const store = useSpecialContractsStore();
+const props = defineProps(['id']);  // 라우터에서 props로 받음
 const router = useRouter();
-const route = useRoute();
+const store = useSpecialContractsStore();
 
 const category = ref('');
 const importance = ref('');
@@ -74,47 +74,46 @@ const importanceColorMap = {
   낮음: '#00FF00',
 };
 
-// ID는 라우트 params에서 받음
-const id = route.params.id;
+const importanceColor = computed(() => importanceColorMap[importance.value] || '');
 
-const goBack = () => {
-  router.back();
-};
+const goBack = () => router.back();
 
 const submitForm = async () => {
   if (!category.value || !importance.value || !description.value) {
     alert('모든 항목을 입력해주세요.');
     return;
   }
-
-  const importance_color = importanceColorMap[importance.value] || '#000000';
-
-  await store.updateContract(id, {
+  await store.updateContract(props.id, {
     category: category.value,
     importance: importance.value,
-    importance_color,
+    importanceColor: importanceColor.value,
     description: description.value,
   });
-
-  router.push('/category/special'); // 수정 후 목록으로 이동
+  router.push('/category/special');
 };
 
 const deleteContract = async () => {
   if (confirm('정말 삭제하시겠습니까?')) {
-    await store.deleteContract(id);
+    await store.deleteContract(props.id);
     router.push('/category/special');
   }
 };
 
 onMounted(async () => {
-  const contract = await store.fetchContractById(id);
+  if (!props.id) {
+    alert('잘못된 접근입니다. ID가 없습니다.');
+    router.back();
+    return;
+  }
+  const contract = await store.fetchContractById(props.id);
   if (contract) {
-    category.value = contract.category;
-    importance.value = contract.importance;
-    description.value = contract.description;
+    category.value = contract.category_name || '';
+    importance.value = contract.importance_level || '';
+    description.value = contract.description_text || '';
   } else {
     alert('특약사항 데이터를 불러오지 못했습니다.');
     router.back();
   }
 });
 </script>
+

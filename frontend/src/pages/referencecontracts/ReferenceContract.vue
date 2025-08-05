@@ -268,7 +268,7 @@ const goToSpecialPage = () => {
           <div class="left-col">
             <div class="form-row">
               <label>임대인(집주인)</label>
-              <input v-model="lessor" type="text" placeholder="성명" />
+              <input v-model="lessor" type="text" placeholder="성명" @input="allowOnlyText($event, lessor)" />
             </div>
             <div class="form-row full">
               <label>소재지</label>
@@ -288,7 +288,7 @@ const goToSpecialPage = () => {
             </div>
             <div class="form-row">
               <label>보증금</label>
-              <input v-model="deposit" type="text" placeholder="원" />
+              <input v-model="deposit" type="text" placeholder="원" @input="allowOnlyNumbers($event, deposit)"/>
             </div>
             <div class="form-row date-range-vertical align-start">
               <label class="align-top">임대차 기간</label>
@@ -308,31 +308,31 @@ const goToSpecialPage = () => {
           <div class="right-col">
             <div class="form-row">
               <label>임차인(세입자)</label>
-              <input v-model="lessee" type="text" placeholder="성명" />
+              <input v-model="lessee" type="text" placeholder="성명" @input="allowOnlyText($event, lessee)" />
             </div>
             <div class="form-row">
               <label>토지 면적</label>
-              <input v-model="landArea" type="text" placeholder="m²" />
+              <input v-model="landArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, landArea)"/>
             </div>
             <div class="form-row">
               <label>건물 면적</label>
-              <input v-model="buildingArea" type="text" placeholder="m²" />
+              <input v-model="buildingArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, buildingArea)"/>
             </div>
             <div class="form-row">
               <label>임차할 면적</label>
-              <input v-model="leaseArea" type="text" placeholder="m²" />
+              <input v-model="leaseArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, leaseArea)"/>
             </div>
             <div class="form-row">
               <label>계약금</label>
-              <input v-model="contractAmount" type="text" placeholder="원" />
+              <input v-model="contractAmount" type="text" placeholder="원" @input="allowOnlyNumbers($event, contractAmount)"/>
             </div>
             <div class="form-row">
               <label>잔금</label>
-              <input v-model="rent" type="text" placeholder="원" />
+              <input v-model="rent" type="text" placeholder="원"  @input="allowOnlyNumbers($event, rent)"/>
             </div>
             <div class="form-row">
               <label>관리비</label>
-              <input v-model="maintenanceFee" type="text" placeholder="원" />
+              <input v-model="maintenanceFee" type="text" placeholder="원" @input="allowOnlyNumbers($event, maintenanceFee)"/>
             </div>
           </div>
         </div>

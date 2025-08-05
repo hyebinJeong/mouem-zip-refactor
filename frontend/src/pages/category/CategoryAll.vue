@@ -62,7 +62,7 @@
 <script setup>
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-// 임시 로그아웃 함수
+// 로그아웃 함수
 const auth = useAuthStore();
 const clientId = '88a530611ac6fa5a18f5747f67b6a359';
 const redirectUri = 'http://localhost:8080/';

@@ -16,7 +16,7 @@
       <div class="mb-3">
         <label class="form-label fw-semibold">특약분류</label>
         <input
-          v-model="type"
+          v-model="category"
           type="text"
           class="form-control"
           placeholder="예: 안전 장치 조항"
@@ -28,7 +28,7 @@
         <select v-model="importance" class="form-select">
           <option disabled value="">중요도 선택</option>
           <option value="높음">높음</option>
-          <option value="보통">보통</option>
+          <option value="중간">중간</option>
           <option value="낮음">낮음</option>
         </select>
       </div>
@@ -54,24 +54,50 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useSpecialContractsStore } from '@/stores/specialContractsStore';
 
+const store = useSpecialContractsStore();
 const router = useRouter();
-const type = ref('');
+
+const category = ref('');
 const importance = ref('');
 const description = ref('');
+const importance_color = ref('');
+
+// 중요도 → 색상 코드 매핑
+const importanceColorMap = {
+  높음: '#FF0000',
+  중간: '#FFA500',
+  낮음: '#00FF00',
+};
+
+// 중요도 값이 바뀔때, 중요도 색상 자동 설정
+watch(importance, (newVal) => {
+  importance_color.value = importanceColorMap[newVal] || '';
+});
 
 const goBack = () => {
   router.back();
 };
 
-const submitForm = () => {
-  console.log({
-    type: type.value,
+const submitForm = async () => {
+  if (!category.value || !importance.value || !description.value) {
+    alert('모든 항목을 입력해주세요.');
+    return;
+  }
+
+  const importance_color = importanceColorMap[importance.value];
+  console.log('importance_color:', importance_color);
+
+  await store.addContract({
+    category: category.value,
     importance: importance.value,
+    importance_color: importance_color.value,
     description: description.value,
   });
-  goBack();
+
+  router.push('/category/special');
 };
 </script>

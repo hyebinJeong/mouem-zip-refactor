@@ -423,7 +423,21 @@ const goToSpecialPage = () => {
   margin-bottom: 20px;
 }
 .form-row.full {
-  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0px;
+}
+
+
+.form-row.full label {
+  width: 120px;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.form-row.full .long-input {
+  flex: 1;
 }
 
 .half-col.horizontal {
@@ -449,12 +463,17 @@ label {
 
 input[type='text'],
 input[type='date'] {
-  flex-grow: 0;
-  width: 314px;
+  flex-grow: 1;
+  min-width: 0;
+  width: 100%;
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 14px;
+}
+
+.long-input[type='text'] {
+  width: 100%;
 }
 .period-vertical {
   display: flex;
@@ -621,7 +640,66 @@ input[type='date'] {
 .btn-back:hover {
   background-color: #e0e0e0;
 }
-.long-input[type='text'] {
-  width: 800px;
+/* 반응형: 화면이 768px 이하일 때 (태블릿·모바일) */
+@media (max-width: 768px) {
+
+  .form-row.full {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-row.full label {
+    width: auto;
+    margin-bottom: 8px;
+  }
+
+  .form-row.full .long-input {
+    width: 100%;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .half-col.horizontal {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  label {
+    width: auto; /* 라벨 고정폭 제거 */
+    margin-bottom: 8px;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .btn-back, .btn-submit {
+    width: 100%;
+  }
+}
+
+/* 모바일(480px 이하) */
+@media (max-width: 480px) {
+  .contract-box {
+    padding: 30px;
+  }
+
+  .title {
+    font-size: 22px;
+    margin-bottom: 30px;
+  }
+
+  input[type='text'],
+  input[type='date'],
+  textarea {
+    font-size: 13px;
+    padding: 10px;
+  }
 }
 </style>

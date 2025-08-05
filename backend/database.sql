@@ -149,11 +149,11 @@ CREATE TABLE special_clause (
 -- 8. 계약서 작성 특약
 -- ============================================
 # CREATE TABLE contract_special_clause (
-#                                          contract_id INT,                  -- 계약서 번호
-#                                          special_clause_id INT,            -- 특약번호
-#                                          PRIMARY KEY (contract_id, special_clause_id),
-#                                          FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
-#                                          FOREIGN KEY (special_clause_id) REFERENCES special_clause(special_clause_id)
+                                           #                                          contract_id INT,                  -- 계약서 번호
+                                           #                                          special_clause_id INT,            -- 특약번호
+                                           #                                          PRIMARY KEY (contract_id, special_clause_id),
+                                           #                                          FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
+                                           #                                          FOREIGN KEY (special_clause_id) REFERENCES special_clause(special_clause_id)
 # );
 
 -- ============================================

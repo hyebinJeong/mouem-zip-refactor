@@ -146,7 +146,7 @@ onMounted(async () => {
       <!-- 마이페이지에서 들어왔을 때만 버튼 보이게 -->
       <button
         v-if="route.query.from === 'myPage'"
-        class="btn btn-secondary position-absolute top-50 translate-middle-y end-0"
+        class="btn btn-primary position-absolute top-50 translate-middle-y end-0"
         @click="downloadPDF"
         :disabled="isLoadingPDF"
       >

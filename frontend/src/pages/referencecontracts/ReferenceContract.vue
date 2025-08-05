@@ -26,9 +26,10 @@ const buildingArea = ref('');
 const leasePart = ref('');
 const leaseArea = ref('');
 
+// 세션스토리지 저장/복원
 function saveContractToSession() {
   const contractData = {
-    contractName: contractName.value, // ✅ 저장
+    contractName: contractName.value,
     lessor: lessor.value,
     lessee: lessee.value,
     address: address.value,
@@ -49,9 +50,31 @@ function saveContractToSession() {
   sessionStorage.setItem('contractData', JSON.stringify(contractData));
 }
 
+// 새로고침 감지
 const isHardReload = () => {
   const navType = performance.getEntriesByType('navigation')[0]?.type;
   return navType === 'reload' || navType === 'navigate';
+};
+
+//유효성 검사
+const allowOnlyNumbers = (event, modelRef) => {
+  const value = event.target.value;
+  if (/^\d*$/.test(value)) {
+    modelRef.value = value;
+  } else {
+    console.log('유효성에 어긋납니다!');
+    event.target.value = modelRef.value;
+  }
+};
+
+const allowOnlyText = (event, modelRef) => {
+  const value = event.target.value;
+  if (/^[ㄱ-ㅎ가-힣a-zA-Z\s]*$/.test(value)) {
+    modelRef.value = value;
+  } else {
+    console.log('유효성에 어긋납니다!');
+    event.target.value = modelRef.value;
+  }
 };
 
 onMounted(() => {
@@ -59,6 +82,7 @@ onMounted(() => {
   const contractData = sessionStorage.getItem('contractData');
 
   if (isHardReload() && !fromSpecialPage) {
+    // 초기화
     contractName.value = '';
     lessor.value = '';
     lessee.value = '';
@@ -76,7 +100,6 @@ onMounted(() => {
     buildingArea.value = '';
     leasePart.value = '';
     leaseArea.value = '';
-
     sessionStorage.removeItem('contractData');
     sessionStorage.removeItem('selectedClauses');
   } else if (contractData) {
@@ -93,9 +116,9 @@ onMounted(() => {
     startDate.value = data.startDate || '';
     endDate.value = data.endDate || '';
     special.value =
-      Array.isArray(data.special) && data.special.length > 0
-        ? data.special
-        : [''];
+        Array.isArray(data.special) && data.special.length > 0
+            ? data.special
+            : [''];
     landCategory.value = data.landCategory || '';
     landArea.value = data.landArea || '';
     buildingArea.value = data.buildingArea || '';
@@ -103,8 +126,9 @@ onMounted(() => {
     leaseArea.value = data.leaseArea || '';
   }
 
+  // 특약 선택 합치기
   const selected = JSON.parse(
-    sessionStorage.getItem('selectedClauses') || '[]'
+      sessionStorage.getItem('selectedClauses') || '[]'
   );
   const newClauses = selected.map((clause) => clause.text).filter(Boolean);
   newClauses.forEach((clause) => {
@@ -116,42 +140,41 @@ onMounted(() => {
   sessionStorage.removeItem('fromSpecialPage');
 });
 
+// 입력 감시해서 세션에 저장
 watch(
-  [
-    contractName,
-    lessor,
-    lessee,
-    address,
-    contractAmount,
-    deposit,
-    rent,
-    structure,
-    maintenanceFee,
-    startDate,
-    endDate,
-    special,
-    landCategory,
-    landArea,
-    buildingArea,
-    leasePart,
-    leaseArea,
-  ],
-  saveContractToSession,
-  { deep: true }
+    [
+      contractName,
+      lessor,
+      lessee,
+      address,
+      contractAmount,
+      deposit,
+      rent,
+      structure,
+      maintenanceFee,
+      startDate,
+      endDate,
+      special,
+      landCategory,
+      landArea,
+      buildingArea,
+      leasePart,
+      leaseArea,
+    ],
+    saveContractToSession,
+    { deep: true }
 );
 
-const addSpecialTerm = () => {
-  special.value.push('');
-};
+// 특약 입력 제어
+const addSpecialTerm = () => special.value.push('');
 const removeSpecialTerm = (index) => {
-  if (special.value.length > 1) {
-    special.value.splice(index, 1);
-  } else {
-    special.value = [''];
-  }
+  if (special.value.length > 1) special.value.splice(index, 1);
+  else special.value = [''];
 };
 
+// ✅ 제출 로직
 const onSubmit = async () => {
+  // 필수 입력 검증
   const requiredFields = [
     contractName.value,
     lessor.value,
@@ -170,14 +193,14 @@ const onSubmit = async () => {
     leasePart.value,
     leaseArea.value,
   ];
-
   if (requiredFields.some((field) => !field || field.trim() === '')) {
     alert('모든 필수 항목을 입력해주세요.');
     return;
   }
 
+  // 특약 최소 1개
   const validSpecials = special.value.filter(
-    (term) => term && term.trim() !== ''
+      (term) => term && term.trim() !== ''
   );
   if (validSpecials.length === 0) {
     alert('특약사항을 최소 1개 이상 입력하거나 선택해주세요.');
@@ -185,23 +208,8 @@ const onSubmit = async () => {
   }
 
   try {
-    const selected = JSON.parse(
-      sessionStorage.getItem('selectedClauses') || '[]'
-    );
-
-    const specialClauseIds = selected
-      .map((clause) => clause.id)
-      .filter((id) => id !== null && id !== undefined);
-
-    const writtenClauses = special.value.filter(
-      (term) =>
-        term &&
-        term.trim() !== '' &&
-        !selected.some((clause) => clause.text === term)
-    );
-
+    // ✅ 백엔드 DTO와 맞춘 payload
     const payload = {
-      userId: 1, // 임시
       contractName: contractName.value,
       lessorName: lessor.value,
       lesseeName: lessee.value,
@@ -218,22 +226,28 @@ const onSubmit = async () => {
       maintenanceCost: parseInt(maintenanceFee.value),
       leaseStart: startDate.value,
       leaseEnd: endDate.value,
-      specialClauseIds: specialClauseIds,
-      specialClauseTexts: writtenClauses,
+      specialClauses: validSpecials, // ✅ JSON 배열
     };
 
-    await axios.post('/api/contract', payload);
+    const res = await axios.post('/api/contract', payload, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+
     alert('계약서가 저장되었습니다.');
+    const contractId = res.data; // 백엔드에서 생성된 contractId 반환
+    router.push({
+      name: 'ReferenceContractSuccess',
+      query: { id: contractId, from: 'list' },
+    });
   } catch (err) {
     console.error('계약서 저장 중 오류 발생:', err);
     alert('저장에 실패했습니다.');
   }
 
-  // 기존 동작은 그대로 유지
   saveContractToSession();
-  router.push({ name: 'ReferenceContractSuccess' });
 };
 
+// 특약 예시 페이지 이동
 const goToSpecialPage = () => {
   sessionStorage.setItem('fromSpecialPage', 'true');
   router.push({ name: 'SpecialContractsRecommendation' });

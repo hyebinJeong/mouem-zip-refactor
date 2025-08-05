@@ -1,682 +1,479 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const router = useRouter();
+const route = useRoute();
 const auth = useAuthStore();
 
-// 폼 데이터
-const contractName = ref('');
-const lessor = ref('');
-const lessee = ref('');
-const address = ref('');
-const contractAmount = ref('');
-const deposit = ref('');
-const rent = ref('');
-const structure = ref('');
-const maintenanceFee = ref('');
-const startDate = ref('');
-const endDate = ref('');
-const special = ref(['']);
-const landCategory = ref('');
-const landArea = ref('');
-const buildingArea = ref('');
-const leasePart = ref('');
-const leaseArea = ref('');
-
-// 세션스토리지 저장/복원
-function saveContractToSession() {
-  const contractData = {
-    contractName: contractName.value,
-    lessor: lessor.value,
-    lessee: lessee.value,
-    address: address.value,
-    contractAmount: contractAmount.value,
-    deposit: deposit.value,
-    rent: rent.value,
-    structure: structure.value,
-    maintenanceFee: maintenanceFee.value,
-    startDate: startDate.value,
-    endDate: endDate.value,
-    special: special.value,
-    landCategory: landCategory.value,
-    landArea: landArea.value,
-    buildingArea: buildingArea.value,
-    leasePart: leasePart.value,
-    leaseArea: leaseArea.value,
-  };
-  sessionStorage.setItem('contractData', JSON.stringify(contractData));
-}
-
-// 새로고침 감지
-const isHardReload = () => {
-  const navType = performance.getEntriesByType('navigation')[0]?.type;
-  return navType === 'reload' || navType === 'navigate';
-};
-
-//유효성 검사
-const allowOnlyNumbers = (event, modelRef) => {
-  const value = event.target.value;
-  if (/^\d*$/.test(value)) {
-    modelRef.value = value;
-  } else {
-    console.log('유효성에 어긋납니다!');
-    event.target.value = modelRef.value;
-  }
-};
-
-const allowOnlyText = (event, modelRef) => {
-  const value = event.target.value;
-  if (/^[ㄱ-ㅎ가-힣a-zA-Z\s]*$/.test(value)) {
-    modelRef.value = value;
-  } else {
-    console.log('유효성에 어긋납니다!');
-    event.target.value = modelRef.value;
-  }
-};
-
-onMounted(() => {
-  const fromSpecialPage = sessionStorage.getItem('fromSpecialPage') === 'true';
-  const contractData = sessionStorage.getItem('contractData');
-
-  if (isHardReload() && !fromSpecialPage) {
-    // 초기화
-    contractName.value = '';
-    lessor.value = '';
-    lessee.value = '';
-    address.value = '';
-    contractAmount.value = '';
-    deposit.value = '';
-    rent.value = '';
-    structure.value = '';
-    maintenanceFee.value = '';
-    startDate.value = '';
-    endDate.value = '';
-    special.value = [''];
-    landCategory.value = '';
-    landArea.value = '';
-    buildingArea.value = '';
-    leasePart.value = '';
-    leaseArea.value = '';
-    sessionStorage.removeItem('contractData');
-    sessionStorage.removeItem('selectedClauses');
-  } else if (contractData) {
-    const data = JSON.parse(contractData);
-    contractName.value = data.contractName || '';
-    lessor.value = data.lessor || '';
-    lessee.value = data.lessee || '';
-    address.value = data.address || '';
-    contractAmount.value = data.contractAmount || '';
-    deposit.value = data.deposit || '';
-    rent.value = data.rent || '';
-    structure.value = data.structure || '';
-    maintenanceFee.value = data.maintenanceFee || '';
-    startDate.value = data.startDate || '';
-    endDate.value = data.endDate || '';
-    special.value =
-      Array.isArray(data.special) && data.special.length > 0
-        ? data.special
-        : [''];
-    landCategory.value = data.landCategory || '';
-    landArea.value = data.landArea || '';
-    buildingArea.value = data.buildingArea || '';
-    leasePart.value = data.leasePart || '';
-    leaseArea.value = data.leaseArea || '';
-  }
-
-  // 특약 선택 합치기
-  const selected = JSON.parse(
-    sessionStorage.getItem('selectedClauses') || '[]'
-  );
-  const newClauses = selected.map((clause) => clause.text).filter(Boolean);
-  newClauses.forEach((clause) => {
-    if (!special.value.includes(clause)) {
-      special.value.unshift(clause);
-    }
-  });
-
-  sessionStorage.removeItem('fromSpecialPage');
+// 계약서 상태
+const contract = ref({
+  contractName: '',
+  lessorName: '',
+  lesseeName: '',
+  address: '',
+  landCategory: '',
+  landArea: '',
+  buildingUsage: '',
+  buildingArea: '',
+  leasedPart: '',
+  leasedArea: '',
+  deposit: '',
+  downPayment: '',
+  balance: '',
+  maintenanceCost: '',
+  leaseStart: '',
+  leaseEnd: '',
+  specialClauses: [],
 });
 
-// 입력 감시해서 세션에 저장
-watch(
-  [
-    contractName,
-    lessor,
-    lessee,
-    address,
-    contractAmount,
-    deposit,
-    rent,
-    structure,
-    maintenanceFee,
-    startDate,
-    endDate,
-    special,
-    landCategory,
-    landArea,
-    buildingArea,
-    leasePart,
-    leaseArea,
-  ],
-  saveContractToSession,
-  { deep: true }
-);
+// ✅ 특약 배열 (List<String>)
+const mergedSpecialTerms = ref([]);
 
-// 특약 입력 제어
-const addSpecialTerm = () => special.value.push('');
-const removeSpecialTerm = (index) => {
-  if (special.value.length > 1) special.value.splice(index, 1);
-  else special.value = [''];
-};
+// ✅ 모달 상태
+const showModal = ref(true);
+const closeModal = () => (showModal.value = false);
 
-// ✅ 제출 로직
-const onSubmit = async () => {
-  // 필수 입력 검증
-  const requiredFields = [
-    contractName.value,
-    lessor.value,
-    lessee.value,
-    address.value,
-    contractAmount.value,
-    deposit.value,
-    rent.value,
-    structure.value,
-    maintenanceFee.value,
-    startDate.value,
-    endDate.value,
-    landCategory.value,
-    landArea.value,
-    buildingArea.value,
-    leasePart.value,
-    leaseArea.value,
-  ];
-  if (requiredFields.some((field) => !field || field.trim() === '')) {
-    alert('모든 필수 항목을 입력해주세요.');
-    return;
-  }
+// ✅ PDF 로딩 상태
+const isLoadingPDF = ref(false);
 
-  // 특약 최소 1개
-  const validSpecials = special.value.filter(
-    (term) => term && term.trim() !== ''
-  );
-  if (validSpecials.length === 0) {
-    alert('특약사항을 최소 1개 이상 입력하거나 선택해주세요.');
-    return;
-  }
+// ✅ 헬퍼 함수
+function formatCurrency(value) {
+  if (!value && value !== 0) return '';
+  return Number(value).toLocaleString() + '원';
+}
+function formatArea(value) {
+  if (!value && value !== 0) return '';
+  return `${value}㎡`;
+}
+function formatDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (isNaN(date)) return value;
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
 
+onMounted(async () => {
   try {
-    // ✅ 백엔드 DTO와 맞춘 payload
-    const payload = {
-      contractName: contractName.value,
-      lessorName: lessor.value,
-      lesseeName: lessee.value,
-      address: address.value,
-      landCategory: landCategory.value,
-      landArea: parseFloat(landArea.value),
-      buildingUsage: structure.value,
-      buildingArea: parseFloat(buildingArea.value),
-      leasedPart: leasePart.value,
-      leasedArea: parseFloat(leaseArea.value),
-      deposit: parseInt(deposit.value),
-      downPayment: parseInt(contractAmount.value),
-      balance: parseInt(rent.value),
-      maintenanceCost: parseInt(maintenanceFee.value),
-      leaseStart: startDate.value,
-      leaseEnd: endDate.value,
-      specialClauses: validSpecials, // ✅ JSON 배열
-    };
+    const contractId = route.params.id || route.query.id;
+    if (!contractId || !auth.isLoggedIn) return;
 
-    const res = await axios.post('/api/contract', payload, {
+    const res = await axios.get(`/api/contract/${contractId}`, {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
 
-    alert('계약서가 저장되었습니다.');
-    const contractId = res.data; // 백엔드에서 생성된 contractId 반환
-    router.push({
-      name: 'ReferenceContractSuccess',
-      query: { id: contractId, from: 'list' },
-    });
-  } catch (err) {
-    console.error('계약서 저장 중 오류 발생:', err);
-    alert('저장에 실패했습니다.');
+    const data = res.data;
+    console.log('계약서 상세 응답:', data);
+
+    contract.value = {
+      contractName: data.contractName,
+      lessorName: data.lessorName,
+      lesseeName: data.lesseeName,
+      address: data.address,
+      landCategory: data.landCategory,
+      landArea: data.landArea,
+      buildingUsage: data.buildingUsage,
+      buildingArea: data.buildingArea,
+      leasedPart: data.leasedPart,
+      leasedArea: data.leasedArea,
+      deposit: data.deposit,
+      downPayment: data.downPayment,
+      balance: data.balance,
+      maintenanceCost: data.maintenanceCost,
+      leaseStart: data.leaseStart,
+      leaseEnd: data.leaseEnd,
+      specialClauses: data.specialClauses || [],
+    };
+
+    // 특약 복사
+    mergedSpecialTerms.value = [...(data.specialClauses || [])];
+  } catch (error) {
+    console.error(
+      '계약서 조회 실패:',
+      error.response?.status,
+      error.response?.data
+    );
   }
+});
 
-  saveContractToSession();
-};
+async function downloadPDF() {
+  const pdfArea = document.getElementById('pdf-area');
+  if (!pdfArea) return;
 
-// 특약 예시 페이지 이동
-const goToSpecialPage = () => {
-  sessionStorage.setItem('fromSpecialPage', 'true');
-  router.push({ name: 'SpecialContractsRecommendation' });
-};
+  isLoadingPDF.value = true; // ✅ 로딩 시작
+
+  // PDF 제외 요소 숨김
+  const excludes = document.querySelectorAll('.exclude-pdf');
+  excludes.forEach((el) => (el.style.visibility = 'hidden'));
+
+  try {
+    const canvas = await html2canvas(pdfArea, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // 첫 페이지
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // 남은 부분 페이지 추가
+    while (heightLeft > 0) {
+      position -= pageHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`${contract.value.contractName || '계약서'}.pdf`);
+  } catch (e) {
+    console.error('PDF 생성 오류:', e);
+  } finally {
+    // 캡처 후 다시 보이게
+    excludes.forEach((el) => (el.style.visibility = 'visible'));
+    isLoadingPDF.value = false; // ✅ 로딩 종료
+  }
+}
 </script>
 
 <template>
-  <div class="wrapper">
-    <div class="contract-box">
-      <h1 class="title">계약서 작성을 위해 필요한 정보를 입력해주세요.</h1>
-      <form class="form-grid" @submit.prevent="onSubmit">
-        <div class="form-row full">
-          <label>계약서 이름</label>
-          <input
-            v-model="contractName"
-            type="text"
-            placeholder="계약서 이름을 작성해주세요."
-          />
-        </div>
+  <div class="page-wrapper">
+    <!-- ✅ PDF 생성 중일 때 로딩 오버레이 -->
+    <div
+      v-if="isLoadingPDF"
+      class="loading-overlay d-flex justify-content-center align-items-center"
+    >
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
 
-        <div class="grid-2col">
-          <div class="left-col">
-            <div class="form-row">
-              <label>임대인(집주인)</label>
-              <input
-                v-model="lessor"
-                type="text"
-                placeholder="성명"
-                @input="allowOnlyText($event, lessor)"
-              />
-            </div>
-            <div class="form-row full">
-              <label>소재지</label>
-              <input
-                v-model="address"
-                type="text"
-                placeholder="도로명 주소를 입력해주세요."
-              />
-            </div>
-            <div class="form-row">
-              <label>토지 지목</label>
-              <input v-model="landCategory" type="text" placeholder="대" />
-            </div>
-            <div class="form-row">
-              <label>건물 구조·용도</label>
-              <input
-                v-model="structure"
-                type="text"
-                placeholder="다세대 주택"
-              />
-            </div>
-            <div class="form-row">
-              <label>임차할 부분</label>
-              <input v-model="leasePart" type="text" placeholder="동·호수" />
-            </div>
-            <div class="form-row">
-              <label>보증금</label>
-              <input
-                v-model="deposit"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, deposit)"
-              />
-            </div>
-            <div class="form-row date-range-vertical align-start">
-              <label class="align-top">임대차 기간</label>
-              <div class="date-block">
-                <div class="date-line">
-                  <input v-model="startDate" type="date" />
-                  <span>부터</span>
-                </div>
-                <div class="date-line">
-                  <input v-model="endDate" type="date" />
-                  <span>까지</span>
-                </div>
+    <div class="container" id="pdf-area">
+      <!-- 상단 헤더 -->
+      <div class="header-box">
+        <h2 class="header-title">계약서가 완성되었어요.</h2>
+        <p class="header-sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
+      </div>
+      <div class="title-with-button">
+        <div class="contract-name">
+          <h3>{{ contract.contractName || '계약서 이름 없음' }}</h3>
+        </div>
+        <!-- ✅ 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
+        <button
+          v-if="route.query.from === 'myPage'"
+          class="btn-download exclude-pdf"
+          @click="downloadPDF"
+          :disabled="isLoadingPDF"
+        >
+          {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
+        </button>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- 계약서 정보 -->
+      <div class="table-box">
+        <table class="info-table">
+          <tr>
+            <td>
+              <div class="label">임대인</div>
+              <div class="value">{{ contract.lessorName }}</div>
+            </td>
+            <td>
+              <div class="label">임차인</div>
+              <div class="value">{{ contract.lesseeName }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">소재지</div>
+              <div class="value">{{ contract.address }}</div>
+            </td>
+            <td>
+              <div class="label">토지 지목</div>
+              <div class="value">{{ contract.landCategory }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">토지 면적</div>
+              <div class="value">{{ formatArea(contract.landArea) }}</div>
+            </td>
+            <td>
+              <div class="label">건물 구조·용도</div>
+              <div class="value">{{ contract.buildingUsage }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">건물 면적</div>
+              <div class="value">{{ formatArea(contract.buildingArea) }}</div>
+            </td>
+            <td>
+              <div class="label">임차할 부분</div>
+              <div class="value">{{ contract.leasedPart }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">임차할 면적</div>
+              <div class="value">{{ formatArea(contract.leasedArea) }}</div>
+            </td>
+            <td>
+              <div class="label">보증금</div>
+              <div class="value">{{ formatCurrency(contract.deposit) }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">계약금</div>
+              <div class="value">
+                {{ formatCurrency(contract.downPayment) }}
               </div>
-            </div>
-          </div>
-
-          <div class="right-col">
-            <div class="form-row">
-              <label>임차인(세입자)</label>
-              <input
-                v-model="lessee"
-                type="text"
-                placeholder="성명"
-                @input="allowOnlyText($event, lessee)"
-              />
-            </div>
-            <div class="form-row">
-              <label>토지 면적</label>
-              <input
-                v-model="landArea"
-                type="text"
-                placeholder="m²"
-                @input="allowOnlyNumbers($event, landArea)"
-              />
-            </div>
-            <div class="form-row">
-              <label>건물 면적</label>
-              <input
-                v-model="buildingArea"
-                type="text"
-                placeholder="m²"
-                @input="allowOnlyNumbers($event, buildingArea)"
-              />
-            </div>
-            <div class="form-row">
-              <label>임차할 면적</label>
-              <input
-                v-model="leaseArea"
-                type="text"
-                placeholder="m²"
-                @input="allowOnlyNumbers($event, leaseArea)"
-              />
-            </div>
-            <div class="form-row">
-              <label>계약금</label>
-              <input
-                v-model="contractAmount"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, contractAmount)"
-              />
-            </div>
-            <div class="form-row">
-              <label>잔금</label>
-              <input
-                v-model="rent"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, rent)"
-              />
-            </div>
-            <div class="form-row">
-              <label>관리비</label>
-              <input
-                v-model="maintenanceFee"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, maintenanceFee)"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row full special-terms">
-          <label>특약 사항</label>
-          <div class="special-input-wrapper">
-            <div class="special-list">
-              <div
-                class="special-input"
-                v-for="(term, index) in special"
-                :key="index"
-              >
-                <textarea
-                  v-model="special[index]"
-                  placeholder="특약 사항을 입력하세요."
-                  rows="3"
-                ></textarea>
-                <div class="btn-group">
-                  <button
-                    v-if="index === special.length - 1"
-                    type="button"
-                    class="btn-small add"
-                    @click="addSpecialTerm"
-                  >
-                    <i class="bi bi-plus-lg icon-white"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn-small remove"
-                    @click="removeSpecialTerm(index)"
-                  >
-                    <i class="bi bi-dash-lg icon-white"></i>
-                  </button>
-                </div>
+            </td>
+            <td>
+              <div class="label">잔금</div>
+              <div class="value">{{ formatCurrency(contract.balance) }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="label">관리비</div>
+              <div class="value">
+                {{ formatCurrency(contract.maintenanceCost) }}
               </div>
-            </div>
-            <div class="side-controls">
-              <button
-                type="button"
-                class="btn-template"
-                @click="goToSpecialPage"
-              >
-                특약 예시에서 선택하기
-              </button>
-              <p class="tip">특약사항을 추가해드릴게요.</p>
-            </div>
-          </div>
-        </div>
+            </td>
+            <td colspan="2">
+              <div class="label">임대차 기간</div>
+              <div class="value">
+                {{ formatDate(contract.leaseStart) }} ~
+                {{ formatDate(contract.leaseEnd) }}
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
 
-        <div class="button-group full">
-          <button
-            type="button"
-            class="btn-back"
-            @click="router.push({ name: 'home' })"
+      <hr class="divider" />
+
+      <!-- ✅ 특약사항 -->
+      <div class="special-section">
+        <h3>특약 사항</h3>
+        <div v-if="mergedSpecialTerms.length">
+          <div
+            v-for="(clause, idx) in mergedSpecialTerms"
+            :key="idx"
+            class="clause-box"
           >
-            뒤로 가기
-          </button>
-          <button type="submit" class="btn-submit">작성 완료</button>
+            <span class="clause-number">{{ idx + 1 }}.</span>
+            <span class="clause-text">{{ clause }}</span>
+          </div>
         </div>
-      </form>
+        <p v-else>등록된 특약이 없습니다.</p>
+      </div>
+    </div>
+
+    <!-- ✅ 모달 -->
+    <div v-if="showModal" class="modal-overlay exclude-pdf">
+      <div class="modal-content">
+        <h2>📌 계약서 자동 삭제 안내</h2>
+        <p>
+          계약서는 작성일 기준 <strong>50일 후 자동 삭제</strong>됩니다.<br />
+          필요 시 사전 <strong>캡쳐 또는 다운로드</strong>해 주세요.
+        </p>
+        <button class="close-btn" @click="closeModal">확인</button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.wrapper {
+/* ✅ 로딩 오버레이 스타일 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 3000;
+}
+
+.page-wrapper {
   display: flex;
   justify-content: center;
-  padding: 40px;
-  background-color: white;
+  padding: 40px 16px;
+  background-color: #f5f7fa;
 }
-.contract-box {
-  background-color: #f7f9fc;
+.container {
+  background-color: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-  padding: 70px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  max-width: 800px;
   width: 100%;
-  max-width: 1100px;
-}
-.title {
-  font-size: 26px;
-  font-weight: bold;
-  margin-bottom: 32px;
-}
-.form-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.grid-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 50px;
-}
-.form-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.form-row.full {
-  flex-wrap: wrap;
-}
-label {
-  width: 160px;
-  font-weight: 700;
-  text-align: left;
-  flex-shrink: 0;
-  font-size: 15px;
-}
-
-input[type='text'],
-input[type='date'] {
-  flex-grow: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
-}
-.date-range .date-inputs {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-grow: 1;
-}
-
-.align-start {
-  align-items: flex-start;
-}
-
-.align-top {
-  padding-top: 10px;
-}
-
-.date-block {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex-grow: 1;
-}
-
-.date-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
-.date-line input[type='date'] {
-  flex-grow: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
-  height: 44px;
+  padding: 40px 32px;
   box-sizing: border-box;
 }
-
-.date-line span {
-  white-space: nowrap;
+.property-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 20px 0;
+  color: #111827;
+  text-align: center;
+}
+.divider {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 24px 0;
+}
+.table-box {
+  margin-bottom: 24px;
   font-size: 14px;
-  font-weight: 500;
+  color: #222;
 }
-.special-terms .special-input-wrapper {
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.info-table td {
+  padding: 12px;
+  border: none;
+  vertical-align: top;
+}
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 6px;
+}
+.value {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+.special-section {
+  margin-top: 16px;
+}
+.special-section h3 {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #111;
+}
+.special-section p {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  gap: 16px;
-  flex-grow: 1;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
-.special-list {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.modal-content {
+  background: white;
+  padding: 32px 24px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
-.special-input {
+.close-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.close-btn:hover {
+  background: #1d4ed8;
+}
+
+.clause-box {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-.special-input textarea {
-  width: 100%;
-  flex-grow: 1;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  resize: vertical;
-}
-.btn-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.btn-small {
-  padding: 6px 12px;
+  background-color: #f0f4ff;
   border-radius: 6px;
-  border: none;
-  background-color: #ddd;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.btn-small.add {
-  background-color: #1a80e5;
-}
-.btn-small.remove {
-  background-color: #fe5252;
+  padding: 8px 12px;
+  margin-bottom: 8px;
 }
 
-.icon-white {
-  color: #fff;
-  font-size: 20px;
-  text-shadow: 0 0 1px #fff, 0 0 1px #fff;
-}
-.side-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding-top: 6px;
-}
-.btn-template {
-  background-color: #1a80e5;
-  color: #ffffff;
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-.tip {
+.clause-number {
   font-size: 13px;
-  color: #888;
-  margin: 0;
-  margin-left: 18px;
+  color: #4b6cb7;
+  margin-right: 8px;
+  font-weight: 500;
 }
-.button-group {
+
+.clause-text {
+  font-size: 14px;
+  color: #111;
+  flex: 1;
+}
+.header-box {
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d4ed8;
+  margin-bottom: 6px;
+}
+
+.header-sub {
+  font-size: 14px;
+  color: #555;
+}
+
+.title-with-button {
   display: flex;
   justify-content: space-between;
-  margin-top: 40px;
+  align-items: center;
 }
 
-.btn-back {
-  background-color: #f0f0f0;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
+.contract-name h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
 }
-.btn-submit {
-  background-color: #1a80e5;
+
+.btn-download {
+  background-color: #2563eb;
   color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: bold;
   border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
   cursor: pointer;
 }
 
-.btn-small.add:hover {
-  background-color: rgb(33, 112, 193);
-  transform: scale(1.05);
-  transition: all 0.1s ease-in-out;
-}
-
-.btn-small.remove:hover {
-  background-color: rgb(218, 81, 81);
-  transform: scale(1.05);
-  transition: all 0.1s ease-in-out;
-}
-
-.btn-template:hover {
-  background-color: #2563eb;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease-in-out;
-}
-
-.btn-submit:hover {
-  background-color: #2563eb;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-}
-
-.btn-back:hover {
-  background-color: #e0e0e0;
+.btn-download:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
 }
 </style>

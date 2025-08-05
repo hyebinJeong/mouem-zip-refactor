@@ -105,11 +105,11 @@ onMounted(async () => {
     router.back();
     return;
   }
-  const contract = await store.fetchContractById(props.id);
+  const contract = await store.fetchContractById(Number(props.id));//숫자변환
   if (contract) {
-    category.value = contract.category_name || '';
-    importance.value = contract.importance_level || '';
-    description.value = contract.description_text || '';
+    category.value = contract.category || '';
+    importance.value = contract.importance || '';
+    description.value = contract.description || '';
   } else {
     alert('특약사항 데이터를 불러오지 못했습니다.');
     router.back();

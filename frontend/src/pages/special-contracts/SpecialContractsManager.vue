@@ -37,7 +37,7 @@
         <tr
           v-for="contract in paginatedContracts"
           :key="contract.special_clause_id"
-          @click="goToEdit(contract.special_clause_id)"
+          @click="goToEdit(contract.specialClauseId)"
           style="cursor: pointer"
         >
           <td class="text-body">{{ contract.category }}</td>
@@ -144,8 +144,9 @@ const changePage = (page) => {
 };
 
 const goToEdit = (id) => {
-  router.push(`/category/special/edit/${id}`);
+  router.push({ name: 'SpecialContractsEdit', params: { id } });
 };
+
 
 const goBack = () => {
   router.back();

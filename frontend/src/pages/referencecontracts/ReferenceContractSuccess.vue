@@ -41,6 +41,22 @@ const closeModal = () => (showModal.value = false);
 // ✅ PDF 로딩 상태
 const isLoadingPDF = ref(false);
 
+// ✅ 헬퍼 함수
+function formatCurrency(value) {
+  if (!value && value !== 0) return '';
+  return Number(value).toLocaleString() + '원';
+}
+function formatArea(value) {
+  if (!value && value !== 0) return '';
+  return `${value}㎡`;
+}
+function formatDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (isNaN(date)) return value;
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
+
 onMounted(async () => {
   try {
     const contractId = route.params.id || route.query.id;
@@ -191,7 +207,7 @@ async function downloadPDF() {
           <tr>
             <td>
               <div class="label">토지 면적</div>
-              <div class="value">{{ contract.landArea }}</div>
+              <div class="value">{{ formatArea(contract.landArea) }}</div>
             </td>
             <td>
               <div class="label">건물 구조·용도</div>
@@ -201,7 +217,7 @@ async function downloadPDF() {
           <tr>
             <td>
               <div class="label">건물 면적</div>
-              <div class="value">{{ contract.buildingArea }}</div>
+              <div class="value">{{ formatArea(contract.buildingArea) }}</div>
             </td>
             <td>
               <div class="label">임차할 부분</div>
@@ -211,32 +227,37 @@ async function downloadPDF() {
           <tr>
             <td>
               <div class="label">임차할 면적</div>
-              <div class="value">{{ contract.leasedArea }}</div>
+              <div class="value">{{ formatArea(contract.leasedArea) }}</div>
             </td>
             <td>
               <div class="label">보증금</div>
-              <div class="value">{{ contract.deposit }}</div>
+              <div class="value">{{ formatCurrency(contract.deposit) }}</div>
             </td>
           </tr>
           <tr>
             <td>
               <div class="label">계약금</div>
-              <div class="value">{{ contract.downPayment }}</div>
+              <div class="value">
+                {{ formatCurrency(contract.downPayment) }}
+              </div>
             </td>
             <td>
               <div class="label">잔금</div>
-              <div class="value">{{ contract.balance }}</div>
+              <div class="value">{{ formatCurrency(contract.balance) }}</div>
             </td>
           </tr>
           <tr>
             <td>
               <div class="label">관리비</div>
-              <div class="value">{{ contract.maintenanceCost }}</div>
+              <div class="value">
+                {{ formatCurrency(contract.maintenanceCost) }}
+              </div>
             </td>
             <td colspan="2">
               <div class="label">임대차 기간</div>
               <div class="value">
-                {{ contract.leaseStart }} ~ {{ contract.leaseEnd }}
+                {{ formatDate(contract.leaseStart) }} ~
+                {{ formatDate(contract.leaseEnd) }}
               </div>
             </td>
           </tr>

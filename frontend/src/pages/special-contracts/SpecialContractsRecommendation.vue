@@ -1,23 +1,37 @@
 <template>
   <div class="container">
     <div class="content-box">
+      <!-- 상단 헤더 -->
       <div class="header-section">
         <div class="title-text">
           <div class="main-title">계약서에 이런 특약을 넣으면 좋아요.</div>
           <div class="sub-title">한눈에 보기 좋게 정리했어요.</div>
           <div class="note">실제 피해 사례 기반으로 정리했어요.</div>
         </div>
-        <div class="scale-bar">
-          <div class="scale-label">피해 예상 규모</div>
-          <div class="scale-bar-graph"><div class="bar-fill"></div></div>
-          <div class="scale-result">중요</div>
+
+        <!-- 오른쪽: 피해 예상 규모 + 중요도 필터 -->
+        <div class="right-controls">
+          <div class="scale-bar">
+            <div class="scale-label">피해 예상 규모</div>
+            <div class="scale-bar-graph"><div class="bar-fill"></div></div>
+            <div class="scale-result">중요</div>
+          </div>
+
+          <!-- ✅ 중요도 필터 드롭다운 -->
+          <select v-model="filter" class="form-select w-auto d-inline-block">
+            <option value="">전체</option>
+            <option value="높음">높음</option>
+            <option value="중간">중간</option>
+            <option value="낮음">낮음</option>
+          </select>
         </div>
       </div>
 
+      <!-- 특약 리스트 -->
       <div class="scroll-wrapper">
         <div class="grid-box">
           <div
-            v-for="(item, index) in recommendations"
+            v-for="(item, index) in filteredRecommendations"
             :key="index"
             :class="['item', item.importanceColor]"
             @click="openModal(item)"
@@ -28,9 +42,10 @@
         </div>
       </div>
 
+      <!-- 하단 캐릭터 -->
       <div
         class="character-box"
-        @click="$router.push({ name: 'reference-contract' })"
+        @click="$router.push({ name: 'ReferenceContract' })"
       >
         <img src="@/assets/skybuddy.png" alt="버디 캐릭터" />
         <div class="speech-bubble">
@@ -39,6 +54,7 @@
       </div>
     </div>
 
+    <!-- 모달 -->
     <div v-if="selectedItem" class="modal-overlay" @click.self="closeModal">
       <div class="modal-box">
         <div class="modal-header">
@@ -71,8 +87,16 @@ export default {
   data() {
     return {
       selectedItem: null,
-      recommendations: [],
+      recommendations: [], // 전체 데이터
+      filter: '', // ✅ 선택된 중요도
     };
+  },
+  computed: {
+    // ✅ 필터 적용된 특약
+    filteredRecommendations() {
+      if (!this.filter) return this.recommendations;
+      return this.recommendations.filter((r) => r.importance === this.filter);
+    },
   },
   created() {
     this.fetchRecommendations();
@@ -88,13 +112,15 @@ export default {
           낮음: 'green',
           기타: 'white',
         };
-        const grouped = {};
 
+        // ✅ 카테고리별 그룹핑
+        const grouped = {};
         data.forEach((item) => {
-          const key = item.category;
+          const key = item.category; // 카테고리 이름
           if (!grouped[key]) {
             grouped[key] = {
               title: key,
+              importance: item.importance,
               importanceColor: importanceMap[item.importance] || 'white',
               clauses: [],
             };
@@ -160,6 +186,15 @@ export default {
   margin-bottom: 32px;
 }
 
+.right-controls {
+  text-align: right;
+}
+
+.form-select {
+  margin-top: 10px;
+}
+
+/* 타이틀 */
 .title-text .main-title {
   font-size: 22px;
   font-weight: 700;
@@ -179,6 +214,7 @@ export default {
   margin-top: 8px;
 }
 
+/* 피해 예상 규모 */
 .scale-bar {
   text-align: right;
 }
@@ -210,64 +246,20 @@ export default {
   font-weight: 600;
 }
 
+/* 리스트 */
 .scroll-wrapper {
   max-height: 460px;
   overflow-y: auto;
   position: relative;
   padding-bottom: 80px;
 }
-
-/* 기존 .scroll-wrapper 유지 + 아래 추가 */
 .scroll-wrapper::-webkit-scrollbar {
   width: 6px;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
-
 .scroll-wrapper:hover::-webkit-scrollbar {
   opacity: 1;
-}
-
-/* 기존 .character-box 수정 */
-.character-box {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
-  display: flex;
-  align-items: flex-end;
-  cursor: pointer;
-  z-index: 1;
-}
-
-.character-box img {
-  width: 60px;
-  height: auto;
-}
-
-/* 말풍선 스타일 */
-.speech-bubble {
-  position: absolute;
-  left: 60px;
-  bottom: 20px;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  padding: 10px 14px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  font-size: 13px;
-  line-height: 1.4;
-  color: #111827;
-  white-space: nowrap;
-}
-
-.speech-bubble::after {
-  content: '';
-  position: absolute;
-  left: -8px;
-  bottom: 12px;
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent #ffffff transparent transparent;
 }
 
 .grid-box {
@@ -291,11 +283,9 @@ export default {
   transition: background-color 0.2s;
   text-align: center;
 }
-
 .item:hover {
   background-color: #e5e7eb;
 }
-
 .item.red {
   background-color: #fef2f2;
 }
@@ -309,6 +299,7 @@ export default {
   background-color: #f3f4f6;
 }
 
+/* 점 표시 */
 .dot {
   width: 8px;
   height: 8px;
@@ -329,16 +320,39 @@ export default {
   background-color: #9ca3af;
 }
 
+/* 캐릭터 */
 .character-box {
   position: absolute;
   bottom: 16px;
   left: 16px;
   z-index: 1;
 }
-
 .character-box img {
   width: 60px;
   height: auto;
+}
+.speech-bubble {
+  position: absolute;
+  left: 60px;
+  bottom: 20px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+  line-height: 1.4;
+  color: #111827;
+  white-space: nowrap;
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  bottom: 12px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #ffffff transparent transparent;
 }
 
 /* 모달 */
@@ -354,7 +368,6 @@ export default {
   justify-content: center;
   z-index: 9999;
 }
-
 .modal-box {
   background-color: white;
   width: 640px;
@@ -363,45 +376,38 @@ export default {
   border-radius: 20px;
   position: relative;
 }
-
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
-
 .modal-header h3 {
   font-size: 18px;
   font-weight: bold;
 }
-
 .close-btn {
   font-size: 24px;
   font-weight: bold;
   cursor: pointer;
 }
-
 .modal-content .clause {
   display: flex;
   align-items: center;
   margin-bottom: 16px;
 }
-
 .clause-number {
   color: #2563eb;
   font-weight: bold;
   font-size: 18px;
   width: 24px;
 }
-
 .clause-text {
   flex: 1;
   font-size: 14px;
   margin-left: 12px;
   margin-right: 8px;
 }
-
 .select-btn {
   background-color: #3b82f6;
   color: white;

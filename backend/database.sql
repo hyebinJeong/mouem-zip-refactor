@@ -64,7 +64,7 @@ CREATE TABLE registry_analysis (
                                    analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
                                    status BOOLEAN NOT NULL DEFAULT TRUE,
                                    file_name VARCHAR(100) NOT NULL,
-                                   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                                   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- ============================================
@@ -78,8 +78,8 @@ CREATE TABLE jeonse_analysis (
                                  jeonse_ratio DECIMAL(5,2) NOT NULL,        -- 전세가율
                                  region_avg_jeonse_ratio DECIMAL(5,2) NOT NULL, -- 지역 평균 전세가율
                                  jeonse_ratio_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
-                                 FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE,
-                                 FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                                 FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id),
+                                 FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- ============================================
@@ -90,8 +90,8 @@ CREATE TABLE checklist (
                            user_id INT,
                            checked TEXT NOT NULL,               -- 체크 여부 전체 JSON으로 저장
                            checklist_rating ENUM('판단보류', '안전', '보통', '주의', '위험') NOT NULL,
-                           FOREIGN KEY (user_id) REFERENCES users(user_id)  ON DELETE CASCADE,
-                           FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE
+                           FOREIGN KEY (user_id) REFERENCES users(user_id),
+                           FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id)
 );
 
 -- ============================================
@@ -102,9 +102,10 @@ CREATE TABLE final_report (
                               user_id INT,
                               registry_id INT,
                               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                              status BOOLEAN NOT NULL,
-                              FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-                              FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id) ON DELETE CASCADE
+                              status BOOLEAN NOT NULL DEFAULT TRUE,
+                              FOREIGN KEY (user_id) REFERENCES users(user_id),
+                              FOREIGN KEY (registry_id) REFERENCES registry_analysis(registry_id),
+                              CONSTRAINT uq_user_registry UNIQUE (user_id, registry_id) -- user_id와 registry_id 조합의 중복 저장 방지
 );
 
 -- ============================================
@@ -112,30 +113,30 @@ CREATE TABLE final_report (
 -- ============================================
 CREATE TABLE contract (
                           contract_id INT AUTO_INCREMENT PRIMARY KEY, -- 계약서 번호 (PK)
-                          user_id INT,                      -- 유저 ID (FK)
-                          contract_name VARCHAR(100) NOT NULL,       -- 계약서 이름
-                          lessor_name VARCHAR(20) NOT NULL,          -- 임대인 성명
-                          lessee_name VARCHAR(20) NOT NULL,          -- 임차인 성명
-                          address VARCHAR(255) NOT NULL,             -- 소재지
-                          land_category VARCHAR(100) NOT NULL,       -- 토지 지목
-                          land_area DECIMAL(10,2) NOT NULL,          -- 토지 면적
-                          building_usage VARCHAR(100) NOT NULL,      -- 건물 구조/용도
-                          building_area DECIMAL(10,2) NOT NULL,      -- 건물 면적
-                          leased_part VARCHAR(100) NOT NULL,         -- 임차한 부분
-                          leased_area DECIMAL(10,2) NOT NULL,        -- 임차한 면적
-                          deposit BIGINT NOT NULL,                   -- 보증금
-                          down_payment BIGINT NOT NULL,              -- 계약금
-                          balance BIGINT NOT NULL,                   -- 잔금
-                          maintenance_cost INT NOT NULL,             -- 관리비
-                          lease_start DATE NOT NULL,                 -- 임대 시작일
-                          lease_end DATE NOT NULL,                   -- 임대 종료일
-                          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,                  -- 생성일
-                          FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                          user_id INT,                                -- 유저 ID (FK)
+                          contract_name VARCHAR(100) NOT NULL,        -- 계약서 이름
+                          lessor_name VARCHAR(20) NOT NULL,           -- 임대인 성명
+                          lessee_name VARCHAR(20) NOT NULL,           -- 임차인 성명
+                          address VARCHAR(255) NOT NULL,              -- 소재지
+                          land_category VARCHAR(100) NOT NULL,        -- 토지 지목
+                          land_area DECIMAL(10,2) NOT NULL,           -- 토지 면적
+                          building_usage VARCHAR(100) NOT NULL,       -- 건물 구조/용도
+                          building_area DECIMAL(10,2) NOT NULL,       -- 건물 면적
+                          leased_part VARCHAR(100) NOT NULL,          -- 임차한 부분
+                          leased_area DECIMAL(10,2) NOT NULL,         -- 임차한 면적
+                          deposit BIGINT NOT NULL,                    -- 보증금
+                          down_payment BIGINT NOT NULL,               -- 계약금
+                          balance BIGINT NOT NULL,                    -- 잔금
+                          maintenance_cost INT NOT NULL,              -- 관리비
+                          lease_start DATE NOT NULL,                  -- 임대 시작일
+                          lease_end DATE NOT NULL,                    -- 임대 종료일
+                          special_clauses JSON NOT NULL,              -- 특약 전체 (배열/JSON으로 저장)
+                          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                          FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
-
--- ============================================
--- 7. 특약
--- ============================================
+# ============================================
+# 7. 특약
+# ============================================
 CREATE TABLE special_clause (
                                 special_clause_id INT PRIMARY KEY AUTO_INCREMENT,  -- 특약번호(pk)
                                 category VARCHAR(50) NOT NULL,                     -- 특약분류
@@ -147,13 +148,13 @@ CREATE TABLE special_clause (
 -- ============================================
 -- 8. 계약서 작성 특약
 -- ============================================
-CREATE TABLE contract_special_clause (
-                                         contract_id INT,                  -- 계약서 번호
-                                         special_clause_id INT,            -- 특약번호
-                                         PRIMARY KEY (contract_id, special_clause_id),
-                                         FOREIGN KEY (contract_id) REFERENCES contract(contract_id) ON DELETE CASCADE,
-                                         FOREIGN KEY (special_clause_id) REFERENCES special_clause(special_clause_id) ON DELETE CASCADE
-);
+# CREATE TABLE contract_special_clause (
+                                           #                                          contract_id INT,                  -- 계약서 번호
+                                           #                                          special_clause_id INT,            -- 특약번호
+                                           #                                          PRIMARY KEY (contract_id, special_clause_id),
+                                           #                                          FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
+                                           #                                          FOREIGN KEY (special_clause_id) REFERENCES special_clause(special_clause_id)
+# );
 
 -- ============================================
 -- 9. 카테고리
@@ -175,20 +176,8 @@ CREATE TABLE term(
                      term_define VARCHAR(255) NOT NULL,             -- 용어 정의
                      term_example VARCHAR(255) NOT NULL,            -- 용어예시
                      term_caution VARCHAR(255) NOT NULL,            -- 용어 주의
-                     FOREIGN KEY (category_id) REFERENCES category(category_id) ON DELETE CASCADE
+                     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
-
-# -- ============================================
-# -- 11. 등기부등본 PDF 저장
-# -- ============================================
-# CREATE TABLE register_pdf (
-#                               pdf_id INT PRIMARY KEY AUTO_INCREMENT,        -- pdf번호
-#                               user_id INT,                         -- 유저번호
-#                               file_name VARCHAR(255) NOT NULL,              -- 파일이름
-#                               file_url VARCHAR(255) NOT NULL,               -- 파일url
-#                               upload_date DATE NOT NULL,                    -- 업로드 시간
-#                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-# );
 
 -- 테스트용 코드
 # 카테고리
@@ -298,6 +287,32 @@ INSERT INTO term (term_name, term_define, term_example, term_caution, category_i
                                                                                         '계약갱신요구권을 행사해 2년 연장했습니다.',
                                                                                         '계약갱신요구권 행사는 기한(6개월~2개월 전)을 지켜야 하며, 거절 사유가 있는 경우 예외가 발생할 수 있습니다.', 4);
 
--- final_table status 기본값 true 설정
-ALTER TABLE final_report
-    MODIFY COLUMN status BOOLEAN NOT NULL DEFAULT TRUE;
+
+
+
+
+
+-- 특약 예시 데이터
+INSERT INTO special_clause (category, importance, importance_color, description) VALUES
+-- 중요 (빨강)
+('대출', '높음', '#FF0000', '전세자금 대출이 불가능할 경우, 계약금은 전액 반환한다.'),
+('보증보험', '높음', '#FF0000', '임대인은 임차인의 보증보험 가입에 필요한 절차에 적극 협조하여, 임대인 또는 집의 하자로 인해 보증보험 가입이 안 될 경우 계약은 무효로 하고, 임대인은 낸 돈 전부를 즉시 돌려준다.'),
+('등기부등본', '높음', '#FF0000', '임대인은 잔금 지급일 익일까지 담보권이나 전세권 등 새로운 권리를 설정하지 않는다.'),
+('등기부등본', '높음', '#FF0000', '임대인은 잔금 지급일 또는 보증보험 가입 예정일까지 소유권 이전 등기를 하지 않는다.'),
+('세금', '높음', '#FF0000', '임대인은 국세 및 지방세, 근저당권 이자 체납이 없음을 고지하며, 임차인이 세금 체납 여부를 확인할 수 있도록 적극 협조한다. 만약 체납이 확인되면 잔금일 전까지 모두 상환하고, 이를 어기면 계약은 무효이며 계약금은 즉시 반환한다.'),
+('매매 고지', '높음', '#FF0000', '임대인은 임대차 기간 중 집을 팔게 될 경우, 임차인에게 반드시 고지한다.'),
+('보증금 반환', '높음', '#FF0000', '임차인이 계약 만료시 임대인은 타 임차인 임대여부와 관계없이 보증금을 즉시 전액 반환한다.'),
+
+-- 중간 (노랑)
+('재건축·철거', '중간', '#FFA500', '임대인은 임대차 기간 중 재건축/철거/용도변경 계획이 있는 경우 계약 체결 시 이를 명시하며, 사전 고지 없이 일방적으로 실행하지 않는다.'),
+('명도/이사', '중간', '#FFA500', '매도인은 잔금일에 명도하며, 기한 내 미이행 시 지연 1일당 10만원의 배상금을 매수인에게 지급한다.'),
+('수리/하자보수', '중간', '#FFA500', '입주 전/후 발생한 누수, 곰팡이, 보일러, 배관 등 시설물 하자는 임대인이 수리한다.'),
+('중도 해지', '중간', '#FFA500', '임차인이 계약 기간 중 퇴거할 경우 직접 신규 세입자를 구하고 임대인의 동의를 받아야 하며, 새 계약 체결 시점부터 보증금 반환한다.'),
+('계약 갱신', '중간', '#FFA500', '계약 만료일 6개월 전~1개월 전까지 갱신 거절 통보 없으면 계약은 자동 연장된다. 임대인이 계약 갱신을 거절하는 경우, 임차인이 새로운 거주지를 찾을 수 있도록 최소 2개월 이상의 유예기간을 보장한다.'),
+('관리비/세금 정산', '중간', '#FFA500', '계약일 이전 발생한 모든 관리비 및 세금(국세·지방세 포함)은 임대인이 정산한다. 이후 발생분은 임차인 부담한다.'),
+
+-- 참고 (초록)
+('원상복구', '낮음', '#00FF00', '임차인은 퇴거 시 원상복구하되, 벽지, 페인트 등 통상적 사용에 의한 손상은 제외한다.'),
+('공과금', '낮음', '#00FF00', '공동 전기, 청소, 경비 등 관리비는 임차인 부담, 수선유지비는 임대인 부담, 전기, 수도, 가스는 실사용량 기준 임차인 부담한다.'),
+('전대 금지', '낮음', '#00FF00', '주택은 주거용으로만 사용하며, 임차인은 임대인의 사전 서면 동의 없이 제 3자에게 무단 전대(재임대) 할 수 없다.'),
+('법적 분쟁', '낮음', '#00FF00', '본 계약은 공인중개사 없이 직거래로 체결되었으며, 발생할 수 있는 분쟁은 민법 및 주택임대차보호법에 따른다.');

@@ -19,6 +19,7 @@ import jsPDF from 'jspdf';
 const route = useRoute();
 const showModal = ref(false);
 const reportData = ref(null);
+const isLoadingPDF = ref(false); // ✅ 로딩 상태 추가
 
 const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
@@ -43,18 +44,23 @@ const registryKeys = [
   { key: 'trustInfos', label: '신탁등기' },
 ];
 
-// PDF 다운로드 (페이지 분할)
-function downloadPDF() {
+// PDF 다운로드 (로딩 처리 추가)
+async function downloadPDF() {
   const pdfArea = document.getElementById('pdf-area');
   if (!pdfArea) return;
 
-  html2canvas(pdfArea, { scale: 2 }).then((canvas) => {
+  isLoadingPDF.value = true; // 로딩 시작
+
+  try {
+    // 파일명용 날짜 문자열
+    const dateStr = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+
+    const canvas = await html2canvas(pdfArea, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
@@ -76,7 +82,11 @@ function downloadPDF() {
     pdf.save(
       `${reportData.value.username || '사용자'}_최종리포트_${dateStr}.pdf`
     );
-  });
+  } catch (e) {
+    console.error('PDF 생성 오류:', e);
+  } finally {
+    isLoadingPDF.value = false; // 로딩 종료
+  }
 }
 
 // 데이터 로드
@@ -84,10 +94,6 @@ onMounted(async () => {
   const userId = Number(route.query.userId);
   const registryId = Number(route.query.registryId);
   const reportId = Number(route.query.reportId);
-
-  console.log('쿼리 파라미터:', route.query);
-  console.log('넘어온 userId:', userId);
-  console.log('넘어온 registryId:', registryId);
 
   try {
     let res;
@@ -140,11 +146,22 @@ onMounted(async () => {
       <!-- 마이페이지에서 들어왔을 때만 버튼 보이게 -->
       <button
         v-if="route.query.from === 'myPage'"
-        class="btn btn-secondary position-absolute top-50 translate-middle-y end-0"
+        class="btn btn-primary position-absolute top-50 translate-middle-y end-0"
         @click="downloadPDF"
+        :disabled="isLoadingPDF"
       >
-        다운로드
+        {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
       </button>
+    </div>
+
+    <!-- PDF 생성 중일 때 로딩 오버레이 -->
+    <div
+      v-if="isLoadingPDF"
+      class="loading-overlay d-flex justify-content-center align-items-center"
+    >
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
     </div>
 
     <!-- PDF에 담길 영역 -->
@@ -156,6 +173,9 @@ onMounted(async () => {
           role="button"
           style="cursor: pointer"
           @click="openModal"
+          aria-label="등급 판정 기준 안내 모달 열기"
+          aria-haspopup="dialog"
+          aria-controls="diagnosis-grade-info-modal"
           >판정기준</span
         >에 의해 설정된 등급입니다.
       </p>
@@ -164,7 +184,6 @@ onMounted(async () => {
       <!-- 등급 -->
       <div class="final-grade-wrap">
         <FinalGrade
-          v-if="reportData"
           :registry="reportData.registryRating"
           :jeonse="reportData.jeonseRatioRating"
           :checklist="reportData.checklistRating"
@@ -174,9 +193,13 @@ onMounted(async () => {
       <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
       <!-- 전세가율 -->
-      <div class="final-jeonse-wrap mt-5 mb-4">
+      <div
+        class="final-jeonse-wrap mt-5 mb-4"
+        role="region"
+        aria-labelledby="jeonse-title"
+      >
         <div v-if="reportData.jeonseRatioRating !== '판단보류'">
-          <h2 style="margin-bottom: 2rem">
+          <h2 style="margin-bottom: 2rem" id="jeonse-title">
             {{ reportData.username }}님의
             <span class="main-color fw-semibold">전세가율</span>을 분석했어요.
           </h2>
@@ -186,14 +209,12 @@ onMounted(async () => {
           >
             <div class="final-jeonse-col" style="width: 100%; max-width: 480px">
               <FinalJeonse
-                v-if="reportData"
                 :jeonseRatio="reportData.jeonseRatio"
                 :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
               />
             </div>
             <div class="final-jeonse-col" style="margin-left: 4rem">
               <FinalJeonseCard
-                v-if="reportData"
                 :salePrice="reportData.expectedSellingPrice"
                 :jeonseDeposit="reportData.deposit"
                 :jeonseRatio="reportData.jeonseRatio"
@@ -206,8 +227,10 @@ onMounted(async () => {
         <div v-else>
           <h2>
             {{ reportData.username }}님의 전세가율은
-            <span class="text-secondary">판단보류 등급</span>으로, 분석이
-            어려워요.
+            <br class="mobile-only-break" />
+            <span class="text-secondary no-break fw-semibold"
+              >판단보류 등급</span
+            >으로, 분석이 어려워요.
           </h2>
         </div>
       </div>
@@ -215,8 +238,12 @@ onMounted(async () => {
       <hr class="my-4 border-top border-secondary-subtle w-75 mt-5" />
 
       <!-- 등기부등본 -->
-      <div class="final-registry-wrap mt-5">
-        <h2 class="mb-3">
+      <div
+        class="final-registry-wrap mt-5"
+        role="region"
+        aria-labelledby="registry-title"
+      >
+        <h2 class="mb-3" id="registry-title">
           {{ reportData.username }}님의
           <span class="main-color fw-semibold">등기부등본</span>을 분석했어요.
         </h2>
@@ -232,18 +259,27 @@ onMounted(async () => {
       <hr class="my-4 border-top border-secondary-subtle w-75 mx-auto" />
 
       <!-- 체크리스트 -->
-      <div class="final-checklist-wrap mt-5 mb-3" style="margin: 6rem 0">
+      <div
+        class="final-checklist-wrap mt-5 mb-3"
+        style="margin: 6rem 0"
+        role="region"
+        aria-labelledby="checklist-title"
+      >
         <div class="final-checklist-inner">
           <div v-if="uncheckedItems.length > 0">
-            <h2 class="mb-3">
+            <h2 class="mb-3" id="checklist-title">
               {{ reportData.username }}님이
+              <br class="mobile-only-break" />
               <span class="main-color fw-semibold">체크하지 않은 항목</span
               >이에요.
             </h2>
             <p class="mb-5">
               향후 불이익을 방지하려면 지금 확인하는 것이 좋아요.
             </p>
-            <FinalChecklist :checked="reportData.checked" />
+            <FinalChecklist
+              v-if="uncheckedItems.length > 0"
+              :checked="reportData.checked"
+            />
           </div>
           <div v-else>
             <h2>
@@ -273,6 +309,17 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* 로딩 오버레이 스타일 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 9999;
+}
+
 .final-jeonse-wrap {
   display: flex;
   flex-direction: column;
@@ -331,9 +378,27 @@ onMounted(async () => {
   color: #1a80e5;
 }
 
+.mobile-only-break {
+  display: none;
+}
+
+.no-break {
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .final-btn-wrap {
-    flex-direction: row;
+    gap: 1rem;
+    flex-wrap: nowrap;
+  }
+
+  .final-btn-wrap button {
+    min-width: 120px;
+    flex: 1 1 auto;
+  }
+
+  .mobile-only-break {
+    display: block;
   }
 }
 </style>

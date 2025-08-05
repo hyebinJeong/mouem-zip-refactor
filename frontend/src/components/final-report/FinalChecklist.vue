@@ -17,6 +17,8 @@ const uncheckedItems = computed(() => {
       v-for="(item, index) in uncheckedItems"
       :key="index"
       class="checkedlist-box p-3 rounded mb-3 text-start"
+      role="region"
+      aria-label="체크하지 않은 항목"
     >
       <p class="mb-0" v-html="item"></p>
     </div>

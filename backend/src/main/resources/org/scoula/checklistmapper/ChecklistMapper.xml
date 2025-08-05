@@ -10,11 +10,4 @@
         VALUES (#{registryId}, #{userId}, #{checkedJson}, #{checklistRating})
     </insert>
 
-    <select id="findByUserId" resultType="org.scoula.checklist.domain.dto.ChecklistDTO">
-        SELECT registry_id, user_id
-        FROM checklist
-        WHERE user_id = #{userId}
-    </select>
-
-
 </mapper>

@@ -54,6 +54,8 @@
             >
             <span v-else style="color: gray">판단 불가</span>
           </p>
+          <hr class="my-3" />
+          <p class="fw-bold fs-5 mb-1" style="color: #151fae">주의 사항</p>
           <div class="analysis-cards-wrapper">
             <AnalysisCards
               v-if="result && result.analysis"

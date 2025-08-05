@@ -147,7 +147,7 @@ $main: #1A80E5;
     min-height: calc(100vh - 130px);
     display: flex;
     justify-content: center;
-    background-color: skyblue;
+    background-color:white;
   }
 
   .container {
@@ -155,6 +155,8 @@ $main: #1A80E5;
     max-width: 1200px;
     padding: 20px;
     box-sizing: border-box;
+    background-color:white;
+
   }
 
   .main-title {
@@ -172,7 +174,7 @@ $main: #1A80E5;
 
   .content-box {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     width: 100%;
     justify-content: center;
@@ -181,7 +183,6 @@ $main: #1A80E5;
   // === 슬라이더 영역 ===
   .slider-wrapper {
     position: relative;
-    background-color:pink;
     width: 320px;
     // height: 180px; ← ❌ 삭제
     display: flex;
@@ -239,7 +240,8 @@ $main: #1A80E5;
     background-color: #f7f9fc;
     padding: 20px;
     border-radius: 16px;
-    width: 100%;
+    margin-left:80px;
+    width: 90%;
     max-width: 800px;
     min-height: 300px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);

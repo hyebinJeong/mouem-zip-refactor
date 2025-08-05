@@ -78,8 +78,9 @@ onMounted(async () => {
     // 계약서 미리보기
     contractPreview.value = Array.isArray(contractRes.data)
       ? contractRes.data.slice(0, 3).map((item) => ({
+          contractId: item.contractId,
           contractName: item.contractName,
-          displayDate: '-', // createdAt 없음 → 표시만 함
+          displayDate: new Date(item.createdAt).toISOString().split('T')[0],
         }))
       : [];
   }
@@ -117,12 +118,26 @@ async function onWithdraw() {
   }
 }
 
-function goToContractPage() {
-  router.push('/contract-list');
-}
 function goToReportPage() {
-  console.log('good');
-  router.push('/report-list');
+  router.push({ name: 'reportList' });
+}
+
+function goToContractPage() {
+  router.push({ name: 'ContractListPage' });
+}
+
+function goToContractDetail(item) {
+  router.push({
+    name: 'ReferenceContractSuccess',
+    query: { id: item.contractId, from: 'myPage' },
+  });
+}
+
+function goToReportDetail(item) {
+  router.push({
+    name: 'finalReportPage',
+    query: { reportId: item.reportId, from: 'myPage' },
+  });
 }
 </script>
 
@@ -157,7 +172,7 @@ function goToReportPage() {
           <tr
             v-for="(item, index) in reportPreview"
             :key="index"
-            @click="onReportClick(item)"
+            @click="goToReportDetail(item)"
             class="clickable-row"
           >
             <td>{{ item.title }}</td>
@@ -174,7 +189,9 @@ function goToReportPage() {
     <!-- 계약서 미리보기 -->
     <section class="contract-section section-with-button">
       <h2>참고용 계약서 목록</h2>
-      <button class="more-btn" @click="goToContractPage">더보기</button>
+      <button type="button" class="more-btn" @click="goToContractPage">
+        더보기
+      </button>
       <table>
         <thead>
           <tr>
@@ -183,7 +200,12 @@ function goToReportPage() {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in contractPreview" :key="index">
+          <tr
+            v-for="(item, index) in contractPreview"
+            :key="index"
+            @click="goToContractDetail(item)"
+            class="clickable-row"
+          >
             <td>{{ item.contractName }}</td>
             <td>{{ item.displayDate }}</td>
           </tr>

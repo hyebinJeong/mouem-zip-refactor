@@ -1,7 +1,9 @@
 package org.scoula.contract.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -23,10 +25,13 @@ public class ContractDTO {
     private long downPayment;
     private long balance;
     private long maintenanceCost;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date leaseStart;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date leaseEnd;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
 
-    // 특약 저장용
-    private List<Integer> specialClauseIds;   // 기존 특약 선택
-    private List<String> specialClauseTexts;  // 새로 입력한 특약
+    // ✅ 특약 JSON 배열
+    private List<String> specialClauses;
 }

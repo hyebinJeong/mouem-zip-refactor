@@ -11,13 +11,14 @@
             address, land_category, land_area, building_usage,
             building_area, leased_part, leased_area,
             deposit, down_payment, balance, maintenance_cost,
-            lease_start, lease_end
+            lease_start, lease_end, special_clauses
         ) VALUES (
                      #{userId}, #{contractName}, #{lessorName}, #{lesseeName},
                      #{address}, #{landCategory}, #{landArea}, #{buildingUsage},
                      #{buildingArea}, #{leasedPart}, #{leasedArea},
                      #{deposit}, #{downPayment}, #{balance}, #{maintenanceCost},
-                     #{leaseStart}, #{leaseEnd}
+                     #{leaseStart}, #{leaseEnd},
+                     CAST(#{specialClauses, typeHandler=org.scoula.config.JsonStringListTypeHandler} AS JSON)
                  )
     </insert>
 
@@ -50,18 +51,13 @@
                c.balance,
                c.maintenance_cost AS maintenanceCost,
                c.lease_start AS leaseStart,
-               c.lease_end AS leaseEnd
+               c.lease_end AS leaseEnd,
+               c.created_at AS createdAt,
+               c.special_clauses AS specialClauses
         FROM contract c
         WHERE c.contract_id = #{contractId}
     </select>
 
-    <!-- 특약 조회 -->
-    <select id="selectSpecialClausesByContractId" resultType="string">
-        SELECT sc.description
-        FROM contract_special_clause csc
-                 JOIN special_clause sc ON csc.special_clause_id = sc.special_clause_id
-        WHERE csc.contract_id = #{contractId}
-    </select>
 
 </mapper>
 

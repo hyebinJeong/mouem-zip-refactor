@@ -9,8 +9,16 @@
     <typeAliases>
         <package name="org.scoula.security.account.domain" />
     </typeAliases>
+    <!-- JSON <-> List<String> 변환 핸들러 등록 -->
+    <typeHandlers>
+        <typeHandler
+                handler="org.scoula.config.JsonStringListTypeHandler"
+                javaType="java.util.List"
+                jdbcType="VARCHAR"/>
+    </typeHandlers>
     <mappers>
         <mapper resource="org/scoula/mapper/UserMapper.xml"/>
         <mapper resource="org/scoula/checklistmapper/ChecklistMapper.xml"/>
+        <mapper resource="org/scoula/contract/mapper/ContractMapper.xml"/>
     </mappers>
 </configuration>

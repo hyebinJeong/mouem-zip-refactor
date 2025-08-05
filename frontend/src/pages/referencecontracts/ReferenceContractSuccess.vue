@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
@@ -10,92 +10,71 @@ const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
 
-onMounted(() => {
-  const contractId = route.params.id || route.query.id;
-  console.log('contractId:', contractId); // 여기에 찍힘
-});
-
+// 계약서 상태
 const contract = ref({
   contractName: '',
-  lessor: '',
-  lessee: '',
+  lessorName: '',
+  lesseeName: '',
   address: '',
   landCategory: '',
   landArea: '',
-  structure: '',
+  buildingUsage: '',
   buildingArea: '',
-  leasePart: '',
-  leaseArea: '',
+  leasedPart: '',
+  leasedArea: '',
   deposit: '',
-  contractAmount: '',
-  rent: '',
-  maintenanceFee: '',
-  startDate: '',
-  endDate: '',
-  special: [],
+  downPayment: '',
+  balance: '',
+  maintenanceCost: '',
+  leaseStart: '',
+  leaseEnd: '',
+  specialClauses: [],
 });
 
-const mergedSpecialTerms = computed(() => {
-  const userSpecials = Array.isArray(contract.value.special)
-    ? contract.value.special
-    : contract.value.special
-    ? [contract.value.special]
-    : [];
-  return [...userSpecials];
-});
+// ✅ 특약 배열 (List<String>)
+const mergedSpecialTerms = ref([]);
 
 // ✅ 모달 상태
 const showModal = ref(true);
+const closeModal = () => (showModal.value = false);
 
-const closeModal = () => {
-  showModal.value = false;
-};
+// ✅ PDF 로딩 상태
+const isLoadingPDF = ref(false);
 
 onMounted(async () => {
   try {
-    // DB에서 조회
     const contractId = route.params.id || route.query.id;
-    if (contractId) {
-      console.log('contractId 확인:', contractId); // 디버깅용
-      const res = await axios.get(`/api/contract/${contractId}`, {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
-      const data = res.data;
-      console.log('status:', res.status); // 디버깅용
-      console.log('백엔드 응답:', res.data); // 디버깅용
+    if (!contractId || !auth.isLoggedIn) return;
 
-      contract.value = {
-        contractName: data.contractName,
-        lessor: data.lessorName,
-        lessee: data.lesseeName,
-        address: data.address,
-        landCategory: data.landCategory,
-        landArea: data.landArea,
-        structure: data.buildingUsage,
-        buildingArea: data.buildingArea,
-        leasePart: data.leasedPart,
-        leaseArea: data.leasedArea,
-        deposit: data.deposit,
-        contractAmount: data.downPayment,
-        rent: data.balance,
-        maintenanceFee: data.maintenanceCost,
-        startDate: data.leaseStart,
-        endDate: data.leaseEnd,
-        special: data.specialClauseTexts || [],
-      };
+    const res = await axios.get(`/api/contract/${contractId}`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
 
-      mergedSpecialTerms.value = [...(data.specialClauseTexts || [])];
+    const data = res.data;
+    console.log('계약서 상세 응답:', data);
 
-      // 세션 스토리지에 저장 (기존방식)
-    } else {
-      const stored = sessionStorage.getItem('contractData');
-      if (stored) {
-        contract.value = JSON.parse(stored);
-        mergedSpecialTerms.value = contract.value.special || [];
-      } else {
-        router.replace({ name: 'ReferenceContract' });
-      }
-    }
+    contract.value = {
+      contractName: data.contractName,
+      lessorName: data.lessorName,
+      lesseeName: data.lesseeName,
+      address: data.address,
+      landCategory: data.landCategory,
+      landArea: data.landArea,
+      buildingUsage: data.buildingUsage,
+      buildingArea: data.buildingArea,
+      leasedPart: data.leasedPart,
+      leasedArea: data.leasedArea,
+      deposit: data.deposit,
+      downPayment: data.downPayment,
+      balance: data.balance,
+      maintenanceCost: data.maintenanceCost,
+      leaseStart: data.leaseStart,
+      leaseEnd: data.leaseEnd,
+      specialClauses: data.specialClauses || [],
+    };
+
+    // 특약 복사
+    mergedSpecialTerms.value = [...(data.specialClauses || [])];
   } catch (error) {
     console.error(
       '계약서 조회 실패:',
@@ -105,18 +84,23 @@ onMounted(async () => {
   }
 });
 
-// PDF 다운로드 (페이지 분할)
-function downloadPDF() {
+async function downloadPDF() {
   const pdfArea = document.getElementById('pdf-area');
   if (!pdfArea) return;
 
-  html2canvas(pdfArea, { scale: 2 }).then((canvas) => {
+  isLoadingPDF.value = true; // ✅ 로딩 시작
+
+  // PDF 제외 요소 숨김
+  const excludes = document.querySelectorAll('.exclude-pdf');
+  excludes.forEach((el) => (el.style.visibility = 'hidden'));
+
+  try {
+    const canvas = await html2canvas(pdfArea, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
@@ -136,49 +120,57 @@ function downloadPDF() {
     }
 
     pdf.save(`${contract.value.contractName || '계약서'}.pdf`);
-  });
+  } catch (e) {
+    console.error('PDF 생성 오류:', e);
+  } finally {
+    // 캡처 후 다시 보이게
+    excludes.forEach((el) => (el.style.visibility = 'visible'));
+    isLoadingPDF.value = false; // ✅ 로딩 종료
+  }
 }
 </script>
+
 <template>
   <div class="page-wrapper">
-    <div class="container" id="pdf-area">
-      <!-- PDF 영역 -->
-
-      <!-- 상단 안내 문구 (화면에서는 숨기기) -->
-      <div v-show="false" class="hidden-header">
-        <h1><span class="highlight">계약서</span>가 완성되었어요.</h1>
-        <p class="sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
+    <!-- ✅ PDF 생성 중일 때 로딩 오버레이 -->
+    <div
+      v-if="isLoadingPDF"
+      class="loading-overlay d-flex justify-content-center align-items-center"
+    >
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
+    </div>
 
-      <!-- 계약서 제목 + 다운로드 버튼 -->
+    <div class="container" id="pdf-area">
       <div class="title-with-button">
         <h2 class="property-title">
-          {{ contract.contractName || '계약서 이름이 입력되지 않았습니다' }}
+          {{ contract.contractName || '계약서 이름 없음' }}
         </h2>
-
-        <!-- 리스트에서 들어온 경우만 다운로드 버튼 표시 -->
+        <!-- ✅ 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
         <button
-          v-if="route.query.from === 'list'"
-          class="btn-download"
+          v-if="route.query.from === 'myPage'"
+          class="btn-download exclude-pdf"
           @click="downloadPDF"
+          :disabled="isLoadingPDF"
         >
-          다운로드
+          {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
         </button>
       </div>
 
       <hr class="divider" />
 
-      <!-- 계약서 내용 -->
+      <!-- 계약서 정보 -->
       <div class="table-box">
         <table class="info-table">
           <tr>
             <td>
-              <div class="label">임대인(집주인)</div>
-              <div class="value">{{ contract.lessor }}</div>
+              <div class="label">임대인</div>
+              <div class="value">{{ contract.lessorName }}</div>
             </td>
             <td>
-              <div class="label">임차인(세입자)</div>
-              <div class="value">{{ contract.lessee }}</div>
+              <div class="label">임차인</div>
+              <div class="value">{{ contract.lesseeName }}</div>
             </td>
           </tr>
           <tr>
@@ -198,7 +190,7 @@ function downloadPDF() {
             </td>
             <td>
               <div class="label">건물 구조·용도</div>
-              <div class="value">{{ contract.structure }}</div>
+              <div class="value">{{ contract.buildingUsage }}</div>
             </td>
           </tr>
           <tr>
@@ -208,13 +200,13 @@ function downloadPDF() {
             </td>
             <td>
               <div class="label">임차할 부분</div>
-              <div class="value">{{ contract.leasePart }}</div>
+              <div class="value">{{ contract.leasedPart }}</div>
             </td>
           </tr>
           <tr>
             <td>
               <div class="label">임차할 면적</div>
-              <div class="value">{{ contract.leaseArea }}</div>
+              <div class="value">{{ contract.leasedArea }}</div>
             </td>
             <td>
               <div class="label">보증금</div>
@@ -224,22 +216,22 @@ function downloadPDF() {
           <tr>
             <td>
               <div class="label">계약금</div>
-              <div class="value">{{ contract.contractAmount }}</div>
+              <div class="value">{{ contract.downPayment }}</div>
             </td>
             <td>
               <div class="label">잔금</div>
-              <div class="value">{{ contract.rent }}</div>
+              <div class="value">{{ contract.balance }}</div>
             </td>
           </tr>
           <tr>
             <td>
               <div class="label">관리비</div>
-              <div class="value">{{ contract.maintenanceFee }}</div>
+              <div class="value">{{ contract.maintenanceCost }}</div>
             </td>
             <td colspan="2">
               <div class="label">임대차 기간</div>
               <div class="value">
-                {{ contract.startDate }} ~ {{ contract.endDate }}
+                {{ contract.leaseStart }} ~ {{ contract.leaseEnd }}
               </div>
             </td>
           </tr>
@@ -251,23 +243,22 @@ function downloadPDF() {
       <!-- ✅ 특약사항 -->
       <div class="special-section">
         <h3>특약 사항</h3>
-        <p
-          v-for="(item, index) in mergedSpecialTerms"
-          :key="index"
-          class="custom"
-        >
-          {{ index + 1 }}. {{ item }}
-        </p>
+        <ul v-if="mergedSpecialTerms.length">
+          <li v-for="(clause, idx) in mergedSpecialTerms" :key="idx">
+            {{ clause }}
+          </li>
+        </ul>
+        <p v-else>등록된 특약이 없습니다.</p>
       </div>
     </div>
 
-    <!-- ✅ 계약서 자동 삭제 안내 모달 -->
-    <div v-if="showModal" class="modal-overlay">
+    <!-- ✅ 모달 -->
+    <div v-if="showModal" class="modal-overlay exclude-pdf">
       <div class="modal-content">
         <h2>📌 계약서 자동 삭제 안내</h2>
         <p>
           계약서는 작성일 기준 <strong>50일 후 자동 삭제</strong>됩니다.<br />
-          필요 시 사전 <strong>캡쳐 또는 다운로드</strong>해 주시기 바랍니다.
+          필요 시 사전 <strong>캡쳐 또는 다운로드</strong>해 주세요.
         </p>
         <button class="close-btn" @click="closeModal">확인</button>
       </div>
@@ -276,13 +267,23 @@ function downloadPDF() {
 </template>
 
 <style scoped>
+/* ✅ 로딩 오버레이 스타일 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 3000;
+}
+
 .page-wrapper {
   display: flex;
   justify-content: center;
   padding: 40px 16px;
   background-color: #f5f7fa;
 }
-
 .container {
   background-color: #ffffff;
   border-radius: 16px;
@@ -292,23 +293,6 @@ function downloadPDF() {
   padding: 40px 32px;
   box-sizing: border-box;
 }
-
-h1 {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.highlight {
-  color: #2563eb;
-}
-
-.sub {
-  font-size: 14px;
-  color: #444;
-  margin-bottom: 24px;
-}
-
 .property-title {
   font-size: 22px;
   font-weight: 700;
@@ -316,73 +300,53 @@ h1 {
   color: #111827;
   text-align: center;
 }
-
+.divider {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 24px 0;
+}
 .table-box {
   margin-bottom: 24px;
   font-size: 14px;
   color: #222;
 }
-
 .info-table {
   width: 100%;
   border-collapse: collapse;
 }
-
 .info-table td {
   padding: 12px;
   border: none;
   vertical-align: top;
 }
-
-/* ✅ 라벨 / 값 스타일 */
 .label {
   font-size: 15px;
   font-weight: 600;
   color: #111;
   margin-bottom: 6px;
 }
-
 .value {
   font-size: 14px;
   color: #333;
   line-height: 1.5;
-  white-space: pre-line; /* 줄바꿈 허용 */
+  white-space: pre-line;
 }
-
-.divider {
-  border: none;
-  border-top: 1px solid #ccc;
-  margin: 24px 0;
-}
-
 .special-section {
   margin-top: 16px;
 }
-
 .special-section h3 {
   font-weight: 700;
   font-size: 16px;
   margin-bottom: 12px;
   color: #111;
 }
-
 .special-section p {
   font-size: 14px;
   color: #333;
   line-height: 1.6;
   margin-bottom: 10px;
 }
-
-.special-section .custom {
-  margin-top: 16px;
-  background-color: #f0f4ff;
-  padding: 12px;
-  border-radius: 8px;
-  color: #1e3a8a;
-  font-weight: 500;
-}
-
-/* ✅ 모달 스타일 */
+/* 모달 스타일 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -395,7 +359,6 @@ h1 {
   align-items: center;
   z-index: 2000;
 }
-
 .modal-content {
   background: white;
   padding: 32px 24px;
@@ -404,23 +367,7 @@ h1 {
   width: 90%;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 0.3s ease;
 }
-
-.modal-content h2 {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 16px;
-  color: #1e3a8a;
-}
-
-.modal-content p {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #333;
-  margin-bottom: 20px;
-}
-
 .close-btn {
   background: #2563eb;
   color: white;
@@ -430,50 +377,7 @@ h1 {
   font-weight: bold;
   cursor: pointer;
 }
-
 .close-btn:hover {
   background: #1d4ed8;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.title-with-button {
-  display: flex;
-  justify-content: center; /* 기본은 가운데 */
-  align-items: center;
-  position: relative;
-  margin: 20px 0;
-}
-
-.title-with-button {
-  display: flex;
-  justify-content: center; /* 제목은 가운데 */
-  align-items: center;
-  position: relative;
-  margin: 20px 0;
-}
-
-.btn-download {
-  position: absolute;
-  right: 0; /* 오른쪽 배치 */
-  background-color: #2563eb;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-}
-.btn-download:hover {
-  background-color: #1d4ed8;
 }
 </style>

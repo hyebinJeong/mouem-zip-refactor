@@ -44,7 +44,7 @@ const registryKeys = [
   { key: 'trustInfos', label: '신탁등기' },
 ];
 
-// ✅ PDF 다운로드 (로딩 처리 추가)
+// PDF 다운로드 (로딩 처리 추가)
 async function downloadPDF() {
   const pdfArea = document.getElementById('pdf-area');
   if (!pdfArea) return;
@@ -154,7 +154,7 @@ onMounted(async () => {
       </button>
     </div>
 
-    <!-- ✅ PDF 생성 중일 때 로딩 오버레이 -->
+    <!-- PDF 생성 중일 때 로딩 오버레이 -->
     <div
       v-if="isLoadingPDF"
       class="loading-overlay d-flex justify-content-center align-items-center"
@@ -309,7 +309,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* ✅ 로딩 오버레이 스타일 */
+/* 로딩 오버레이 스타일 */
 .loading-overlay {
   position: fixed;
   top: 0;

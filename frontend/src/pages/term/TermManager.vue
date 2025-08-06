@@ -8,7 +8,7 @@
       <h5 class="fw-bold mb-0">용어 관리</h5>
     </div>
 
-    <p class="text-muted">전체 용어 리스트를 확인하고 관리하는 페이지입니다.</p>
+    <p class="text-muted">전체 용어 목록을 확인하고 관리하는 페이지입니다.</p>
 
     <!-- 검색창 -->
     <div class="mb-3 d-flex justify-content-end">

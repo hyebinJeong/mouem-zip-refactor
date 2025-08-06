@@ -157,6 +157,9 @@ const allowOnlyText = (event, modelRef) => {
 onMounted(() => {
   const fromSpecialPage = sessionStorage.getItem('fromSpecialPage') === 'true';
   const contractData = sessionStorage.getItem('contractData');
+  const script = document.createElement('script');
+  script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+  document.body.appendChild(script);
 
   if (isHardReload() && !fromSpecialPage) {
     // 초기화
@@ -329,6 +332,21 @@ const goToSpecialPage = () => {
   sessionStorage.setItem('fromSpecialPage', 'true');
   router.push({ name: 'SpecialContractsRecommendation' });
 };
+
+const openPostcode = () => {
+  new window.daum.Postcode({
+    oncomplete: function (data) {
+      const userType = data.userSelectedType;
+      if (userType === 'R' && data.roadAddress) {
+        address.value = data.roadAddress;
+      } else if (userType === 'J' && data.jibunAddress) {
+        address.value = data.jibunAddress;
+      } else {
+        address.value = '';
+      }
+    },
+  }).open();
+};
 </script>
 
 <template>
@@ -371,19 +389,29 @@ const goToSpecialPage = () => {
         <!-- 소재지 -->
         <div class="form-row full">
           <label>소재지</label>
-          <input
-            v-model="address"
-            type="text"
-            placeholder="도로명 주소를 입력해주세요."
-            class="long-input"
-          />
+          <div class="input-with-button icon-style">
+            <input
+              v-model="address"
+              type="text"
+              placeholder="도로명 주소를 입력해주세요."
+              class="long-input"
+              readonly
+            />
+            <button type="button" class="icon-btn" @click="openPostcode">
+              🔍
+            </button>
+          </div>
         </div>
 
         <!-- 토지 지목 + 토지 면적 -->
         <div class="form-row">
           <div class="half-col horizontal">
             <label>토지 지목</label>
-            <input v-model="landCategory" type="text" placeholder="대" />
+            <input
+              v-model="landCategory"
+              type="text"
+              placeholder="전, 대, 임야 등"
+            />
             <button
               type="button"
               class="icon-btn"
@@ -407,7 +435,7 @@ const goToSpecialPage = () => {
         <div class="form-row">
           <div class="half-col horizontal">
             <label>건물 구조·용도</label>
-            <input v-model="structure" type="text" placeholder="다세대 주택" />
+            <input v-model="structure" type="text" placeholder="단독 주택" />
             <button
               type="button"
               class="icon-btn"
@@ -914,7 +942,23 @@ input[type='date'] {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
 }
+
+.input-with-button.icon-style input {
+  flex: 1;
+}
+
+.input-with-button.icon-style .icon-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .icon-btn {
   background: #1a80e5;
   border: none;

@@ -148,7 +148,9 @@ function goToReportDetail(item) {
     <div class="user-info">
       <p class="user-name">{{ user.name }}</p>
       <p class="user-email">{{ user.email }}</p>
-      <button @click="onKakaoLogout" class="btn">임시 로그아웃</button>
+      <button @click="onKakaoLogout" class="btn btn-outline-primary btn-sm">
+        로그아웃
+      </button>
       <p class="user-note">
         모든 리포트는 생성일로부터 50일이 지나면 자동 만료됩니다.<br />
         필요한 경우 <span class="pdf-highlight">PDF로 저장해 보관</span>하시는

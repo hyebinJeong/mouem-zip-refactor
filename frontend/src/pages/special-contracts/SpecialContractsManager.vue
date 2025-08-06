@@ -9,7 +9,7 @@
     </div>
 
     <p class="text-muted">
-      전체 특약사항(예시) 목록을 확인하고 관리하는 페이지입니다.
+      전체 특약사항 목록을 확인하고 관리하는 페이지입니다.
     </p>
 
     <!-- 검색창 -->
@@ -146,7 +146,6 @@ const changePage = (page) => {
 const goToEdit = (id) => {
   router.push({ name: 'SpecialContractsEdit', params: { id } });
 };
-
 
 const goBack = () => {
   router.back();

@@ -26,8 +26,8 @@
     <table class="table align-middle">
       <thead>
         <tr>
-          <th style="width: 20%">단어</th>
-          <th style="width: 60%">단어 설명</th>
+          <th style="width: 30%">단어</th>
+          <th style="width: 50%">단어 설명</th>
           <th style="width: 20%">카테고리</th>
         </tr>
       </thead>

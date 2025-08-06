@@ -29,8 +29,8 @@
     <table class="table align-middle">
       <thead>
         <tr>
-          <th style="width: 20%">카테고리</th>
-          <th style="width: 60%">카테고리 설명</th>
+          <th style="width: 30%">카테고리</th>
+          <th style="width: 50%">카테고리 설명</th>
           <th style="width: 20%">카테고리 색상</th>
         </tr>
       </thead>

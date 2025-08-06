@@ -87,7 +87,6 @@ const routes = [
     path: '/checklist/checklist',
     name: 'checklist',
     component: CheckList,
-    meta: { requiresAuth: true },
   },
   { path: '/login', name: 'Login', component: LoginPage },
 

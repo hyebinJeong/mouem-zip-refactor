@@ -31,12 +31,12 @@ const contract = ref({
   specialClauses: [],
 });
 
-// ✅ 특약 배열
+// ✅ 특약 배열 (List<String>)
 const mergedSpecialTerms = ref([]);
 
 // ✅ 모달 상태
-const showModal = ref(true);
-const closeModal = () => (showModal.value = false);
+//const showModal = ref(true);
+//const closeModal = () => (showModal.value = false);
 
 // ✅ PDF 로딩 상태
 const isLoadingPDF = ref(false);
@@ -88,9 +88,14 @@ onMounted(async () => {
       specialClauses: data.specialClauses || [],
     };
 
+    // 특약 복사
     mergedSpecialTerms.value = [...(data.specialClauses || [])];
   } catch (error) {
-    console.error('계약서 조회 실패:', error);
+    console.error(
+      '계약서 조회 실패:',
+      error.response?.status,
+      error.response?.data
+    );
   }
 });
 
@@ -98,8 +103,9 @@ async function downloadPDF() {
   const pdfArea = document.getElementById('pdf-area');
   if (!pdfArea) return;
 
-  isLoadingPDF.value = true;
+  isLoadingPDF.value = true; // ✅ 로딩 시작
 
+  // PDF 제외 요소 숨김
   const excludes = document.querySelectorAll('.exclude-pdf');
   excludes.forEach((el) => (el.style.visibility = 'hidden'));
 
@@ -116,9 +122,11 @@ async function downloadPDF() {
     let heightLeft = imgHeight;
     let position = 0;
 
+    // 첫 페이지
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
     heightLeft -= pageHeight;
 
+    // 남은 부분 페이지 추가
     while (heightLeft > 0) {
       position -= pageHeight;
       pdf.addPage();
@@ -130,15 +138,16 @@ async function downloadPDF() {
   } catch (e) {
     console.error('PDF 생성 오류:', e);
   } finally {
+    // 캡처 후 다시 보이게
     excludes.forEach((el) => (el.style.visibility = 'visible'));
-    isLoadingPDF.value = false;
+    isLoadingPDF.value = false; // ✅ 로딩 종료
   }
 }
 </script>
 
 <template>
   <div class="page-wrapper">
-    <!-- 로딩 오버레이 -->
+    <!-- ✅ PDF 생성 중일 때 로딩 오버레이 -->
     <div
       v-if="isLoadingPDF"
       class="loading-overlay d-flex justify-content-center align-items-center"
@@ -154,10 +163,19 @@ async function downloadPDF() {
         <h2 class="header-title">계약서가 완성되었어요.</h2>
         <p class="header-sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
       </div>
-
-      <!-- 계약명 -->
-      <div class="contract-name">
-        <h3>{{ contract.contractName || '계약서 이름 없음' }}</h3>
+      <div class="title-with-button">
+        <div class="contract-name">
+          <h3>{{ contract.contractName || '계약서 이름 없음' }}</h3>
+        </div>
+        <!-- ✅ 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
+        <button
+          v-if="route.query.from === 'myPage'"
+          class="btn-download exclude-pdf"
+          @click="downloadPDF"
+          :disabled="isLoadingPDF"
+        >
+          {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
+        </button>
       </div>
 
       <hr class="divider" />
@@ -167,11 +185,11 @@ async function downloadPDF() {
         <table class="info-table">
           <tr class="row-divider">
             <td>
-              <div class="label">임대인(임주인)</div>
+              <div class="label">임대인</div>
               <div class="value">{{ contract.lessorName }}</div>
             </td>
             <td>
-              <div class="label">임차인(세입자)</div>
+              <div class="label">임차인</div>
               <div class="value">{{ contract.lesseeName }}</div>
             </td>
           </tr>
@@ -413,6 +431,7 @@ async function downloadPDF() {
   background-color: #2563eb;
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
 }
+
 .clause-box {
   display: flex;
   align-items: center;

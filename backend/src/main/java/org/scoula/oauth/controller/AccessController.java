@@ -18,12 +18,11 @@ public class AccessController {
             "/safety-check/{id}",
             "/agreement",
             "/my",
-            "/checklist/checklist",
             "/contract-list",
             "/report-list",
             "/final-report",
             "/referencecontracts",
-            "/referencecontracts/**"  
+            "/referencecontracts/**"
     })
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> checkUserAccess() {

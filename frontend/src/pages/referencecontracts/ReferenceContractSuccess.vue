@@ -34,10 +34,6 @@ const contract = ref({
 // ✅ 특약 배열 (List<String>)
 const mergedSpecialTerms = ref([]);
 
-// ✅ 모달 상태
-const showModal = ref(true);
-const closeModal = () => (showModal.value = false);
-
 // ✅ PDF 로딩 상태
 const isLoadingPDF = ref(false);
 
@@ -160,7 +156,9 @@ async function downloadPDF() {
     <div class="container" id="pdf-area">
       <!-- 상단 헤더 -->
       <div class="header-box">
-        <h2 class="header-title"><span class="blue-text">계약서</span>가 완성되었어요.</h2>
+        <h2 class="header-title">
+          <span class="blue-text">계약서</span>가 완성되었어요.
+        </h2>
         <p class="header-sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
       </div>
       <div class="title-with-button">
@@ -169,10 +167,10 @@ async function downloadPDF() {
         </div>
         <!-- ✅ 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
         <button
-            v-if="route.query.from === 'myPage'"
-            class="btn btn-primary exclude-pdf"
-            @click="downloadPDF"
-            :disabled="isLoadingPDF"
+          v-if="route.query.from === 'myPage'"
+          class="btn btn-primary exclude-pdf"
+          @click="downloadPDF"
+          :disabled="isLoadingPDF"
         >
           {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
         </button>
@@ -290,20 +288,6 @@ async function downloadPDF() {
         <p v-else>등록된 특약이 없습니다.</p>
       </div>
     </div>
-
-    <!-- 모달 -->
-    <transition name="fade">
-    <div v-if="showModal" class="modal-overlay exclude-pdf">
-      <div class="modal-content">
-        <h2>📌 계약서 자동 삭제 안내</h2>
-        <p>
-          계약서는 작성일 기준 <strong>50일 후 자동 삭제</strong>됩니다.<br />
-          필요 시 사전 <strong>캡쳐 또는 다운로드</strong>해 주세요.
-        </p>
-        <button class="close-btn" @click="closeModal">확인</button>
-      </div>
-    </div>
-    </transition>
   </div>
 </template>
 
@@ -322,7 +306,7 @@ async function downloadPDF() {
   display: flex;
   justify-content: center;
   padding: 60px 100px;
-  background-color: #F7F9FC;
+  background-color: #f7f9fc;
 }
 .container {
   background-color: #ffffff;
@@ -406,59 +390,6 @@ async function downloadPDF() {
   color: #333;
   line-height: 1.6;
   margin-bottom: 10px;
-}
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
-.modal-content {
-  background: white;
-  padding: 34px 26px;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  transform: translateY(0);
-  animation: slideDown 0.35s ease;
-}
-.close-btn {
-  background-color: #1a80e5;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.modal-content h2{
-  font-size: 20px;
-}
-
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.close-btn:hover {
-  background-color: #2563eb;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
 }
 
 .clause-box {

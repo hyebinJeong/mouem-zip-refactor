@@ -26,6 +26,83 @@ const buildingArea = ref('');
 const leasePart = ref('');
 const leaseArea = ref('');
 
+// ✅ 모달 상태
+const showLandModal = ref(false);
+const showBuildingModal = ref(false);
+
+// ✅ 토지 지목 리스트
+const landCategories = [
+  '전',
+  '답',
+  '과수원',
+  '목장용지',
+  '임야',
+  '광천지',
+  '염전',
+  '대',
+  '공장용지',
+  '학교용지',
+  '주차장',
+  '주유소용지',
+  '창고용지',
+  '도로',
+  '철도용지',
+  '제방',
+  '하천',
+  '구거',
+  '유지',
+  '양어장',
+  '수도용지',
+  '공원',
+  '체육용지',
+  '유원지',
+  '종교용지',
+  '사적지',
+  '묘지',
+  '잡종지',
+];
+
+// ✅ 건물 용도 리스트
+const buildingUsages = [
+  '단독주택',
+  '공동주택',
+  '제1종 근린생활시설',
+  '제2종 근린생활시설',
+  '문화 및 집회시설',
+  '종교시설',
+  '판매시설',
+  '운수시설',
+  '의료시설',
+  '교육연구시설',
+  '노유자시설',
+  '수련시설',
+  '운동시설',
+  '업무시설',
+  '숙박시설',
+  '위락시설',
+  '관광휴게시설',
+  '제1종 산업시설',
+  '제2종 산업시설',
+  '창고시설',
+  '위험물저장및처리시설',
+  '자원순환관련시설',
+  '교정 및 군사시설',
+  '방송통신시설',
+  '발전시설',
+  '묘지관련시설',
+  '공원시설',
+];
+
+// ✅ 모달 동작
+function selectLandCategory(item) {
+  landCategory.value = item;
+  showLandModal.value = false;
+}
+function selectBuildingUsage(item) {
+  structure.value = item;
+  showBuildingModal.value = false;
+}
+
 // 세션스토리지 저장/복원
 function saveContractToSession() {
   const contractData = {
@@ -116,9 +193,9 @@ onMounted(() => {
     startDate.value = data.startDate || '';
     endDate.value = data.endDate || '';
     special.value =
-        Array.isArray(data.special) && data.special.length > 0
-            ? data.special
-            : [''];
+      Array.isArray(data.special) && data.special.length > 0
+        ? data.special
+        : [''];
     landCategory.value = data.landCategory || '';
     landArea.value = data.landArea || '';
     buildingArea.value = data.buildingArea || '';
@@ -128,7 +205,7 @@ onMounted(() => {
 
   // 특약 선택 합치기
   const selected = JSON.parse(
-      sessionStorage.getItem('selectedClauses') || '[]'
+    sessionStorage.getItem('selectedClauses') || '[]'
   );
   const newClauses = selected.map((clause) => clause.text).filter(Boolean);
   newClauses.forEach((clause) => {
@@ -142,27 +219,27 @@ onMounted(() => {
 
 // 입력 감시해서 세션에 저장
 watch(
-    [
-      contractName,
-      lessor,
-      lessee,
-      address,
-      contractAmount,
-      deposit,
-      rent,
-      structure,
-      maintenanceFee,
-      startDate,
-      endDate,
-      special,
-      landCategory,
-      landArea,
-      buildingArea,
-      leasePart,
-      leaseArea,
-    ],
-    saveContractToSession,
-    { deep: true }
+  [
+    contractName,
+    lessor,
+    lessee,
+    address,
+    contractAmount,
+    deposit,
+    rent,
+    structure,
+    maintenanceFee,
+    startDate,
+    endDate,
+    special,
+    landCategory,
+    landArea,
+    buildingArea,
+    leasePart,
+    leaseArea,
+  ],
+  saveContractToSession,
+  { deep: true }
 );
 
 // 특약 입력 제어
@@ -200,7 +277,7 @@ const onSubmit = async () => {
 
   // 특약 최소 1개
   const validSpecials = special.value.filter(
-      (term) => term && term.trim() !== ''
+    (term) => term && term.trim() !== ''
   );
   if (validSpecials.length === 0) {
     alert('특약사항을 최소 1개 이상 입력하거나 선택해주세요.');
@@ -261,25 +338,45 @@ const goToSpecialPage = () => {
       <form class="form-grid" @submit.prevent="onSubmit">
         <div class="form-row full">
           <label>계약서 이름</label>
-          <input v-model="contractName" type="text" placeholder="계약서 이름을 작성해주세요." class="long-input"/>
+          <input
+            v-model="contractName"
+            type="text"
+            placeholder="계약서 이름을 작성해주세요."
+            class="long-input"
+          />
         </div>
 
         <!-- 임대인 + 임차인 -->
         <div class="form-row">
           <div class="half-col horizontal">
             <label>임대인(집주인)</label>
-            <input v-model="lessor" type="text" placeholder="성명" @input="allowOnlyText($event, lessor)" />
+            <input
+              v-model="lessor"
+              type="text"
+              placeholder="성명"
+              @input="allowOnlyText($event, lessor)"
+            />
           </div>
           <div class="half-col horizontal">
             <label>임차인(세입자)</label>
-            <input v-model="lessee" type="text" placeholder="성명" @input="allowOnlyText($event, lessee)" />
+            <input
+              v-model="lessee"
+              type="text"
+              placeholder="성명"
+              @input="allowOnlyText($event, lessee)"
+            />
           </div>
         </div>
 
         <!-- 소재지 -->
         <div class="form-row full">
           <label>소재지</label>
-          <input v-model="address" type="text" placeholder="도로명 주소를 입력해주세요." class="long-input" />
+          <input
+            v-model="address"
+            type="text"
+            placeholder="도로명 주소를 입력해주세요."
+            class="long-input"
+          />
         </div>
 
         <!-- 토지 지목 + 토지 면적 -->
@@ -287,10 +384,22 @@ const goToSpecialPage = () => {
           <div class="half-col horizontal">
             <label>토지 지목</label>
             <input v-model="landCategory" type="text" placeholder="대" />
+            <button
+              type="button"
+              class="icon-btn"
+              @click="showLandModal = true"
+            >
+              📑
+            </button>
           </div>
           <div class="half-col horizontal">
             <label>토지 면적</label>
-            <input v-model="landArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, landArea)" />
+            <input
+              v-model="landArea"
+              type="text"
+              placeholder="m²"
+              @input="allowOnlyNumbers($event, landArea)"
+            />
           </div>
         </div>
 
@@ -299,10 +408,22 @@ const goToSpecialPage = () => {
           <div class="half-col horizontal">
             <label>건물 구조·용도</label>
             <input v-model="structure" type="text" placeholder="다세대 주택" />
+            <button
+              type="button"
+              class="icon-btn"
+              @click="showBuildingModal = true"
+            >
+              🏠
+            </button>
           </div>
           <div class="half-col horizontal">
             <label>건물 면적</label>
-            <input v-model="buildingArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, buildingArea)" />
+            <input
+              v-model="buildingArea"
+              type="text"
+              placeholder="m²"
+              @input="allowOnlyNumbers($event, buildingArea)"
+            />
           </div>
         </div>
 
@@ -314,7 +435,12 @@ const goToSpecialPage = () => {
           </div>
           <div class="half-col horizontal">
             <label>임차할 면적</label>
-            <input v-model="leaseArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, leaseArea)" />
+            <input
+              v-model="leaseArea"
+              type="text"
+              placeholder="m²"
+              @input="allowOnlyNumbers($event, leaseArea)"
+            />
           </div>
         </div>
 
@@ -322,11 +448,21 @@ const goToSpecialPage = () => {
         <div class="form-row">
           <div class="half-col horizontal">
             <label>보증금</label>
-            <input v-model="deposit" type="text" placeholder="원" @input="allowOnlyNumbers($event, deposit)" />
+            <input
+              v-model="deposit"
+              type="text"
+              placeholder="원"
+              @input="allowOnlyNumbers($event, deposit)"
+            />
           </div>
           <div class="half-col horizontal">
             <label>계약금</label>
-            <input v-model="contractAmount" type="text" placeholder="원" @input="allowOnlyNumbers($event, contractAmount)" />
+            <input
+              v-model="contractAmount"
+              type="text"
+              placeholder="원"
+              @input="allowOnlyNumbers($event, contractAmount)"
+            />
           </div>
         </div>
 
@@ -334,11 +470,21 @@ const goToSpecialPage = () => {
         <div class="form-row">
           <div class="half-col horizontal">
             <label>잔금</label>
-            <input v-model="rent" type="text" placeholder="원" @input="allowOnlyNumbers($event, rent)" />
+            <input
+              v-model="rent"
+              type="text"
+              placeholder="원"
+              @input="allowOnlyNumbers($event, rent)"
+            />
           </div>
           <div class="half-col horizontal">
             <label>관리비</label>
-            <input v-model="maintenanceFee" type="text" placeholder="원" @input="allowOnlyNumbers($event, maintenanceFee)" />
+            <input
+              v-model="maintenanceFee"
+              type="text"
+              placeholder="원"
+              @input="allowOnlyNumbers($event, maintenanceFee)"
+            />
           </div>
         </div>
 
@@ -360,28 +506,91 @@ const goToSpecialPage = () => {
           <label>특약 사항</label>
           <div class="special-input-wrapper">
             <div class="special-list">
-              <div class="special-input" v-for="(term, index) in special" :key="index">
-                <textarea v-model="special[index]" placeholder="특약 사항을 입력하세요." rows="3"></textarea>
+              <div
+                class="special-input"
+                v-for="(term, index) in special"
+                :key="index"
+              >
+                <textarea
+                  v-model="special[index]"
+                  placeholder="특약 사항을 입력하세요."
+                  rows="3"
+                ></textarea>
                 <div class="btn-group">
-                  <button v-if="index === special.length - 1" type="button" class="btn-small add" @click="addSpecialTerm">
+                  <button
+                    v-if="index === special.length - 1"
+                    type="button"
+                    class="btn-small add"
+                    @click="addSpecialTerm"
+                  >
                     <i class="bi bi-plus-lg icon-white"></i>
                   </button>
-                  <button type="button" class="btn-small remove" @click="removeSpecialTerm(index)">
+                  <button
+                    type="button"
+                    class="btn-small remove"
+                    @click="removeSpecialTerm(index)"
+                  >
                     <i class="bi bi-dash-lg icon-white"></i>
                   </button>
                 </div>
               </div>
             </div>
             <div class="side-controls">
-              <button type="button" class="btn-template" @click="goToSpecialPage">특약 예시에서 선택하기</button>
+              <button
+                type="button"
+                class="btn-template"
+                @click="goToSpecialPage"
+              >
+                특약 예시에서 선택하기
+              </button>
               <p class="tip">특약사항을 추가해드릴게요.</p>
             </div>
           </div>
         </div>
 
         <div class="button-group full">
-          <button type="button" class="btn-back" @click="router.push({ name: 'home' })">뒤로 가기</button>
+          <button
+            type="button"
+            class="btn-back"
+            @click="router.push({ name: 'home' })"
+          >
+            뒤로 가기
+          </button>
           <button type="submit" class="btn-submit">작성 완료</button>
+        </div>
+
+        <!-- ✅ 토지 지목 모달 -->
+        <div v-if="showLandModal" class="modal-overlay">
+          <div class="modal-content">
+            <h3>토지 지목 선택</h3>
+            <ul class="grid">
+              <li
+                v-for="(item, i) in landCategories"
+                :key="i"
+                @click="selectLandCategory(item)"
+              >
+                {{ item }}
+              </li>
+            </ul>
+            <button @click="showLandModal = false">닫기</button>
+          </div>
+        </div>
+
+        <!-- ✅ 건물 용도 모달 -->
+        <div v-if="showBuildingModal" class="modal-overlay">
+          <div class="modal-content">
+            <h3>건물 구조·용도 선택</h3>
+            <ul class="grid">
+              <li
+                v-for="(item, i) in buildingUsages"
+                :key="i"
+                @click="selectBuildingUsage(item)"
+              >
+                {{ item }}
+              </li>
+            </ul>
+            <button @click="showBuildingModal = false">닫기</button>
+          </div>
         </div>
       </form>
     </div>
@@ -396,7 +605,7 @@ const goToSpecialPage = () => {
   background-color: white;
 }
 .contract-box {
-  background-color: #F7F9FC;
+  background-color: #f7f9fc;
   border-radius: 16px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
   padding: 70px;
@@ -428,7 +637,6 @@ const goToSpecialPage = () => {
   align-items: center;
   gap: 0px;
 }
-
 
 .form-row.full label {
   width: 120px;
@@ -500,7 +708,7 @@ input[type='date'] {
   border-radius: 8px;
 }
 
-.period-line span{
+.period-line span {
   font-weight: 600;
   font-size: 15px;
 }
@@ -555,17 +763,16 @@ input[type='date'] {
   white-space: nowrap;
 }
 .btn-small.add {
-  background-color: #1A80E5;
+  background-color: #1a80e5;
 }
 .btn-small.remove {
-  background-color: #FE5252;
+  background-color: #fe5252;
 }
 
 .icon-white {
   color: #fff;
   font-size: 20px;
-  text-shadow: 0 0 1px #fff,
-  0 0 1px #fff;
+  text-shadow: 0 0 1px #fff, 0 0 1px #fff;
 }
 .side-controls {
   display: flex;
@@ -575,7 +782,7 @@ input[type='date'] {
   padding-top: 6px;
 }
 .btn-template {
-  background-color: #1A80E5;
+  background-color: #1a80e5;
   color: #ffffff;
   font-weight: bold;
   border: none;
@@ -605,7 +812,7 @@ input[type='date'] {
   cursor: pointer;
 }
 .btn-submit {
-  background-color: #1A80E5;
+  background-color: #1a80e5;
   color: white;
   padding: 12px 24px;
   border-radius: 8px;
@@ -642,7 +849,6 @@ input[type='date'] {
 }
 /* 반응형: 화면이 768px 이하일 때 (태블릿·모바일) */
 @media (max-width: 768px) {
-
   .form-row.full {
     flex-direction: column;
     align-items: flex-start;
@@ -679,7 +885,8 @@ input[type='date'] {
     width: 100%;
   }
 
-  .btn-back, .btn-submit {
+  .btn-back,
+  .btn-submit {
     width: 100%;
   }
 }
@@ -701,5 +908,112 @@ input[type='date'] {
     font-size: 13px;
     padding: 10px;
   }
+}
+/* 버튼 디자인*/
+.input-with-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.icon-btn {
+  background: #1a80e5;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+}
+/* 모달 디자인 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-content h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+.modal-content input[type='text'] {
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.modal-content button {
+  background-color: #1a80e5;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-content button:hover {
+  background-color: #2563eb;
+}
+
+.modal-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.modal-content ul li {
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.modal-content ul li:last-child {
+  border-bottom: none;
+}
+
+.modal-content ul li:hover {
+  background: #f3f6fb;
+}
+
+.modal-content button:last-of-type {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.modal-content button:last-of-type:hover {
+  background-color: #d0d0d0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
 }
 </style>

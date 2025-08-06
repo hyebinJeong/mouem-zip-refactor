@@ -167,10 +167,10 @@ async function downloadPDF() {
         <div class="contract-name">
           <h3>{{ contract.contractName || '계약서 이름 없음' }}</h3>
         </div>
-        <!-- ✅ 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
+        <!-- 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
         <button
           v-if="route.query.from === 'myPage'"
-          class="btn-download exclude-pdf"
+          class="btn btn-primary exclude-pdf"
           @click="downloadPDF"
           :disabled="isLoadingPDF"
         >
@@ -241,7 +241,9 @@ async function downloadPDF() {
             </td>
             <td>
               <div class="label">계약금</div>
-              <div class="value">{{ formatCurrency(contract.downPayment) }}</div>
+              <div class="value">
+                {{ formatCurrency(contract.downPayment) }}
+              </div>
             </td>
           </tr>
 
@@ -252,7 +254,9 @@ async function downloadPDF() {
             </td>
             <td>
               <div class="label">관리비</div>
-              <div class="value">{{ formatCurrency(contract.maintenanceCost) }}</div>
+              <div class="value">
+                {{ formatCurrency(contract.maintenanceCost) }}
+              </div>
             </td>
           </tr>
 
@@ -316,7 +320,7 @@ async function downloadPDF() {
   display: flex;
   justify-content: center;
   padding: 60px 100px;
-  background-color: #F7F9FC;
+  background-color: #f7f9fc;
 }
 .container {
   background-color: #ffffff;
@@ -419,7 +423,7 @@ async function downloadPDF() {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 .close-btn {
-  background-color: #1A80E5;
+  background-color: #1a80e5;
   color: white;
   border: none;
   padding: 10px 20px;

@@ -169,10 +169,10 @@ async function downloadPDF() {
         </div>
         <!-- ✅ 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
         <button
-          v-if="route.query.from === 'myPage'"
-          class="btn-download exclude-pdf"
-          @click="downloadPDF"
-          :disabled="isLoadingPDF"
+            v-if="route.query.from === 'myPage'"
+            class="btn btn-primary exclude-pdf"
+            @click="downloadPDF"
+            :disabled="isLoadingPDF"
         >
           {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
         </button>
@@ -501,4 +501,14 @@ async function downloadPDF() {
   opacity: 0;
 }
 
+.title-with-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.title-with-button .btn {
+  margin-left: auto;
+}
 </style>

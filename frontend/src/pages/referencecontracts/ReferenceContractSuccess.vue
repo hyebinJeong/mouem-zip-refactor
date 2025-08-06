@@ -241,7 +241,9 @@ async function downloadPDF() {
             </td>
             <td>
               <div class="label">계약금</div>
-              <div class="value">{{ formatCurrency(contract.downPayment) }}</div>
+              <div class="value">
+                {{ formatCurrency(contract.downPayment) }}
+              </div>
             </td>
           </tr>
 
@@ -252,7 +254,9 @@ async function downloadPDF() {
             </td>
             <td>
               <div class="label">관리비</div>
-              <div class="value">{{ formatCurrency(contract.maintenanceCost) }}</div>
+              <div class="value">
+                {{ formatCurrency(contract.maintenanceCost) }}
+              </div>
             </td>
           </tr>
 

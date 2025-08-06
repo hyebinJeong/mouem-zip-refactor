@@ -466,4 +466,15 @@ async function downloadPDF() {
   padding: 12px;
   vertical-align: top;
 }
+
+.title-with-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.title-with-button .btn {
+  margin-left: auto;
+}
 </style>

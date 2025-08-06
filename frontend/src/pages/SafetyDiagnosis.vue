@@ -15,6 +15,9 @@
         placeholder="금액을 입력해주세요. 예시) 30000 (3억)"
         class="input-box"
       />
+      <p class="tip" v-if="jeonsePrice" style="margin-top: 4px;">
+        입력하신 금액: <strong>{{ formatPrice(jeonsePrice) }}</strong>
+      </p>
     </div>
 
     <div class="input-group">
@@ -117,6 +120,20 @@ const handleClick = async () => {
     alert('분석 실패: ' + e.message);
   } finally {
     isSubmitting.value = false;
+  }
+};
+
+// 숫자를 억/만원 단위로 변환해주는 함수
+const formatPrice = (value) => {
+  const billion = Math.floor(value / 10000); // 억
+  const million = value % 10000; // 나머지 만원
+
+  if (billion > 0 && million > 0) {
+    return `${billion}억 ${million.toLocaleString()}만원`;
+  } else if (billion > 0) {
+    return `${billion}억`;
+  } else {
+    return `${million.toLocaleString()}만원`;
   }
 };
 

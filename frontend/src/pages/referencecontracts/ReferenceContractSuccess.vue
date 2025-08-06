@@ -67,7 +67,6 @@ onMounted(async () => {
     });
 
     const data = res.data;
-    console.log('계약서 상세 응답:', data);
 
     contract.value = {
       contractName: data.contractName,
@@ -168,10 +167,10 @@ async function downloadPDF() {
         <div class="contract-name">
           <h3>{{ contract.contractName || '계약서 이름 없음' }}</h3>
         </div>
-        <!-- ✅ 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
+        <!-- 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
         <button
           v-if="route.query.from === 'myPage'"
-          class="btn-download exclude-pdf"
+          class="btn btn-primary exclude-pdf"
           @click="downloadPDF"
           :disabled="isLoadingPDF"
         >
@@ -184,7 +183,7 @@ async function downloadPDF() {
       <!-- 계약서 정보 -->
       <div class="table-box">
         <table class="info-table">
-          <tr>
+          <tr class="row-divider">
             <td>
               <div class="label">임대인</div>
               <div class="value">{{ contract.lessorName }}</div>
@@ -194,65 +193,74 @@ async function downloadPDF() {
               <div class="value">{{ contract.lesseeName }}</div>
             </td>
           </tr>
-          <tr>
-            <td>
+
+          <tr class="row-divider">
+            <td colspan="2">
               <div class="label">소재지</div>
               <div class="value">{{ contract.address }}</div>
             </td>
+          </tr>
+
+          <tr class="row-divider">
             <td>
               <div class="label">토지 지목</div>
               <div class="value">{{ contract.landCategory }}</div>
             </td>
-          </tr>
-          <tr>
             <td>
               <div class="label">토지 면적</div>
               <div class="value">{{ formatArea(contract.landArea) }}</div>
             </td>
+          </tr>
+
+          <tr class="row-divider">
             <td>
               <div class="label">건물 구조·용도</div>
               <div class="value">{{ contract.buildingUsage }}</div>
             </td>
-          </tr>
-          <tr>
             <td>
               <div class="label">건물 면적</div>
               <div class="value">{{ formatArea(contract.buildingArea) }}</div>
             </td>
+          </tr>
+
+          <tr class="row-divider">
             <td>
               <div class="label">임차할 부분</div>
               <div class="value">{{ contract.leasedPart }}</div>
             </td>
-          </tr>
-          <tr>
             <td>
               <div class="label">임차할 면적</div>
               <div class="value">{{ formatArea(contract.leasedArea) }}</div>
             </td>
+          </tr>
+
+          <tr class="row-divider">
             <td>
               <div class="label">보증금</div>
               <div class="value">{{ formatCurrency(contract.deposit) }}</div>
             </td>
-          </tr>
-          <tr>
             <td>
               <div class="label">계약금</div>
               <div class="value">
                 {{ formatCurrency(contract.downPayment) }}
               </div>
             </td>
+          </tr>
+
+          <tr class="row-divider">
             <td>
               <div class="label">잔금</div>
               <div class="value">{{ formatCurrency(contract.balance) }}</div>
             </td>
-          </tr>
-          <tr>
             <td>
               <div class="label">관리비</div>
               <div class="value">
                 {{ formatCurrency(contract.maintenanceCost) }}
               </div>
             </td>
+          </tr>
+
+          <tr>
             <td colspan="2">
               <div class="label">임대차 기간</div>
               <div class="value">
@@ -283,7 +291,7 @@ async function downloadPDF() {
       </div>
     </div>
 
-    <!-- ✅ 모달 
+    <!-- 모달 -->
     <div v-if="showModal" class="modal-overlay exclude-pdf">
       <div class="modal-content">
         <h2>📌 계약서 자동 삭제 안내</h2>
@@ -293,47 +301,63 @@ async function downloadPDF() {
         </p>
         <button class="close-btn" @click="closeModal">확인</button>
       </div>
-    </div>-->
+    </div>
   </div>
 </template>
 
 <style scoped>
-/* ✅ 로딩 오버레이 스타일 */
 .loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgb(255, 255, 255);
   z-index: 3000;
 }
 
 .page-wrapper {
   display: flex;
   justify-content: center;
-  padding: 40px 16px;
-  background-color: #f5f7fa;
+  padding: 60px 100px;
+  background-color: #f7f9fc;
 }
 .container {
   background-color: #ffffff;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  max-width: 800px;
+  max-width: 680px;
   width: 100%;
-  padding: 40px 32px;
+  padding: 60px 90px;
   box-sizing: border-box;
 }
-.property-title {
-  font-size: 22px;
+.header-box {
+  margin-bottom: 16px;
+}
+.header-title {
+  font-size: 24px;
   font-weight: 700;
-  margin: 20px 0;
-  color: #111827;
-  text-align: center;
+  color: #1d4ed8;
+  margin-bottom: 20px;
+  margin-left: 10px;
+}
+.header-sub {
+  font-size: 14px;
+  color: #555;
+  margin-left: 10px;
+}
+.contract-name {
+  margin: 20px 0 20px 10px;
+}
+.contract-name h3 {
+  font-size: 20px;
+  font-weight: 670;
+  color: #000000;
+  text-align: left;
 }
 .divider {
   border: none;
-  border-top: 1px solid #ccc;
+  border-top: 1.4px solid #a6a6a6;
   margin: 24px 0;
 }
 .table-box {
@@ -353,12 +377,12 @@ async function downloadPDF() {
 .label {
   font-size: 15px;
   font-weight: 600;
-  color: #111;
+  color: #4e4e4e;
   margin-bottom: 6px;
 }
 .value {
   font-size: 14px;
-  color: #333;
+  color: #222222;
   line-height: 1.5;
   white-space: pre-line;
 }
@@ -377,7 +401,6 @@ async function downloadPDF() {
   line-height: 1.6;
   margin-bottom: 10px;
 }
-/* 모달 스타일 
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -398,9 +421,9 @@ async function downloadPDF() {
   width: 90%;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}*/
+}
 .close-btn {
-  background: #2563eb;
+  background-color: #1a80e5;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -409,7 +432,8 @@ async function downloadPDF() {
   cursor: pointer;
 }
 .close-btn:hover {
-  background: #1d4ed8;
+  background-color: #2563eb;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
 }
 
 .clause-box {
@@ -433,47 +457,24 @@ async function downloadPDF() {
   color: #111;
   flex: 1;
 }
-.header-box {
-  text-align: left;
-  margin-bottom: 16px;
+
+.info-table .row-divider td {
+  border-bottom: 1.3px solid #efefef;
 }
 
-.header-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1d4ed8;
-  margin-bottom: 6px;
-}
-
-.header-sub {
-  font-size: 14px;
-  color: #555;
+.info-table td {
+  padding: 12px;
+  vertical-align: top;
 }
 
 .title-with-button {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 20px 0;
 }
 
-.contract-name h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.btn-download {
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.btn-download:disabled {
-  background-color: #93c5fd;
-  cursor: not-allowed;
+.title-with-button .btn {
+  margin-left: auto;
 }
 </style>

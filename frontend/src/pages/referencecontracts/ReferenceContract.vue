@@ -261,78 +261,97 @@ const goToSpecialPage = () => {
       <form class="form-grid" @submit.prevent="onSubmit">
         <div class="form-row full">
           <label>계약서 이름</label>
-          <input v-model="contractName" type="text" placeholder="계약서 이름을 작성해주세요." />
+          <input v-model="contractName" type="text" placeholder="계약서 이름을 작성해주세요." class="long-input"/>
         </div>
 
-        <div class="grid-2col">
-          <div class="left-col">
-            <div class="form-row">
-              <label>임대인(집주인)</label>
-              <input v-model="lessor" type="text" placeholder="성명" @input="allowOnlyText($event, lessor)" />
-            </div>
-            <div class="form-row full">
-              <label>소재지</label>
-              <input v-model="address" type="text" placeholder="도로명 주소를 입력해주세요." />
-            </div>
-            <div class="form-row">
-              <label>토지 지목</label>
-              <input v-model="landCategory" type="text" placeholder="대" />
-            </div>
-            <div class="form-row">
-              <label>건물 구조·용도</label>
-              <input v-model="structure" type="text" placeholder="다세대 주택" />
-            </div>
-            <div class="form-row">
-              <label>임차할 부분</label>
-              <input v-model="leasePart" type="text" placeholder="동·호수" />
-            </div>
-            <div class="form-row">
-              <label>보증금</label>
-              <input v-model="deposit" type="text" placeholder="원" @input="allowOnlyNumbers($event, deposit)"/>
-            </div>
-            <div class="form-row date-range-vertical align-start">
-              <label class="align-top">임대차 기간</label>
-              <div class="date-block">
-                <div class="date-line">
-                  <input v-model="startDate" type="date" />
-                  <span>부터</span>
-                </div>
-                <div class="date-line">
-                  <input v-model="endDate" type="date" />
-                  <span>까지</span>
-                </div>
-              </div>
-            </div>
+        <!-- 임대인 + 임차인 -->
+        <div class="form-row">
+          <div class="half-col horizontal">
+            <label>임대인(집주인)</label>
+            <input v-model="lessor" type="text" placeholder="성명" @input="allowOnlyText($event, lessor)" />
           </div>
+          <div class="half-col horizontal">
+            <label>임차인(세입자)</label>
+            <input v-model="lessee" type="text" placeholder="성명" @input="allowOnlyText($event, lessee)" />
+          </div>
+        </div>
 
-          <div class="right-col">
-            <div class="form-row">
-              <label>임차인(세입자)</label>
-              <input v-model="lessee" type="text" placeholder="성명" @input="allowOnlyText($event, lessee)" />
+        <!-- 소재지 -->
+        <div class="form-row full">
+          <label>소재지</label>
+          <input v-model="address" type="text" placeholder="도로명 주소를 입력해주세요." class="long-input" />
+        </div>
+
+        <!-- 토지 지목 + 토지 면적 -->
+        <div class="form-row">
+          <div class="half-col horizontal">
+            <label>토지 지목</label>
+            <input v-model="landCategory" type="text" placeholder="대" />
+          </div>
+          <div class="half-col horizontal">
+            <label>토지 면적</label>
+            <input v-model="landArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, landArea)" />
+          </div>
+        </div>
+
+        <!-- 건물 구조·용도 + 건물 면적 -->
+        <div class="form-row">
+          <div class="half-col horizontal">
+            <label>건물 구조·용도</label>
+            <input v-model="structure" type="text" placeholder="다세대 주택" />
+          </div>
+          <div class="half-col horizontal">
+            <label>건물 면적</label>
+            <input v-model="buildingArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, buildingArea)" />
+          </div>
+        </div>
+
+        <!-- 임차할 부분 + 임차할 면적 -->
+        <div class="form-row">
+          <div class="half-col horizontal">
+            <label>임차할 부분</label>
+            <input v-model="leasePart" type="text" placeholder="동·호수" />
+          </div>
+          <div class="half-col horizontal">
+            <label>임차할 면적</label>
+            <input v-model="leaseArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, leaseArea)" />
+          </div>
+        </div>
+
+        <!-- 보증금 + 계약금 -->
+        <div class="form-row">
+          <div class="half-col horizontal">
+            <label>보증금</label>
+            <input v-model="deposit" type="text" placeholder="원" @input="allowOnlyNumbers($event, deposit)" />
+          </div>
+          <div class="half-col horizontal">
+            <label>계약금</label>
+            <input v-model="contractAmount" type="text" placeholder="원" @input="allowOnlyNumbers($event, contractAmount)" />
+          </div>
+        </div>
+
+        <!-- 잔금 + 관리비 -->
+        <div class="form-row">
+          <div class="half-col horizontal">
+            <label>잔금</label>
+            <input v-model="rent" type="text" placeholder="원" @input="allowOnlyNumbers($event, rent)" />
+          </div>
+          <div class="half-col horizontal">
+            <label>관리비</label>
+            <input v-model="maintenanceFee" type="text" placeholder="원" @input="allowOnlyNumbers($event, maintenanceFee)" />
+          </div>
+        </div>
+
+        <div class="form-row period-vertical">
+          <label>임대차 기간</label>
+          <div class="period-column">
+            <div class="period-line">
+              <input v-model="startDate" type="date" />
+              <span>부터</span>
             </div>
-            <div class="form-row">
-              <label>토지 면적</label>
-              <input v-model="landArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, landArea)"/>
-            </div>
-            <div class="form-row">
-              <label>건물 면적</label>
-              <input v-model="buildingArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, buildingArea)"/>
-            </div>
-            <div class="form-row">
-              <label>임차할 면적</label>
-              <input v-model="leaseArea" type="text" placeholder="m²" @input="allowOnlyNumbers($event, leaseArea)"/>
-            </div>
-            <div class="form-row">
-              <label>계약금</label>
-              <input v-model="contractAmount" type="text" placeholder="원" @input="allowOnlyNumbers($event, contractAmount)"/>
-            </div>
-            <div class="form-row">
-              <label>잔금</label>
-              <input v-model="rent" type="text" placeholder="원"  @input="allowOnlyNumbers($event, rent)"/>
-            </div>
-            <div class="form-row">
-              <label>관리비</label>
-              <input v-model="maintenanceFee" type="text" placeholder="원" @input="allowOnlyNumbers($event, maintenanceFee)"/>
+            <div class="period-line">
+              <input v-model="endDate" type="date" />
+              <span>까지</span>
             </div>
           </div>
         </div>
@@ -373,7 +392,7 @@ const goToSpecialPage = () => {
 .wrapper {
   display: flex;
   justify-content: center;
-  padding: 40px;
+  padding: 60px;
   background-color: white;
 }
 .contract-box {
@@ -385,20 +404,17 @@ const goToSpecialPage = () => {
   max-width: 1100px;
 }
 .title {
-  font-size: 26px;
+  font-size: 27px;
   font-weight: bold;
-  margin-bottom: 32px;
+  margin-top: -25px;
+  margin-bottom: 55px;
 }
 .form-grid {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
-.grid-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 50px;
-}
+
 .form-row {
   display: flex;
   align-items: center;
@@ -407,61 +423,91 @@ const goToSpecialPage = () => {
   margin-bottom: 20px;
 }
 .form-row.full {
-  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0px;
 }
+
+
+.form-row.full label {
+  width: 120px;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.form-row.full .long-input {
+  flex: 1;
+}
+
+.half-col.horizontal {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.half-col.horizontal label {
+  font-weight: 700;
+  width: 120px;
+  margin-bottom: 0px;
+}
+
 label {
-  width: 160px;
+  width: 105px;
   font-weight: 700;
   text-align: left;
   flex-shrink: 0;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 input[type='text'],
 input[type='date'] {
   flex-grow: 1;
+  min-width: 0;
+  width: 100%;
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 14px;
 }
-.date-range .date-inputs {
+
+.long-input[type='text'] {
+  width: 100%;
+}
+.period-vertical {
   display: flex;
-  gap: 8px;
   align-items: center;
-  flex-grow: 1;
 }
 
-.align-start {
-  align-items: flex-start;
-}
-
-.align-top {
-  padding-top: 10px;
-}
-
-.date-block {
+.period-column {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex-grow: 1;
 }
 
-.date-line {
+.period-line {
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
+}
+
+.period-line input[type='date'] {
+  width: 275px;
+  height: 44px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.period-line span{
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .date-line input[type='date'] {
   flex-grow: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
   height: 44px;
-  box-sizing: border-box;
 }
 
 .date-line span {
@@ -593,5 +639,67 @@ input[type='date'] {
 
 .btn-back:hover {
   background-color: #e0e0e0;
+}
+/* 반응형: 화면이 768px 이하일 때 (태블릿·모바일) */
+@media (max-width: 768px) {
+
+  .form-row.full {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-row.full label {
+    width: auto;
+    margin-bottom: 8px;
+  }
+
+  .form-row.full .long-input {
+    width: 100%;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .half-col.horizontal {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  label {
+    width: auto; /* 라벨 고정폭 제거 */
+    margin-bottom: 8px;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .btn-back, .btn-submit {
+    width: 100%;
+  }
+}
+
+/* 모바일(480px 이하) */
+@media (max-width: 480px) {
+  .contract-box {
+    padding: 30px;
+  }
+
+  .title {
+    font-size: 22px;
+    margin-bottom: 30px;
+  }
+
+  input[type='text'],
+  input[type='date'],
+  textarea {
+    font-size: 13px;
+    padding: 10px;
+  }
 }
 </style>

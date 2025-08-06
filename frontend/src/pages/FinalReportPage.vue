@@ -19,7 +19,7 @@ import jsPDF from 'jspdf';
 const route = useRoute();
 const showModal = ref(false);
 const reportData = ref(null);
-const isLoadingPDF = ref(false); // ✅ 로딩 상태 추가
+const isLoadingPDF = ref(false); // 로딩 상태 추가
 
 const openModal = () => (showModal.value = true);
 const closeModal = () => (showModal.value = false);
@@ -213,7 +213,7 @@ onMounted(async () => {
                 :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
               />
             </div>
-            <div class="final-jeonse-col" style="margin-left: 4rem">
+            <div class="final-jeonse-col ms-md-4 mt-4 mt-md-0">
               <FinalJeonseCard
                 :salePrice="reportData.expectedSellingPrice"
                 :jeonseDeposit="reportData.deposit"
@@ -399,6 +399,12 @@ onMounted(async () => {
 
   .mobile-only-break {
     display: block;
+  }
+}
+
+@media (max-width: 576px) {
+  .jeonse-card-wrap p {
+    white-space: normal;
   }
 }
 </style>

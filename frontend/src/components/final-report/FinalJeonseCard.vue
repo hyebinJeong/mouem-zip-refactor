@@ -16,16 +16,25 @@ const gradeColorStyle = computed(() => getGradeColor(props.jeonseRatioRating));
 <template>
   <div class="FinalJeonseCard">
     <div
-      class="rounded-3 shadow-sm mx-auto pt-3 pb-2"
-      style="max-width: 400px; background-color: #f8f9fa"
+      class="rounded-3 shadow-sm mx-auto pt-3 pb-3"
+      style="max-width: 640px; width: 100%; background-color: #f8f9fa"
     >
-      <div class="jeonse-card-wrap px-5 mx-5 text-start">
-        <p>예상 매매가 : {{ (salePrice || 0).toLocaleString() }}만원</p>
-        <p>전세 보증금 : {{ (jeonseDeposit || 0).toLocaleString() }}만원</p>
-        <p>예상 전세가율 : {{ (jeonseRatio || 0).toLocaleString() }}%</p>
+      <div class="px-4 text-start">
+        <p class="mb-0 fs-6 fw-semibold">
+          예상 매매가 : {{ (salePrice || 0).toLocaleString() }}만원
+        </p>
+        <p class="mb-0 fs-6 fw-semibold">
+          전세 보증금 : {{ (jeonseDeposit || 0).toLocaleString() }}만원
+        </p>
+        <p class="mb-0 fs-6 fw-semibold">
+          예상 전세가율 : {{ (jeonseRatio || 0).toLocaleString() }}%
+        </p>
       </div>
     </div>
-    <h5 class="mt-5">
+    <h5
+      class="mt-4 text-center fs-5 fw-normal text-nowrap"
+      style="max-width: 640px; margin: 0 auto"
+    >
       <span>{{ username }}님의 전세가율은 </span>
       <span
         ><span class="fw-bold" :style="{ color: gradeColorStyle }"
@@ -37,6 +46,10 @@ const gradeColorStyle = computed(() => getGradeColor(props.jeonseRatioRating));
 </template>
 
 <style scoped>
-/* .FinalJeonseCard {
-} */
+@media (max-width: 576px) {
+  .FinalJeonseCard h5 {
+    white-space: normal;
+    max-width: 100% !important;
+  }
+}
 </style>

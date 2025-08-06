@@ -572,7 +572,7 @@ const goToSpecialPage = () => {
                 {{ item }}
               </li>
             </ul>
-            <button @click="showLandModal = false">닫기</button>
+            <button class="close-btn" @click="showLandModal = false">닫기</button>
           </div>
         </div>
 
@@ -589,7 +589,7 @@ const goToSpecialPage = () => {
                 {{ item }}
               </li>
             </ul>
-            <button @click="showBuildingModal = false">닫기</button>
+            <button class="close-btn" @click="showBuildingModal = false">닫기</button>
           </div>
         </div>
       </form>
@@ -1001,13 +1001,18 @@ input[type='date'] {
   background: #f3f6fb;
 }
 
-.modal-content button:last-of-type {
-  background-color: #e0e0e0;
-  color: #333;
+.close-btn {
+  background-color: #1a80e5;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
-
-.modal-content button:last-of-type:hover {
-  background-color: #d0d0d0;
+.close-btn:hover {
+  background-color: #2563eb;
 }
 
 .grid {

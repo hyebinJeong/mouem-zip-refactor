@@ -35,8 +35,8 @@ const contract = ref({
 const mergedSpecialTerms = ref([]);
 
 // ✅ 모달 상태
-//const showModal = ref(true);
-//const closeModal = () => (showModal.value = false);
+const showModal = ref(true);
+const closeModal = () => (showModal.value = false);
 
 // ✅ PDF 로딩 상태
 const isLoadingPDF = ref(false);
@@ -160,7 +160,7 @@ async function downloadPDF() {
     <div class="container" id="pdf-area">
       <!-- 상단 헤더 -->
       <div class="header-box">
-        <h2 class="header-title">계약서가 완성되었어요.</h2>
+        <h2 class="header-title"><span class="blue-text">계약서</span>가 완성되었어요.</h2>
         <p class="header-sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
       </div>
       <div class="title-with-button">
@@ -288,6 +288,7 @@ async function downloadPDF() {
     </div>
 
     <!-- 모달 -->
+    <transition name="fade">
     <div v-if="showModal" class="modal-overlay exclude-pdf">
       <div class="modal-content">
         <h2>📌 계약서 자동 삭제 안내</h2>
@@ -298,6 +299,7 @@ async function downloadPDF() {
         <button class="close-btn" @click="closeModal">확인</button>
       </div>
     </div>
+    </transition>
   </div>
 </template>
 
@@ -331,12 +333,16 @@ async function downloadPDF() {
   margin-bottom: 16px;
 }
 .header-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  color: #1d4ed8;
+  color: #000000;
   margin-bottom: 20px;
   margin-left: 10px;
 }
+.header-title .blue-text {
+  color: #1a80e5;
+}
+
 .header-sub {
   font-size: 14px;
   color: #555;
@@ -404,6 +410,7 @@ async function downloadPDF() {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -411,15 +418,17 @@ async function downloadPDF() {
 }
 .modal-content {
   background: white;
-  padding: 32px 24px;
+  padding: 34px 26px;
   border-radius: 12px;
   max-width: 400px;
   width: 90%;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
+  animation: slideDown 0.35s ease;
 }
 .close-btn {
-  background-color: #1A80E5;
+  background-color: #1a80e5;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -427,6 +436,22 @@ async function downloadPDF() {
   font-weight: bold;
   cursor: pointer;
 }
+.modal-content h2{
+  font-size: 20px;
+}
+
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .close-btn:hover {
   background-color: #2563eb;
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
@@ -462,4 +487,14 @@ async function downloadPDF() {
   padding: 12px;
   vertical-align: top;
 }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 </style>

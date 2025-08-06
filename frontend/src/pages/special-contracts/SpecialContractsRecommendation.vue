@@ -165,17 +165,17 @@ export default {
 
 <style scoped>
 .container {
-  background-color: #f3f4f6;
+  background-color: #F7F9FC;
   min-height: 100vh;
-  padding: 40px 60px;
+  padding: 60px 100px;
   font-family: 'Arial', sans-serif;
 }
 
 .content-box {
-  background-color: white;
-  padding: 40px;
+  background-color: #ffffff;
+  padding: 70px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   position: relative;
 }
 
@@ -196,7 +196,7 @@ export default {
 
 /* 타이틀 */
 .title-text .main-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: #1f2937;
 }
@@ -271,10 +271,10 @@ export default {
 .item {
   background-color: #f9fafb;
   padding: 16px;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 17px;
+  font-weight: 600;
   color: #1f2937;
   cursor: pointer;
   display: flex;
@@ -282,9 +282,12 @@ export default {
   justify-content: center;
   transition: background-color 0.2s;
   text-align: center;
+  min-height: 70px;
 }
 .item:hover {
-  background-color: #e5e7eb;
+  background-color: #f3f4f6;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
 }
 .item.red {
   background-color: #fef2f2;
@@ -299,6 +302,9 @@ export default {
   background-color: #f3f4f6;
 }
 
+.item {
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
 /* 점 표시 */
 .dot {
   width: 8px;
@@ -375,27 +381,52 @@ export default {
   padding: 32px;
   border-radius: 20px;
   position: relative;
+  animation: modal-pop 0.3s ease-out;
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .modal-header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 .modal-header h3 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
 }
 .close-btn {
+  position: absolute;
+  right: 16px;
+  top: 0%;
   font-size: 24px;
   font-weight: bold;
   cursor: pointer;
 }
+.modal-content {
+  padding: 30px 20px;
+}
 .modal-content .clause {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  background: #f9fafb;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(229, 231, 235, 0.52);
 }
+
 .clause-number {
   color: #2563eb;
   font-weight: bold;
@@ -413,8 +444,14 @@ export default {
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 6px 13px;
   cursor: pointer;
   font-size: 13px;
+  margin-left: 8px;
+}
+.select-btn:hover {
+  background-color: #2563eb;
+  transform: scale(1.03);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 </style>

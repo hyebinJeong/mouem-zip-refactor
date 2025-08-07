@@ -488,31 +488,31 @@ const openPostcode = () => {
 
         <!-- 보증금 + 계약금 -->
         <div class="form-row">
-          <div class="half-col horizontal">
+          <div class="half-col horizontal align-top">
             <label>보증금</label>
             <div class="input-with-tip">
               <input
-                v-model="deposit"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, deposit)"
+                  v-model="deposit"
+                  type="text"
+                  placeholder="원"
+                  @input="allowOnlyNumbers($event, deposit)"
               />
-              <p class="tip" v-if="deposit">
+              <p class="m-tip" v-show="deposit">
                 입력하신 금액: <strong>{{ formatPrice(deposit) }}</strong>
               </p>
             </div>
           </div>
 
-          <div class="half-col horizontal">
+          <div class="half-col horizontal align-top">
             <label>계약금</label>
             <div class="input-with-tip">
               <input
-                v-model="contractAmount"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, contractAmount)"
+                  v-model="contractAmount"
+                  type="text"
+                  placeholder="원"
+                  @input="allowOnlyNumbers($event, contractAmount)"
               />
-              <p class="tip" v-if="contractAmount">
+              <p class="m-tip" v-show="contractAmount">
                 입력하신 금액:
                 <strong>{{ formatPrice(contractAmount) }}</strong>
               </p>
@@ -522,32 +522,32 @@ const openPostcode = () => {
 
         <!-- 잔금 + 관리비 -->
         <div class="form-row">
-          <div class="half-col horizontal">
+          <div class="half-col horizontal align-top">
             <label>잔금</label>
             <div class="input-with-tip">
               <input
-                v-model="rent"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, rent)"
+                  v-model="rent"
+                  type="text"
+                  placeholder="원"
+                  @input="allowOnlyNumbers($event, rent)"
               />
-              <p class="tip" v-if="rent">
+              <p class="m-tip" v-show="rent">
                 입력하신 금액:
                 <strong>{{ formatPrice(rent) }}</strong>
               </p>
             </div>
           </div>
 
-          <div class="half-col horizontal">
+          <div class="half-col horizontal align-top">
             <label>관리비</label>
             <div class="input-with-tip">
               <input
-                v-model="maintenanceFee"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, maintenanceFee)"
+                  v-model="maintenanceFee"
+                  type="text"
+                  placeholder="원"
+                  @input="allowOnlyNumbers($event, maintenanceFee)"
               />
-              <p class="tip" v-if="maintenanceFee">
+              <p class="m-tip" v-show="maintenanceFee">
                 입력하신 금액:
                 <strong>{{ formatPrice(maintenanceFee) }}</strong>
               </p>
@@ -728,6 +728,7 @@ const openPostcode = () => {
   margin-bottom: 0px;
 }
 
+
 label {
   width: 105px;
   font-weight: 700;
@@ -870,12 +871,7 @@ input[type='date'] {
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-.tip {
-  font-size: 13px;
-  color: #666;
-  margin-top: 4px;
-  margin-left: 4px; /* input 안쪽 padding 느낌 주기 */
-}
+
 .button-group {
   display: flex;
   justify-content: space-between;
@@ -1178,8 +1174,19 @@ input[type='date'] {
   white-space: nowrap;
 }
 .input-with-tip {
-  flex: 1;
+  position: relative;
   display: flex;
-  flex-direction: column; /* input 밑에 tip 배치 */
+  flex-direction: column;
+  flex: 1;
+}
+
+.m-tip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  margin-top: 4px; /* input 아래 간격 */
 }
 </style>

@@ -397,8 +397,8 @@ const openPostcode = () => {
               class="long-input"
               readonly
             />
-            <button type="button" class="icon-btn" @click="openPostcode">
-              🔍
+            <button type="button" class="address-btn" @click="openPostcode">
+              주소검색
             </button>
           </div>
         </div>
@@ -414,10 +414,10 @@ const openPostcode = () => {
             />
             <button
               type="button"
-              class="icon-btn"
+              class="icon-btn sel-btn"
               @click="showLandModal = true"
             >
-              📑
+              <i class="bi-geo-alt"></i>
             </button>
           </div>
           <div class="half-col horizontal">
@@ -438,10 +438,10 @@ const openPostcode = () => {
             <input v-model="structure" type="text" placeholder="단독 주택" />
             <button
               type="button"
-              class="icon-btn"
+              class="icon-btn sel-btn"
               @click="showBuildingModal = true"
             >
-              🏠
+              <i class="bi-house"></i>
             </button>
           </div>
           <div class="half-col horizontal">
@@ -591,11 +591,11 @@ const openPostcode = () => {
         <div v-if="showLandModal" class="modal-overlay">
           <div class="modal-content">
             <h3>토지 지목 선택</h3>
-            <ul class="grid">
+            <ul class="list-style">
               <li
-                v-for="(item, i) in landCategories"
-                :key="i"
-                @click="selectLandCategory(item)"
+                  v-for="(item, i) in landCategories"
+                  :key="i"
+                  @click="selectLandCategory(item)"
               >
                 {{ item }}
               </li>
@@ -608,7 +608,7 @@ const openPostcode = () => {
         <div v-if="showBuildingModal" class="modal-overlay">
           <div class="modal-content">
             <h3>건물 구조·용도 선택</h3>
-            <ul class="grid">
+            <ul class="list-style">
               <li
                 v-for="(item, i) in buildingUsages"
                 :key="i"
@@ -802,6 +802,18 @@ input[type='date'] {
   font-size: 20px;
   text-shadow: 0 0 1px #fff, 0 0 1px #fff;
 }
+
+.sel-btn{
+  min-width: 45px;
+  margin-left: 10px;
+}
+
+.sel-btn:hover{
+  background-color: rgb(33, 112, 193);
+  transform: scale(1.02);
+  transition: all 0.1s ease-in-out;
+}
+
 .side-controls {
   display: flex;
   flex-direction: column;
@@ -862,19 +874,49 @@ input[type='date'] {
 }
 
 .btn-template:hover {
-  background-color: #2563eb;
+  background-color: rgb(33, 112, 193);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease-in-out;
 }
 
 .btn-submit:hover {
-  background-color: #2563eb;
+  background-color: rgb(33, 112, 193);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);
+  transition: all 0.1s ease-in-out;
 }
 
 .btn-back:hover {
-  background-color: #e0e0e0;
+  background-color: #d6d6d6;
+  transform: scale(1.02);
+  transition: all 0.1s ease-in-out;
 }
+
+.list-style {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.list-style li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s ease, font-weight 0.2s ease;
+  font-size: 16px;
+}
+
+.list-style li:hover {
+  background: #f0f4ff;
+  font-weight: bold;
+}
+
+
 /* 반응형: 화면이 768px 이하일 때 (태블릿·모바일) */
 @media (max-width: 768px) {
   .form-row.full {
@@ -958,6 +1000,24 @@ input[type='date'] {
   align-items: center;
   justify-content: center;
 }
+.address-btn {
+  background: #1a80e5;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  padding: 0 15px;    /* 좌우 길게 */
+  height: 44px;
+  min-width: 100px;   /* 길이 확보 */
+  cursor: pointer;
+}
+
+.address-btn:hover {
+  background-color: rgb(33, 112, 193);
+  transform: scale(1.02);
+  transition: all 0.1s ease-in-out;
+}
 
 .icon-btn {
   background: #1a80e5;
@@ -1012,13 +1072,15 @@ input[type='date'] {
   border: none;
   border-radius: 8px;
   padding: 10px 16px;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .modal-content button:hover {
-  background-color: #2563eb;
+  background-color: rgb(33, 112, 193);
+  transform: scale(1.01);
+  transition: all 0.1s ease-in-out;
 }
 
 .modal-content ul {
@@ -1050,10 +1112,14 @@ input[type='date'] {
   color: #ffffff;
   border: none;
   border-radius: 8px;
-  padding: 10px 16px;
+  padding: 8px 12px;
+  width: 100px;
   font-size: 14px;
   cursor: pointer;
   transition: background 0.2s ease;
+
+  display: block;
+  margin: 0 auto;
 }
 .close-btn:hover {
   background-color: #2563eb;

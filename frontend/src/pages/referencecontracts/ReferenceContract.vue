@@ -26,6 +26,24 @@ const buildingArea = ref('');
 const leasePart = ref('');
 const leaseArea = ref('');
 
+// 숫자를 억/만원/원 단위로 변환해주는 함수
+const formatPrice = (value) => {
+  if (!value) return '0원';
+  const num = parseInt(value, 10);
+
+  const billion = Math.floor(num / 100000000); // 억 단위
+  const million = Math.floor((num % 100000000) / 10000); // 만원 단위
+  const won = num % 10000; // 나머지 원
+
+  let result = [];
+  if (billion > 0) result.push(`${billion}억`);
+  if (million > 0) result.push(`${million}만`);
+  if (won > 0) result.push(`${won.toLocaleString()}원`);
+
+  if (result.length === 0) return '0원';
+  return result.join(' ');
+};
+
 // ✅ 모달 상태
 const showLandModal = ref(false);
 const showBuildingModal = ref(false);
@@ -407,11 +425,7 @@ const openPostcode = () => {
         <div class="form-row">
           <div class="half-col horizontal">
             <label>토지 지목</label>
-            <input
-              v-model="landCategory"
-              type="text"
-              placeholder="전, 대, 임야 등"
-            />
+            <input v-model="landCategory" type="text" placeholder="대" />
             <button
               type="button"
               class="icon-btn sel-btn"
@@ -476,21 +490,33 @@ const openPostcode = () => {
         <div class="form-row">
           <div class="half-col horizontal">
             <label>보증금</label>
-            <input
-              v-model="deposit"
-              type="text"
-              placeholder="원"
-              @input="allowOnlyNumbers($event, deposit)"
-            />
+            <div class="input-with-tip">
+              <input
+                v-model="deposit"
+                type="text"
+                placeholder="원"
+                @input="allowOnlyNumbers($event, deposit)"
+              />
+              <p class="tip" v-if="deposit">
+                입력하신 금액: <strong>{{ formatPrice(deposit) }}</strong>
+              </p>
+            </div>
           </div>
+
           <div class="half-col horizontal">
             <label>계약금</label>
-            <input
-              v-model="contractAmount"
-              type="text"
-              placeholder="원"
-              @input="allowOnlyNumbers($event, contractAmount)"
-            />
+            <div class="input-with-tip">
+              <input
+                v-model="contractAmount"
+                type="text"
+                placeholder="원"
+                @input="allowOnlyNumbers($event, contractAmount)"
+              />
+              <p class="tip" v-if="contractAmount">
+                입력하신 금액:
+                <strong>{{ formatPrice(contractAmount) }}</strong>
+              </p>
+            </div>
           </div>
         </div>
 
@@ -498,21 +524,34 @@ const openPostcode = () => {
         <div class="form-row">
           <div class="half-col horizontal">
             <label>잔금</label>
-            <input
-              v-model="rent"
-              type="text"
-              placeholder="원"
-              @input="allowOnlyNumbers($event, rent)"
-            />
+            <div class="input-with-tip">
+              <input
+                v-model="rent"
+                type="text"
+                placeholder="원"
+                @input="allowOnlyNumbers($event, rent)"
+              />
+              <p class="tip" v-if="rent">
+                입력하신 금액:
+                <strong>{{ formatPrice(rent) }}</strong>
+              </p>
+            </div>
           </div>
+
           <div class="half-col horizontal">
             <label>관리비</label>
-            <input
-              v-model="maintenanceFee"
-              type="text"
-              placeholder="원"
-              @input="allowOnlyNumbers($event, maintenanceFee)"
-            />
+            <div class="input-with-tip">
+              <input
+                v-model="maintenanceFee"
+                type="text"
+                placeholder="원"
+                @input="allowOnlyNumbers($event, maintenanceFee)"
+              />
+              <p class="tip" v-if="maintenanceFee">
+                입력하신 금액:
+                <strong>{{ formatPrice(maintenanceFee) }}</strong>
+              </p>
+            </div>
           </div>
         </div>
 
@@ -833,9 +872,9 @@ input[type='date'] {
 }
 .tip {
   font-size: 13px;
-  color: #888;
-  margin: 0;
-  margin-left: 18px;
+  color: #666;
+  margin-top: 4px;
+  margin-left: 4px; /* input 안쪽 padding 느낌 주기 */
 }
 .button-group {
   display: flex;
@@ -1130,5 +1169,17 @@ input[type='date'] {
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 12px;
   margin-top: 12px;
+}
+
+.tip {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+.input-with-tip {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* input 밑에 tip 배치 */
 }
 </style>

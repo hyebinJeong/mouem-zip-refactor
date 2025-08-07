@@ -415,8 +415,8 @@ const openPostcode = () => {
               class="long-input"
               readonly
             />
-            <button type="button" class="icon-btn" @click="openPostcode">
-              🔍
+            <button type="button" class="address-btn" @click="openPostcode">
+              주소검색
             </button>
           </div>
         </div>
@@ -428,10 +428,10 @@ const openPostcode = () => {
             <input v-model="landCategory" type="text" placeholder="대" />
             <button
               type="button"
-              class="icon-btn"
+              class="icon-btn sel-btn"
               @click="showLandModal = true"
             >
-              📑
+              <i class="bi-geo-alt"></i>
             </button>
           </div>
           <div class="half-col horizontal">
@@ -452,10 +452,10 @@ const openPostcode = () => {
             <input v-model="structure" type="text" placeholder="단독 주택" />
             <button
               type="button"
-              class="icon-btn"
+              class="icon-btn sel-btn"
               @click="showBuildingModal = true"
             >
-              🏠
+              <i class="bi-house"></i>
             </button>
           </div>
           <div class="half-col horizontal">
@@ -488,31 +488,31 @@ const openPostcode = () => {
 
         <!-- 보증금 + 계약금 -->
         <div class="form-row">
-          <div class="half-col horizontal">
+          <div class="half-col horizontal align-top">
             <label>보증금</label>
             <div class="input-with-tip">
               <input
-                v-model="deposit"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, deposit)"
+                  v-model="deposit"
+                  type="text"
+                  placeholder="원"
+                  @input="allowOnlyNumbers($event, deposit)"
               />
-              <p class="tip" v-if="deposit">
+              <p class="m-tip" v-show="deposit">
                 입력하신 금액: <strong>{{ formatPrice(deposit) }}</strong>
               </p>
             </div>
           </div>
 
-          <div class="half-col horizontal">
+          <div class="half-col horizontal align-top">
             <label>계약금</label>
             <div class="input-with-tip">
               <input
-                v-model="contractAmount"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, contractAmount)"
+                  v-model="contractAmount"
+                  type="text"
+                  placeholder="원"
+                  @input="allowOnlyNumbers($event, contractAmount)"
               />
-              <p class="tip" v-if="contractAmount">
+              <p class="m-tip" v-show="contractAmount">
                 입력하신 금액:
                 <strong>{{ formatPrice(contractAmount) }}</strong>
               </p>
@@ -522,32 +522,32 @@ const openPostcode = () => {
 
         <!-- 잔금 + 관리비 -->
         <div class="form-row">
-          <div class="half-col horizontal">
+          <div class="half-col horizontal align-top">
             <label>잔금</label>
             <div class="input-with-tip">
               <input
-                v-model="rent"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, rent)"
+                  v-model="rent"
+                  type="text"
+                  placeholder="원"
+                  @input="allowOnlyNumbers($event, rent)"
               />
-              <p class="tip" v-if="rent">
+              <p class="m-tip" v-show="rent">
                 입력하신 금액:
                 <strong>{{ formatPrice(rent) }}</strong>
               </p>
             </div>
           </div>
 
-          <div class="half-col horizontal">
+          <div class="half-col horizontal align-top">
             <label>관리비</label>
             <div class="input-with-tip">
               <input
-                v-model="maintenanceFee"
-                type="text"
-                placeholder="원"
-                @input="allowOnlyNumbers($event, maintenanceFee)"
+                  v-model="maintenanceFee"
+                  type="text"
+                  placeholder="원"
+                  @input="allowOnlyNumbers($event, maintenanceFee)"
               />
-              <p class="tip" v-if="maintenanceFee">
+              <p class="m-tip" v-show="maintenanceFee">
                 입력하신 금액:
                 <strong>{{ formatPrice(maintenanceFee) }}</strong>
               </p>
@@ -630,16 +630,16 @@ const openPostcode = () => {
         <div v-if="showLandModal" class="modal-overlay">
           <div class="modal-content">
             <h3>토지 지목 선택</h3>
-            <ul class="grid">
+            <ul class="list-style">
               <li
-                v-for="(item, i) in landCategories"
-                :key="i"
-                @click="selectLandCategory(item)"
+                  v-for="(item, i) in landCategories"
+                  :key="i"
+                  @click="selectLandCategory(item)"
               >
                 {{ item }}
               </li>
             </ul>
-            <button @click="showLandModal = false">닫기</button>
+            <button class="close-btn" @click="showLandModal = false">닫기</button>
           </div>
         </div>
 
@@ -647,7 +647,7 @@ const openPostcode = () => {
         <div v-if="showBuildingModal" class="modal-overlay">
           <div class="modal-content">
             <h3>건물 구조·용도 선택</h3>
-            <ul class="grid">
+            <ul class="list-style">
               <li
                 v-for="(item, i) in buildingUsages"
                 :key="i"
@@ -656,7 +656,7 @@ const openPostcode = () => {
                 {{ item }}
               </li>
             </ul>
-            <button @click="showBuildingModal = false">닫기</button>
+            <button class="close-btn" @click="showBuildingModal = false">닫기</button>
           </div>
         </div>
       </form>
@@ -727,6 +727,7 @@ const openPostcode = () => {
   width: 120px;
   margin-bottom: 0px;
 }
+
 
 label {
   width: 105px;
@@ -841,6 +842,18 @@ input[type='date'] {
   font-size: 20px;
   text-shadow: 0 0 1px #fff, 0 0 1px #fff;
 }
+
+.sel-btn{
+  min-width: 45px;
+  margin-left: 10px;
+}
+
+.sel-btn:hover{
+  background-color: rgb(33, 112, 193);
+  transform: scale(1.02);
+  transition: all 0.1s ease-in-out;
+}
+
 .side-controls {
   display: flex;
   flex-direction: column;
@@ -858,12 +871,7 @@ input[type='date'] {
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-.tip {
-  font-size: 13px;
-  color: #666;
-  margin-top: 4px;
-  margin-left: 4px; /* input 안쪽 padding 느낌 주기 */
-}
+
 .button-group {
   display: flex;
   justify-content: space-between;
@@ -901,19 +909,49 @@ input[type='date'] {
 }
 
 .btn-template:hover {
-  background-color: #2563eb;
+  background-color: rgb(33, 112, 193);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease-in-out;
 }
 
 .btn-submit:hover {
-  background-color: #2563eb;
+  background-color: rgb(33, 112, 193);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);
+  transition: all 0.1s ease-in-out;
 }
 
 .btn-back:hover {
-  background-color: #e0e0e0;
+  background-color: #d6d6d6;
+  transform: scale(1.02);
+  transition: all 0.1s ease-in-out;
 }
+
+.list-style {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.list-style li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s ease, font-weight 0.2s ease;
+  font-size: 16px;
+}
+
+.list-style li:hover {
+  background: #f0f4ff;
+  font-weight: bold;
+}
+
+
 /* 반응형: 화면이 768px 이하일 때 (태블릿·모바일) */
 @media (max-width: 768px) {
   .form-row.full {
@@ -997,6 +1035,24 @@ input[type='date'] {
   align-items: center;
   justify-content: center;
 }
+.address-btn {
+  background: #1a80e5;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  padding: 0 15px;    /* 좌우 길게 */
+  height: 44px;
+  min-width: 100px;   /* 길이 확보 */
+  cursor: pointer;
+}
+
+.address-btn:hover {
+  background-color: rgb(33, 112, 193);
+  transform: scale(1.02);
+  transition: all 0.1s ease-in-out;
+}
 
 .icon-btn {
   background: #1a80e5;
@@ -1051,13 +1107,15 @@ input[type='date'] {
   border: none;
   border-radius: 8px;
   padding: 10px 16px;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .modal-content button:hover {
-  background-color: #2563eb;
+  background-color: rgb(33, 112, 193);
+  transform: scale(1.01);
+  transition: all 0.1s ease-in-out;
 }
 
 .modal-content ul {
@@ -1084,13 +1142,22 @@ input[type='date'] {
   background: #f3f6fb;
 }
 
-.modal-content button:last-of-type {
-  background-color: #e0e0e0;
-  color: #333;
-}
+.close-btn {
+  background-color: #1a80e5;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 
-.modal-content button:last-of-type:hover {
-  background-color: #d0d0d0;
+  display: block;
+  margin: 0 auto;
+}
+.close-btn:hover {
+  background-color: #2563eb;
 }
 
 .grid {
@@ -1107,8 +1174,19 @@ input[type='date'] {
   white-space: nowrap;
 }
 .input-with-tip {
-  flex: 1;
+  position: relative;
   display: flex;
-  flex-direction: column; /* input 밑에 tip 배치 */
+  flex-direction: column;
+  flex: 1;
+}
+
+.m-tip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  margin-top: 4px; /* input 아래 간격 */
 }
 </style>

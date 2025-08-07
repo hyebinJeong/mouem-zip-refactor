@@ -54,7 +54,7 @@ const routes = [
   },
   {
     path: '/referencecontracts',
-    // meta: { requiresAuth: true },
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',

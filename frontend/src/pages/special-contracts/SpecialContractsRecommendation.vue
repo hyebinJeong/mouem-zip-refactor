@@ -41,17 +41,22 @@
           </div>
         </div>
       </div>
-
-      <!-- 하단 캐릭터 -->
-      <div
-        class="character-box"
+      <!-- 선택된 특약 리스트 -->
+      <div v-if="selectedClauses.length" class="selected-clauses">
+        <h4>선택된 특약</h4>
+        <ul>
+          <li v-for="(clause, index) in selectedClauses" :key="index">
+            {{ clause.text }}
+            <span class="remove-x" @click="removeClause(index)">×</span>
+          </li>
+        </ul>
+      </div>
+      <button
+        class="add-button"
         @click="$router.push({ name: 'ReferenceContract' })"
       >
-        <img src="@/assets/skybuddy.png" alt="버디 캐릭터" />
-        <div class="speech-bubble">
-          선택을 완료하셨다면<br />저를 클릭해주세요!
-        </div>
-      </div>
+        추가하기
+      </button>
     </div>
 
     <!-- 모달 -->
@@ -88,7 +93,8 @@ export default {
     return {
       selectedItem: null,
       recommendations: [], // 전체 데이터
-      filter: '', // ✅ 선택된 중요도
+      filter: '', // 선택된 중요도
+      selectedClauses: [], // 선택된 특약 목록
     };
   },
   computed: {
@@ -100,6 +106,8 @@ export default {
   },
   created() {
     this.fetchRecommendations();
+    const stored = sessionStorage.getItem('selectedClauses');
+    this.selectedClauses = stored ? JSON.parse(stored) : [];
   },
   methods: {
     async fetchRecommendations() {
@@ -143,15 +151,16 @@ export default {
       this.selectedItem = null;
     },
     selectClause(clause) {
-      const selected = JSON.parse(
-        sessionStorage.getItem('selectedClauses') || '[]'
+      const alreadyExists = this.selectedClauses.some(
+        (item) => item.text === clause.text
       );
 
-      const alreadyExists = selected.some((item) => item.text === clause.text);
-
       if (!alreadyExists) {
-        selected.push(clause);
-        sessionStorage.setItem('selectedClauses', JSON.stringify(selected));
+        this.selectedClauses.push(clause);
+        sessionStorage.setItem(
+          'selectedClauses',
+          JSON.stringify(this.selectedClauses)
+        );
         alert('특약 사항이 추가되었습니다.');
       } else {
         alert('이미 선택된 조항입니다.');
@@ -159,13 +168,20 @@ export default {
 
       this.closeModal();
     },
+    removeClause(index) {
+      this.selectedClauses.splice(index, 1);
+      sessionStorage.setItem(
+        'selectedClauses',
+        JSON.stringify(this.selectedClauses)
+      );
+    },
   },
 };
 </script>
 
 <style scoped>
 .container {
-  background-color: #F7F9FC;
+  background-color: #f7f9fc;
   min-height: 100vh;
   padding: 60px 100px;
   font-family: 'Arial', sans-serif;
@@ -248,7 +264,7 @@ export default {
 
 /* 리스트 */
 .scroll-wrapper {
-  max-height: 460px;
+  /* max-height: 460px; */
   overflow-y: auto;
   position: relative;
   padding-bottom: 80px;
@@ -287,7 +303,7 @@ export default {
 .item:hover {
   background-color: #f3f4f6;
   transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 .item.red {
   background-color: #fef2f2;
@@ -325,40 +341,62 @@ export default {
 .white-dot {
   background-color: #9ca3af;
 }
-
-/* 캐릭터 */
-.character-box {
+.add-button {
   position: absolute;
-  bottom: 16px;
-  left: 16px;
-  z-index: 1;
+  bottom: 40px;
+  right: 24px;
+  z-index: 10;
+  padding: 12px 20px;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
-.character-box img {
-  width: 60px;
-  height: auto;
+.add-button:hover {
+  background-color: #2563eb;
 }
-.speech-bubble {
-  position: absolute;
-  left: 60px;
-  bottom: 20px;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+/* 선택한 특약사항 */
+.selected-clauses {
+  margin-top: 24px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background-color: #f0f4ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+}
+.selected-clauses h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.selected-clauses ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.selected-clauses li {
+  background-color: white;
   padding: 10px 14px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  font-size: 13px;
-  line-height: 1.4;
-  color: #111827;
-  white-space: nowrap;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #dbeafe;
+  font-size: 14px;
 }
-.speech-bubble::after {
-  content: '';
-  position: absolute;
-  left: -8px;
-  bottom: 12px;
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent #ffffff transparent transparent;
+.remove-x {
+  font-weight: bold;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 18px;
+}
+.remove-x:hover {
+  color: #b91c1c;
 }
 
 /* 모달 */
@@ -453,6 +491,6 @@ export default {
 .select-btn:hover {
   background-color: #2563eb;
   transform: scale(1.03);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 </style>

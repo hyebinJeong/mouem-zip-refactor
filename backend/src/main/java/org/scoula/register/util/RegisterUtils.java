@@ -71,7 +71,7 @@ public class RegisterUtils {
 
         // 탐색할 키워드 목록
         String[] keywords = {
-                "채권자", "권리자", "근저당권자", "가등기권자", "수탁자", "전세권자"
+                "채권자", "권리자", "근저당권자", "가등기권자", "수탁자", "전세권자", "소유자"
         };
 
         int minIdx = Integer.MAX_VALUE;

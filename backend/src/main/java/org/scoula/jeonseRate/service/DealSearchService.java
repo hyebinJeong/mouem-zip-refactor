@@ -45,7 +45,11 @@ public class DealSearchService {
      * @param recentMonths 조회 대상 월 목록
      * @return 유사 매물 평균 매매가 (단위: 만원)
      */
-    public Optional<JeonseRateDTO> getDealAmount(String lawdCode, String jibun ,String buildingName, List<String> recentMonths) {
+
+    @Value("${deal.area.tolerance:1.0}")
+    private double areaTolerance; // 기본 ±1.0㎡
+
+    public Optional<JeonseRateDTO> getDealAmount(String lawdCode, String jibun ,String buildingName, List<String> recentMonths, Double targetArea) {
         JeonseRateDTO jeonseRateDTO = new JeonseRateDTO();
         List<DealDTO> allDeals = new ArrayList<>();
 
@@ -88,6 +92,29 @@ public class DealSearchService {
         // 1차 필터: 지번 기준
         List<DealDTO> filteredByJibun = allDeals.stream()
                 .filter(d -> d.getJibun() != null && d.getJibun().equals(jibun))
+                .filter(d -> {
+                    if (d.getExcluUseAr() == null || targetArea == null) return false;
+                    // 문자열로 들어오기 때문에 Double.parseDouble() 해서 숫자로 변환
+                    double dealArea = Double.parseDouble(d.getExcluUseAr());
+
+
+                    double diff = Math.abs(dealArea - targetArea);
+
+                    System.out.printf("[면적 비교] targetArea=%.2f, dealArea=%.4f, 차이=%.4f, 허용오차=±%.1f㎡%n",
+                            targetArea, dealArea, diff, areaTolerance);
+
+                    if (diff <= areaTolerance) {
+                        System.out.println("→ 오차 범위 내 매물로 인정");
+                        return true;
+                    } else {
+                        System.out.println("→ 오차 범위 초과");
+                        return false;
+                    }
+
+
+
+                    //return Math.abs(dealArea - targetArea) <= areaTolerance; // ±1.0㎡ 이내
+                })
                 .collect(Collectors.toList());
 
         // 2차 필터: 건물명 기준 (있을 경우만)
@@ -100,6 +127,7 @@ public class DealSearchService {
                             isSimilarName(buildingName, d.getMhouseNm());
                 })
                 .collect(Collectors.toList());
+
 
         // 매물이 없다면 판단 보류
         if (finalFiltered.isEmpty()) {

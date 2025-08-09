@@ -151,9 +151,9 @@ const getGradeMessage = (rating) => {
     case '안전':
       return `${userName}님이 올려주신 등기부등본은 안전합니다.`;
     case '보통':
-      return `${userName}님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 2년 안에 기재됐던 내역이 있습니다.`;
+      return `${userName}님이 올려주신 등기부등본은 보통입니다.`;
     case '주의':
-      return `${userName}님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 1년 안에 기재됐던 내역이 있습니다.`;
+      return `${userName}님이 올려주신 등기부등본은 주의가 필요합니다.`;
     case '위험':
       return `${userName}님이 올려주신 등기부등본은 위험합니다.`;
     default:

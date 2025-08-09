@@ -56,8 +56,8 @@ public class RegisterRatingEvaluator {
                         // 금액 필드는 없지만, 말소 안 된 권리가 있으면 위험 신호
                         hasOtherActiveRights = true;
                     }
-
                 } else {
+                    // 말소된 권리 중 최근 1년, 2년 내 내역 체크
                     long days = java.time.temporal.ChronoUnit.DAYS.between(date, now);
                     if (days <= 365) {
                         hasCanceledWithin1Year = true;
@@ -72,21 +72,25 @@ public class RegisterRatingEvaluator {
 //        System.out.println("보증금: " + myDeposit);
 
         // 경매 내역 있으면 무조건 위험
-        if (hasActiveAuction) {
-            return RegistryRating.위험;
+        if (hasActiveAuction) return RegistryRating.위험;
+
+        // 말소 안 된 권리가 하나라도 있으면 위험도 평가 시작
+        boolean hasAnyActiveRights = hasOtherActiveRights || totalPriorAmount > 0;
+
+        if (hasAnyActiveRights) {
+            // 선순위 채권 / 보증금 비율
+            double ratio = (double) totalPriorAmount / myDeposit;
+
+            if (ratio >= 1.0) { // 100% 이상
+                return RegistryRating.위험;
+            } else if (ratio >= 0.4) { // 40% 이상 100% 미만
+                return RegistryRating.주의;
+            } else if (ratio > 0) { // 0 초과 40% 미만
+                return RegistryRating.보통;
+            }
         }
 
-        // 금액 합산 제외된 권리라도 말소 안 된 게 있으면 위험
-        if (hasOtherActiveRights) {
-            return RegistryRating.위험;
-        }
-
-        // 선순위 채권 총액 >= 내 보증금 → 위험
-        if (totalPriorAmount >= myDeposit) {
-            return RegistryRating.위험;
-        }
-
-        // 금액은 안전 → 날짜 기반 평가
+        // 말소 안 된 권리 없으면 말소 내역 기준으로 판단
         if (hasCanceledWithin1Year) return RegistryRating.주의;
         if (hasCanceledWithin2Years) return RegistryRating.보통;
         return RegistryRating.안전;

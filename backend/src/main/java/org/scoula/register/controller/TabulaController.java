@@ -31,7 +31,7 @@ public class TabulaController {
     private final TrustServiceImpl trustServiceImpl;
 
     @PostMapping
-    public ResponseEntity<?> analyzeRegistry(@RequestParam("userId") Integer userId, @RequestParam("file") MultipartFile file, @RequestParam("address") String address, @RequestParam("registryName") String registryName) {
+    public ResponseEntity<?> analyzeRegistry(@RequestParam("userId") Integer userId, @RequestParam("file") MultipartFile file, @RequestParam("address") String address, @RequestParam("jeonsePrice") String jeonsePrice, @RequestParam("registryName") String registryName) {
         try {
             // S3 업로드
             String uploadedFileName = awsS3Service.uploadFile(file);
@@ -49,7 +49,15 @@ public class TabulaController {
             response.setTrustInfos(trustServiceImpl.extractTrustInfos(table));
 
             // 위험 등급 평가
-            RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response);
+            long depositInWon = 0L; // try 밖에서 선언
+            try {
+                int depositInManWon = Integer.parseInt(jeonsePrice);
+                depositInWon = depositInManWon * 10_000L;
+                // depositInWon 으로 계산 진행
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response, depositInWon);
 
             int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, uploadedFileName);
 

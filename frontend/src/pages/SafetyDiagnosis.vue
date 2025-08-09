@@ -258,11 +258,19 @@ const saveManualArea = async () => {
     alert('면적을 입력해주세요.');
     return;
   }
+  if (isSubmitting.value) return; // 중복 클릭 방지
+  isSubmitting.value = true;
 
-  areaValue.value = manualArea.value;
-  showManualInput.value = false;
-  // console.log('받은 area:', areaValue.value);
-  await proceedToLeaseAnalysis(registerIdRef.value);
+  try {
+    areaValue.value = manualArea.value;
+    showManualInput.value = false;
+    // console.log('받은 area:', areaValue.value);
+    await proceedToLeaseAnalysis(registerIdRef.value);
+  } catch (e) {
+    alert('분석 실패: ' + e.message);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 onMounted(() => {

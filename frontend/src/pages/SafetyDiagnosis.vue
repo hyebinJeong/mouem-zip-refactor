@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <h2 class="headline">
-      매물 안전성 분석, <strong>딱 <span class="blue">네 가지</span></strong
+      매물 안전성 분석, <strong>딱 <span class="blue">다섯 가지</span></strong
       >만 해요.
     </h2>
     <p class="sub">보증금, 주소를 입력하고 등기부등본만 올리면 끝!</p>
@@ -15,7 +15,7 @@
         placeholder="금액을 입력해주세요. 예시) 30000 (3억)"
         class="input-box"
       />
-      <p class="tip" v-if="jeonsePrice" style="margin-top: 4px;">
+      <p class="tip" v-if="jeonsePrice" style="margin-top: 4px">
         입력하신 금액: <strong>{{ formatPrice(jeonsePrice) }}</strong>
       </p>
     </div>
@@ -32,9 +32,13 @@
         <button @click="openPostcode">주소 검색</button>
       </div>
     </div>
+    <div class="input-group">
+      <label>3. 상세 주소</label>
+      <input v-model="detail" placeholder="101동 101호" class="input-box" />
+    </div>
 
     <div class="input-group">
-      <label>3. 등기부등본을 업로드해주세요.</label>
+      <label>4. 등기부등본을 업로드해주세요.</label>
       <div class="upload-box" @click="$refs.fileInput.click()">
         <input
           type="file"
@@ -50,7 +54,7 @@
     </div>
 
     <div class="input-group">
-      <label>4. 매물 이름</label>
+      <label>5. 매물 이름</label>
       <p class="tip">
         설정한 이름은 체크리스트 진단 매물 선택 시, 마이페이지에서 최종 리포트와
         계약서 조회 시 사용됩니다.
@@ -71,6 +75,30 @@
       {{ isSubmitting ? '분석 중...' : '분석 시작하기' }}
     </button>
   </div>
+  <div
+    v-if="showManualInput"
+    class="modal-backdrop"
+    @click.self="showManualInput = false"
+  >
+    <div class="modal-box">
+      <p class="modal-message">
+        면적을 읽어오던 도중 오류가 발생했습니다.<br />
+        면적을 직접 입력해주세요.
+      </p>
+      <input
+        v-model="manualArea"
+        type="text"
+        placeholder="면적 입력 (예: 630.44㎡)"
+        class="modal-input"
+      />
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" @click="showManualInput = false">
+          취소
+        </button>
+        <button class="modal-btn save" @click="saveManualArea">저장</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -85,9 +113,15 @@ const selectedAddress = ref('');
 const roadAddress = ref('');
 const jibunAddress = ref('');
 const jeonsePrice = ref('');
+const detail = ref('');
 const file = ref(null);
 const registryName = ref('');
 const isSubmitting = ref(false);
+
+const manualArea = ref('');
+const areaValue = ref('');
+const showManualInput = ref(false);
+const registerIdRef = ref(null);
 
 const openPostcode = () => {
   new window.daum.Postcode({
@@ -141,6 +175,7 @@ const submitForm = async () => {
   if (
     !file.value ||
     !selectedAddress.value ||
+    !detail.value ||
     !jeonsePrice.value ||
     !registryName.value
   ) {
@@ -157,6 +192,7 @@ const submitForm = async () => {
   formData.append('userId', auth.userId);
   formData.append('file', file.value);
   formData.append('address', selectedAddress.value);
+  formData.append('detail', detail.value);
   formData.append('jeonsePrice', jeonsePrice.value);
   formData.append('registryName', registryName.value);
 
@@ -172,19 +208,39 @@ const submitForm = async () => {
       throw new Error(err);
     }
 
-    const registerId = await response.json();
+    const data = await response.json();
+    registerIdRef.value = data.registerId;
+    const area = data.area;
+    if (!area) {
+      showManualInput.value = true; // 직접 입력 폼 보이기
+      return; // 다음 단계 진행 중단
+    } else {
+      areaValue.value = area;
+      showManualInput.value = false;
+      // console.log('받은 area:', areaValue.value);
 
-    // 2단계: 전세가율 분석
+      await proceedToLeaseAnalysis(registerIdRef.value);
+    }
+  } catch (e) {
+    alert('분석 실패: ' + e.message);
+  }
+};
+
+// 2단계: 전세가율 분석
+const proceedToLeaseAnalysis = async (registerId) => {
+  try {
     const leaseRes = await fetch('/api/diagnosis/leasePer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         registerId: registerId,
+        // area: areaValue.value,
         address: selectedAddress.value,
         jeonsePrice: jeonsePrice.value,
         userId: auth.userId,
       }),
     });
+
     if (!leaseRes.ok) {
       throw new Error(await leaseRes.text());
     }
@@ -192,7 +248,28 @@ const submitForm = async () => {
     // 3단계: 모든 분석 완료 후 결과 페이지로 이동
     router.push(`/safety-check/${registerId}`);
   } catch (e) {
+    alert('전세가율 분석 실패: ' + e.message);
+  }
+};
+
+// 직접 면적 입력 후 저장 및 다음 단계 진행
+const saveManualArea = async () => {
+  if (!manualArea.value) {
+    alert('면적을 입력해주세요.');
+    return;
+  }
+  if (isSubmitting.value) return; // 중복 클릭 방지
+  isSubmitting.value = true;
+
+  try {
+    areaValue.value = manualArea.value;
+    showManualInput.value = false;
+    // console.log('받은 area:', areaValue.value);
+    await proceedToLeaseAnalysis(registerIdRef.value);
+  } catch (e) {
     alert('분석 실패: ' + e.message);
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
@@ -321,5 +398,87 @@ label {
 .submit-btn.disabled {
   pointer-events: none;
   opacity: 0.6;
+}
+
+/* 면적이 읽히지 않는 경우 모달창 */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: white;
+  padding: 30px 25px;
+  border-radius: 12px;
+  width: 400px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.modal-message {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 25px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: #3b82f6; /* 파란색 포커스 */
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+.modal-btn {
+  padding: 10px 28px;
+  font-size: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+  min-width: 100px;
+}
+
+.modal-btn.cancel {
+  background-color: #f3f4f6; /* 연한 회색 */
+  color: #555;
+}
+
+.modal-btn.cancel:hover {
+  background-color: #e5e7eb;
+}
+
+.modal-btn.save {
+  background-color: #2563eb; /* 진한 파란색 */
+  color: white;
+  font-weight: 600;
+}
+
+.modal-btn.save:hover {
+  background-color: #1e40af;
 }
 </style>

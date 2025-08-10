@@ -5,6 +5,7 @@ import org.scoula.register.domain.RegistryRating;
 import org.scoula.register.domain.dto.*;
 import org.scoula.register.service.*;
 import org.scoula.register.util.RegisterRatingEvaluator;
+import org.scoula.register.util.RegisterUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,7 @@ public class TabulaController {
     private final TrustServiceImpl trustServiceImpl;
 
     @PostMapping
-    public ResponseEntity<?> analyzeRegistry(@RequestParam("userId") Integer userId, @RequestParam("file") MultipartFile file, @RequestParam("address") String address, @RequestParam("jeonsePrice") String jeonsePrice, @RequestParam("registryName") String registryName) {
+    public ResponseEntity<?> analyzeRegistry(@RequestParam("userId") Integer userId, @RequestParam("file") MultipartFile file, @RequestParam("address") String address, @RequestParam("detail") String detail, @RequestParam("jeonsePrice") String jeonsePrice, @RequestParam("registryName") String registryName) {
         try {
             // S3 업로드
             String uploadedFileName = awsS3Service.uploadFile(file);
@@ -59,9 +60,14 @@ public class TabulaController {
             }
             RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response, depositInWon);
 
+            // 면적 추출
+            String area = RegisterUtils.getArea(table, detail);
             int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, uploadedFileName);
 
-            return ResponseEntity.ok(registerId);
+            Map<String, Object> result = new HashMap<>();
+            result.put("registerId", registerId);
+            result.put("area", area);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

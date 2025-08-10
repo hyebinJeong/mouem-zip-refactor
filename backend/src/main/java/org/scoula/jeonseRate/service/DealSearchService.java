@@ -46,8 +46,8 @@ public class DealSearchService {
      * @return 유사 매물 평균 매매가 (단위: 만원)
      */
 
-    @Value("${deal.area.tolerance:1.0}")
-    private double areaTolerance; // 기본 ±1.0㎡
+    @Value("${deal.area.tolerance:3.0}")
+    private double areaTolerance; // 기본 ±3.0㎡
 
     public Optional<JeonseRateDTO> getDealAmount(String lawdCode, String jibun ,String buildingName, List<String> recentMonths, Double targetArea) {
         JeonseRateDTO jeonseRateDTO = new JeonseRateDTO();
@@ -113,7 +113,7 @@ public class DealSearchService {
 
 
 
-                    //return Math.abs(dealArea - targetArea) <= areaTolerance; // ±1.0㎡ 이내
+                    //return Math.abs(dealArea - targetArea) <= areaTolerance; // ±3.0㎡ 이내
                 })
                 .collect(Collectors.toList());
 

@@ -234,7 +234,7 @@ const proceedToLeaseAnalysis = async (registerId) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         registerId: registerId,
-        // area: areaValue.value,
+        excluUseAr: areaValue.value,
         address: selectedAddress.value,
         jeonsePrice: jeonsePrice.value,
         userId: auth.userId,

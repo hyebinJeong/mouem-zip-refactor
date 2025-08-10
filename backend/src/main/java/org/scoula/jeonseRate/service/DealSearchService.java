@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * 실거래가 기반 평균 매매가 계산 서비스
- * - 아파트 → 연립다세대 → 오피스텔 순으로 실거래 데이터를 조회
+ * - 아파트 → 오피스텔 → 연립다세대 순으로 실거래 데이터를 조회
  * - 입력 지번과 유사한 매물 필터링 후 평균 매매가 계산
  */
 @Service
@@ -62,25 +62,25 @@ public class DealSearchService {
             jeonseRateDTO.setBuildingType(HouseTypeCode.APARTMENT.getName());
         }
 
-        // 2. 아파트 매물 없으면 연립다세대 조회
+        // 2. 아파트 매물 없으면 오피스텔 조회
         if (allDeals.isEmpty()) {
             for (String month : recentMonths) {
                 DealResponseDTO response = getDeals(lawdCode, month, officeApiUrl);
                 allDeals.addAll(extractDeals(response));
             }
             if (!allDeals.isEmpty()) {
-                jeonseRateDTO.setBuildingType(HouseTypeCode.MULTI_HOUSE.getName());
+                jeonseRateDTO.setBuildingType(HouseTypeCode.OPISTEL.getName());
             }
         }
 
-        // 3. 연립다세대 매물 없으면 오피스텔 조회
+        // 3. 오피스텔 매물 없으면 연립다세대 조회
         if (allDeals.isEmpty()) {
             for (String month : recentMonths) {
                 DealResponseDTO response = getDeals(lawdCode, month, rowhouseApiUrl);
                 allDeals.addAll(extractDeals(response));
             }
             if (!allDeals.isEmpty()) {
-                jeonseRateDTO.setBuildingType(HouseTypeCode.OPISTEL.getName());
+                jeonseRateDTO.setBuildingType(HouseTypeCode.MULTI_HOUSE.getName());
             }
         }
 
@@ -97,23 +97,7 @@ public class DealSearchService {
                     // 문자열로 들어오기 때문에 Double.parseDouble() 해서 숫자로 변환
                     double dealArea = Double.parseDouble(d.getExcluUseAr());
 
-
-                    double diff = Math.abs(dealArea - targetArea);
-
-                    System.out.printf("[면적 비교] targetArea=%.2f, dealArea=%.4f, 차이=%.4f, 허용오차=±%.1f㎡%n",
-                            targetArea, dealArea, diff, areaTolerance);
-
-                    if (diff <= areaTolerance) {
-                        System.out.println("→ 오차 범위 내 매물로 인정");
-                        return true;
-                    } else {
-                        System.out.println("→ 오차 범위 초과");
-                        return false;
-                    }
-
-
-
-                    //return Math.abs(dealArea - targetArea) <= areaTolerance; // ±3.0㎡ 이내
+                    return Math.abs(dealArea - targetArea) <= areaTolerance; // ±3.0㎡ 이내
                 })
                 .collect(Collectors.toList());
 

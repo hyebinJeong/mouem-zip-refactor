@@ -58,11 +58,13 @@ public class TabulaController {
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
-            RegistryRating registryRating = RegisterRatingEvaluator.evaluateRiskLevel(response, depositInWon);
+            RiskEvaluationResult data = RegisterRatingEvaluator.evaluateRiskLevel(response, depositInWon);
+            RegistryRating registryRating = data.getRating();
+            long totalPriorAmount = data.getTotalPriorAmount();
 
             // 면적 추출
             String area = RegisterUtils.getArea(table, detail);
-            int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, uploadedFileName);
+            int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, uploadedFileName, totalPriorAmount);
 
             Map<String, Object> result = new HashMap<>();
             result.put("registerId", registerId);
@@ -129,6 +131,7 @@ public class TabulaController {
             result.put("address", dto.getAddress());
             result.put("rating", dto.getRegistryRating());
             result.put("fileUrl", fileUrl);
+            result.put("totalPriorAmount", dto.getTotalPriorAmount());
 
             return ResponseEntity.ok(result);
         } catch (NullPointerException e) {

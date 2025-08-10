@@ -10,7 +10,7 @@ import java.util.List;
 public class RegisterRatingEvaluator {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년M월d일");
 
-    public static RegistryRating evaluateRiskLevel(RegisterAnalysisResponse response, long myDeposit) {
+    public static RiskEvaluationResult evaluateRiskLevel(RegisterAnalysisResponse response, long myDeposit) {
         LocalDate now = LocalDate.now();
 
         boolean hasCanceledWithin1Year = false;
@@ -72,28 +72,36 @@ public class RegisterRatingEvaluator {
 //        System.out.println("보증금: " + myDeposit);
 
         // 경매 내역 있으면 무조건 위험
-        if (hasActiveAuction) return RegistryRating.위험;
+        RegistryRating rating;
 
-        // 말소 안 된 권리가 하나라도 있으면 위험도 평가 시작
-        boolean hasAnyActiveRights = hasOtherActiveRights || totalPriorAmount > 0;
+        if (hasActiveAuction) {
+            rating = RegistryRating.위험;
+        } else {
+            // 말소 안 된 권리가 하나라도 있으면 위험도 평가 시작
+            boolean hasAnyActiveRights = hasOtherActiveRights || totalPriorAmount > 0;
 
-        if (hasAnyActiveRights) {
-            // 선순위 채권 / 보증금 비율
-            double ratio = (double) totalPriorAmount / myDeposit;
+            if (hasAnyActiveRights) {
+                // 선순위 채권 / 보증금 비율
+                double ratio = (double) totalPriorAmount / myDeposit;
 
-            if (ratio >= 1.0) { // 100% 이상
-                return RegistryRating.위험;
-            } else if (ratio >= 0.4) { // 40% 이상 100% 미만
-                return RegistryRating.주의;
-            } else if (ratio > 0) { // 0 초과 40% 미만
-                return RegistryRating.보통;
+                if (ratio >= 1.0) { // 100% 이상
+                    rating = RegistryRating.위험;
+                } else if (ratio >= 0.4) { // 40% 이상 100% 미만
+                    rating = RegistryRating.주의;
+                } else if (ratio > 0) { // 0 초과 40% 미만
+                    rating = RegistryRating.보통;
+                } else {
+                    rating = RegistryRating.안전;
+                }
+            } else {
+                // 말소 안 된 권리 없으면 말소 내역 기준으로 판단
+                if (hasCanceledWithin1Year) rating = RegistryRating.주의;
+                else if (hasCanceledWithin2Years) rating = RegistryRating.보통;
+                else rating = RegistryRating.안전;
             }
         }
 
-        // 말소 안 된 권리 없으면 말소 내역 기준으로 판단
-        if (hasCanceledWithin1Year) return RegistryRating.주의;
-        if (hasCanceledWithin2Years) return RegistryRating.보통;
-        return RegistryRating.안전;
+        return new RiskEvaluationResult(rating, totalPriorAmount);
     }
 
     private static List<List<? extends DatedCanceledItem>> getAllInfoLists(RegisterAnalysisResponse response) {

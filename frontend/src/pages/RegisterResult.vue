@@ -71,6 +71,9 @@
             >
             <span v-else style="color: gray">판단 불가</span>
           </p>
+          <p class="prior-info">
+            선순위 채권총액: {{ formatCurrency(result.totalPriorAmount) }}원
+          </p>
           <hr class="my-3" />
           <p class="fw-bold fs-5 mb-1" style="color: #151fae">주의 사항</p>
           <div class="analysis-cards-wrapper">
@@ -124,6 +127,12 @@ const router = useRouter();
 const result = ref(null);
 const auth = useAuthStore();
 const user = ref(null);
+
+// 금액 쉼표 표시
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return '';
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
 
 const analysisItems = [
   { label: '경매', key: 'auctionInfos' },
@@ -248,7 +257,8 @@ onMounted(async () => {
 
 /* 기본 정보 스타일 */
 .address-info,
-.jeonse-rate-info {
+.jeonse-rate-info,
+.prior-info {
   font-size: 1.25rem;
 }
 

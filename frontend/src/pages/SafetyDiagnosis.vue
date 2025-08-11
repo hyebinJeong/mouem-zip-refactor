@@ -85,12 +85,18 @@
         면적을 읽어오던 도중 오류가 발생했습니다.<br />
         면적을 직접 입력해주세요.
       </p>
-      <input
-        v-model="manualArea"
-        type="text"
-        placeholder="면적 입력 (예: 630.44㎡)"
-        class="modal-input"
-      />
+      <div class="unit-input">
+        <input
+          v-model.number="manualArea"
+          type="number"
+          step="0.01"
+          min="0"
+          inputmode="decimal"
+          placeholder="면적 입력 (예: 56.88)"
+          class="modal-input"
+        />
+        <span class="unit">㎡</span>
+      </div>
       <div class="modal-buttons">
         <button class="modal-btn cancel" @click="showManualInput = false">
           취소
@@ -122,6 +128,7 @@ const manualArea = ref('');
 const areaValue = ref('');
 const showManualInput = ref(false);
 const registerIdRef = ref(null);
+
 
 const openPostcode = () => {
   new window.daum.Postcode({
@@ -234,7 +241,7 @@ const proceedToLeaseAnalysis = async (registerId) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         registerId: registerId,
-        // area: areaValue.value,
+        excluUseAr: areaValue.value,
         address: selectedAddress.value,
         jeonsePrice: jeonsePrice.value,
         userId: auth.userId,
@@ -254,15 +261,20 @@ const proceedToLeaseAnalysis = async (registerId) => {
 
 // 직접 면적 입력 후 저장 및 다음 단계 진행
 const saveManualArea = async () => {
-  if (!manualArea.value) {
-    alert('면적을 입력해주세요.');
-    return;
-  }
-  if (isSubmitting.value) return; // 중복 클릭 방지
+  const raw = String(manualArea.value ?? '').trim(); 
+  // 쉼표 소수점을 점으로 변환 (예: 56,88 -> 56.88)
+  const num = Number(raw.replace(',', '.'));
+  if (!Number.isFinite(num) || num <= 0) {
+  alert('면적은 숫자만 입력 가능하며, 0보다 커야 합니다. (예: 56.88)');
+  return;
+}
+
+  // 중복 클릭 방지
+  if (isSubmitting.value) return;
   isSubmitting.value = true;
 
   try {
-    areaValue.value = manualArea.value;
+    areaValue.value = Number(num.toFixed(4));
     showManualInput.value = false;
     // console.log('받은 area:', areaValue.value);
     await proceedToLeaseAnalysis(registerIdRef.value);
@@ -480,5 +492,20 @@ label {
 
 .modal-btn.save:hover {
   background-color: #1e40af;
+}
+
+.unit-input {
+  display: flex;
+  align-items: center;
+}
+
+.unit-input .modal-input {
+  flex: 1;
+}
+
+.unit-input .unit {
+  margin-left: 6px;
+  font-size: 14px;
+  color: #555;
 }
 </style>

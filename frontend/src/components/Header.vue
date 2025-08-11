@@ -9,9 +9,9 @@
         <div class="menu-item" @click="goChecklist">체크리스트</div>
 
         <div
-          class="menu-item dropdown"
-          @mouseenter="showContractGuide = true"
-          @mouseleave="showContractGuide = false"
+            class="menu-item dropdown"
+            @mouseenter="showContractGuide = true"
+            @mouseleave="showContractGuide = false"
         >
           계약 가이드
           <ul class="dropdown-list" v-show="showContractGuide">
@@ -21,8 +21,22 @@
         </div>
 
         <div class="menu-item" @click="goGlossary">용어해설집</div>
-        <button class="mypage" :style="{ color: fontColor }" @click="goMyPage">
+
+        <button
+            v-if="userId"
+            class="mypage"
+            :style="{ color: fontColor }"
+            @click="goMyPage"
+        >
           마이페이지
+        </button>
+        <button
+            v-else
+            class="mypage"
+            :style="{ color: fontColor }"
+            @click="goLogin"
+        >
+          로그인
         </button>
       </div>
     </div>
@@ -30,9 +44,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { defineProps } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 import logo from '@/assets/homebuddylogo.png';
 
 const props = defineProps({
@@ -42,6 +56,9 @@ const props = defineProps({
 const router = useRouter();
 const showContractGuide = ref(false);
 
+const auth = useAuthStore();
+const userId = computed(() => auth.userId);
+
 const goHome = () => router.push('/');
 const goSafetyCheck = () => router.push('/agreement');
 const goChecklist = () => router.push('/checklist');
@@ -49,6 +66,7 @@ const goReferenceContract = () => router.push('/referencecontracts');
 const goReferenceGuidebook = () => router.push('/reference-guidebook');
 const goGlossary = () => router.push('/glossary');
 const goMyPage = () => router.push('/my');
+const goLogin = () => router.push('/login');
 </script>
 
 <style scoped>

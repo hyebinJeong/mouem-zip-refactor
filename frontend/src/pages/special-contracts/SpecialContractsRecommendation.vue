@@ -41,17 +41,22 @@
           </div>
         </div>
       </div>
-
-      <!-- 하단 캐릭터 -->
-      <div
-        class="character-box"
+      <!-- 선택된 특약 리스트 -->
+      <div v-if="selectedClauses.length" class="selected-clauses">
+        <h4>선택된 특약</h4>
+        <ul>
+          <li v-for="(clause, index) in selectedClauses" :key="index">
+            {{ clause.text }}
+            <span class="remove-x" @click="removeClause(index)">×</span>
+          </li>
+        </ul>
+      </div>
+      <button
+        class="add-button"
         @click="$router.push({ name: 'ReferenceContract' })"
       >
-        <img src="@/assets/skybuddy.png" alt="버디 캐릭터" />
-        <div class="speech-bubble">
-          선택을 완료하셨다면<br />저를 클릭해주세요!
-        </div>
-      </div>
+        추가하기
+      </button>
     </div>
 
     <!-- 모달 -->
@@ -88,7 +93,8 @@ export default {
     return {
       selectedItem: null,
       recommendations: [], // 전체 데이터
-      filter: '', // ✅ 선택된 중요도
+      filter: '', // 선택된 중요도
+      selectedClauses: [], // 선택된 특약 목록
     };
   },
   computed: {
@@ -100,6 +106,8 @@ export default {
   },
   created() {
     this.fetchRecommendations();
+    const stored = sessionStorage.getItem('selectedClauses');
+    this.selectedClauses = stored ? JSON.parse(stored) : [];
   },
   methods: {
     async fetchRecommendations() {
@@ -143,15 +151,16 @@ export default {
       this.selectedItem = null;
     },
     selectClause(clause) {
-      const selected = JSON.parse(
-        sessionStorage.getItem('selectedClauses') || '[]'
+      const alreadyExists = this.selectedClauses.some(
+        (item) => item.text === clause.text
       );
 
-      const alreadyExists = selected.some((item) => item.text === clause.text);
-
       if (!alreadyExists) {
-        selected.push(clause);
-        sessionStorage.setItem('selectedClauses', JSON.stringify(selected));
+        this.selectedClauses.push(clause);
+        sessionStorage.setItem(
+          'selectedClauses',
+          JSON.stringify(this.selectedClauses)
+        );
         alert('특약 사항이 추가되었습니다.');
       } else {
         alert('이미 선택된 조항입니다.');
@@ -159,23 +168,30 @@ export default {
 
       this.closeModal();
     },
+    removeClause(index) {
+      this.selectedClauses.splice(index, 1);
+      sessionStorage.setItem(
+        'selectedClauses',
+        JSON.stringify(this.selectedClauses)
+      );
+    },
   },
 };
 </script>
 
 <style scoped>
 .container {
-  background-color: #f3f4f6;
+  background-color: #f7f9fc;
   min-height: 100vh;
-  padding: 40px 60px;
+  padding: 60px 100px;
   font-family: 'Arial', sans-serif;
 }
 
 .content-box {
-  background-color: white;
-  padding: 40px;
+  background-color: #ffffff;
+  padding: 70px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   position: relative;
 }
 
@@ -196,7 +212,7 @@ export default {
 
 /* 타이틀 */
 .title-text .main-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: #1f2937;
 }
@@ -248,7 +264,7 @@ export default {
 
 /* 리스트 */
 .scroll-wrapper {
-  max-height: 460px;
+  /* max-height: 460px; */
   overflow-y: auto;
   position: relative;
   padding-bottom: 80px;
@@ -271,10 +287,10 @@ export default {
 .item {
   background-color: #f9fafb;
   padding: 16px;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 17px;
+  font-weight: 600;
   color: #1f2937;
   cursor: pointer;
   display: flex;
@@ -282,9 +298,12 @@ export default {
   justify-content: center;
   transition: background-color 0.2s;
   text-align: center;
+  min-height: 70px;
 }
 .item:hover {
-  background-color: #e5e7eb;
+  background-color: #f3f4f6;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 .item.red {
   background-color: #fef2f2;
@@ -299,6 +318,9 @@ export default {
   background-color: #f3f4f6;
 }
 
+.item {
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
 /* 점 표시 */
 .dot {
   width: 8px;
@@ -319,40 +341,62 @@ export default {
 .white-dot {
   background-color: #9ca3af;
 }
-
-/* 캐릭터 */
-.character-box {
+.add-button {
   position: absolute;
-  bottom: 16px;
-  left: 16px;
-  z-index: 1;
+  bottom: 40px;
+  right: 24px;
+  z-index: 10;
+  padding: 12px 20px;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
-.character-box img {
-  width: 60px;
-  height: auto;
+.add-button:hover {
+  background-color: #2563eb;
 }
-.speech-bubble {
-  position: absolute;
-  left: 60px;
-  bottom: 20px;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+/* 선택한 특약사항 */
+.selected-clauses {
+  margin-top: 24px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background-color: #f0f4ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+}
+.selected-clauses h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.selected-clauses ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.selected-clauses li {
+  background-color: white;
   padding: 10px 14px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  font-size: 13px;
-  line-height: 1.4;
-  color: #111827;
-  white-space: nowrap;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #dbeafe;
+  font-size: 14px;
 }
-.speech-bubble::after {
-  content: '';
-  position: absolute;
-  left: -8px;
-  bottom: 12px;
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent #ffffff transparent transparent;
+.remove-x {
+  font-weight: bold;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 18px;
+}
+.remove-x:hover {
+  color: #b91c1c;
 }
 
 /* 모달 */
@@ -363,6 +407,7 @@ export default {
   width: 100%;
   height: 100%;
   background-color: rgba(31, 41, 55, 0.5);
+  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -375,27 +420,52 @@ export default {
   padding: 32px;
   border-radius: 20px;
   position: relative;
+  animation: modal-pop 0.3s ease-out;
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .modal-header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 .modal-header h3 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
 }
 .close-btn {
+  position: absolute;
+  right: 16px;
+  top: 0%;
   font-size: 24px;
   font-weight: bold;
   cursor: pointer;
 }
+.modal-content {
+  padding: 30px 20px;
+}
 .modal-content .clause {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  background: #f9fafb;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(229, 231, 235, 0.52);
 }
+
 .clause-number {
   color: #2563eb;
   font-weight: bold;
@@ -413,8 +483,14 @@ export default {
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 6px 13px;
   cursor: pointer;
   font-size: 13px;
+  margin-left: 8px;
+}
+.select-btn:hover {
+  background-color: #2563eb;
+  transform: scale(1.03);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 </style>

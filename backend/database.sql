@@ -64,6 +64,7 @@ CREATE TABLE registry_analysis (
                                    analysis_date DATETIME DEFAULT CURRENT_TIMESTAMP,               -- 분석일
                                    status BOOLEAN NOT NULL DEFAULT TRUE,
                                    file_name VARCHAR(100) NOT NULL,
+                                   total_prior_amount BIGINT NOT NULL,
                                    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 

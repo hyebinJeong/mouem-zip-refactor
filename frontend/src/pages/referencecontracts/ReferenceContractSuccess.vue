@@ -143,303 +143,218 @@ async function downloadPDF() {
 
 <template>
   <div class="page-wrapper">
-    <!-- ✅ PDF 생성 중일 때 로딩 오버레이 -->
-    <div
-      v-if="isLoadingPDF"
-      class="loading-overlay d-flex justify-content-center align-items-center"
-    >
+    <div v-if="isLoadingPDF" class="loading-overlay d-flex justify-content-center align-items-center">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
 
-    <div class="container" id="pdf-area">
-      <!-- 상단 헤더 -->
-      <div class="header-box">
-        <h2 class="header-title">
-          <span class="blue-text">계약서</span>가 완성되었어요.
-        </h2>
-        <p class="header-sub">계약서는 마이페이지에서 다운로드할 수 있어요.</p>
-      </div>
-      <div class="title-with-button">
-        <div class="contract-name">
-          <h3>{{ contract.contractName || '계약서 이름 없음' }}</h3>
+    <div class="contract-document" id="pdf-area">
+      <h1 class="document-title">부동산 임대차 계약서</h1>
+      <div class="lessor-lessee-info">
+        <div class="info-item">
+          임대인({{ contract.lessorName }})과 임차인({{ contract.lesseeName }})은 아래와 같이 임대차 계약을 체결한다.
         </div>
-        <!-- ✅ 마이페이지에서 들어왔을 때만 다운로드 버튼 표시 -->
-        <button
-          v-if="route.query.from === 'myPage'"
-          class="btn btn-primary exclude-pdf"
-          @click="downloadPDF"
-          :disabled="isLoadingPDF"
-        >
-          {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
-        </button>
       </div>
+      <table class="document-table">
+        <tr class="table-header-row">
+          <td colspan="4">[ 임차주택의 표시 ]</td>
+        </tr>
+        <tr>
+          <td class="table-label">소재지</td>
+          <td class="table-value" colspan="3">{{ contract.address }}</td>
+        </tr>
+        <tr>
+          <td class="table-label">토지 지목</td>
+          <td class="table-value">{{ contract.landCategory }}</td>
+          <td class="table-label">토지 면적</td>
+          <td class="table-value">{{ formatArea(contract.landArea) }}</td>
+        </tr>
+        <tr>
+          <td class="table-label">건물 구조·용도</td>
+          <td class="table-value">{{ contract.buildingUsage }}</td>
+          <td class="table-label">건물면적</td>
+          <td class="table-value">{{ formatArea(contract.buildingArea) }}</td>
+        </tr>
+        <tr>
+          <td class="table-label">임차할 부분</td>
+          <td class="table-value">{{ contract.leasedPart }}</td>
+          <td class="table-label">임차할 면적</td>
+          <td class="table-value">{{ formatArea(contract.leasedArea) }}</td>
+        </tr>
+        
+        <tr class="table-header-row">
+          <td colspan="4">[ 계약 내용 ]</td>
+        </tr>
+        <tr>
+          <td class="table-label">보증금</td>
+          <td class="table-value">{{ formatCurrency(contract.deposit) }}</td>
+          <td class="table-label">계약금</td>
+          <td class="table-value">{{ formatCurrency(contract.downPayment) }}</td>
+        </tr>
+        <tr>
+          <td class="table-label">잔금</td>
+          <td class="table-value">{{ formatCurrency(contract.balance) }}</td>
+          <td class="table-label">관리비</td>
+          <td class="table-value">{{ formatCurrency(contract.maintenanceCost) }}</td>
+        </tr>
+        
+        <tr class="table-header-row">
+          <td colspan="4">[ 임대차 기간 ]</td>
+        </tr>
+        <tr>
+          <td class="table-label">기간</td>
+          <td class="table-value" colspan="3">
+            {{ formatDate(contract.leaseStart) }} ~ {{ formatDate(contract.leaseEnd) }}
+          </td>
+        </tr>
 
-      <hr class="divider" />
+        <tr class="table-header-row">
+          <td colspan="4">특약사항</td>
+        </tr>
+        <tr v-if="mergedSpecialTerms.length">
+          <td colspan="4" class="special-clauses-cell">
+            <ul class="special-list">
+              <li v-for="(clause, idx) in mergedSpecialTerms" :key="idx">
+                {{ idx + 1 }}. {{ clause }}
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr v-else>
+          <td colspan="4" class="special-clauses-cell">등록된 특약이 없습니다.</td>
+        </tr>
+      </table>
 
-      <!-- 계약서 정보 -->
-      <div class="table-box">
-        <table class="info-table">
-          <tr class="row-divider">
-            <td>
-              <div class="label">임대인</div>
-              <div class="value">{{ contract.lessorName }}</div>
-            </td>
-            <td>
-              <div class="label">임차인</div>
-              <div class="value">{{ contract.lesseeName }}</div>
-            </td>
-          </tr>
+    </div>
 
-          <tr class="row-divider">
-            <td colspan="2">
-              <div class="label">소재지</div>
-              <div class="value">{{ contract.address }}</div>
-            </td>
-          </tr>
-
-          <tr class="row-divider">
-            <td>
-              <div class="label">토지 지목</div>
-              <div class="value">{{ contract.landCategory }}</div>
-            </td>
-            <td>
-              <div class="label">토지 면적</div>
-              <div class="value">{{ formatArea(contract.landArea) }}</div>
-            </td>
-          </tr>
-
-          <tr class="row-divider">
-            <td>
-              <div class="label">건물 구조·용도</div>
-              <div class="value">{{ contract.buildingUsage }}</div>
-            </td>
-            <td>
-              <div class="label">건물 면적</div>
-              <div class="value">{{ formatArea(contract.buildingArea) }}</div>
-            </td>
-          </tr>
-
-          <tr class="row-divider">
-            <td>
-              <div class="label">임차할 부분</div>
-              <div class="value">{{ contract.leasedPart }}</div>
-            </td>
-            <td>
-              <div class="label">임차할 면적</div>
-              <div class="value">{{ formatArea(contract.leasedArea) }}</div>
-            </td>
-          </tr>
-
-          <tr class="row-divider">
-            <td>
-              <div class="label">보증금</div>
-              <div class="value">{{ formatCurrency(contract.deposit) }}</div>
-            </td>
-            <td>
-              <div class="label">계약금</div>
-              <div class="value">
-                {{ formatCurrency(contract.downPayment) }}
-              </div>
-            </td>
-          </tr>
-
-          <tr class="row-divider">
-            <td>
-              <div class="label">잔금</div>
-              <div class="value">{{ formatCurrency(contract.balance) }}</div>
-            </td>
-            <td>
-              <div class="label">관리비</div>
-              <div class="value">
-                {{ formatCurrency(contract.maintenanceCost) }}
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td colspan="2">
-              <div class="label">임대차 기간</div>
-              <div class="value">
-                {{ formatDate(contract.leaseStart) }} ~
-                {{ formatDate(contract.leaseEnd) }}
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <hr class="divider" />
-
-      <!-- ✅ 특약사항 -->
-      <div class="special-section">
-        <h3>특약 사항</h3>
-        <div v-if="mergedSpecialTerms.length">
-          <div
-            v-for="(clause, idx) in mergedSpecialTerms"
-            :key="idx"
-            class="clause-box"
-          >
-            <span class="clause-number">{{ idx + 1 }}.</span>
-            <span class="clause-text">{{ clause }}</span>
-          </div>
-        </div>
-        <p v-else>등록된 특약이 없습니다.</p>
-      </div>
+    <div class="button-area exclude-pdf">
+      <button v-if="route.query.from === 'myPage'" class="btn btn-primary download-btn" @click="downloadPDF" :disabled="isLoadingPDF">
+        {{ isLoadingPDF ? 'PDF 생성 중...' : '다운로드' }}
+      </button>
+      <button class="btn btn-secondary home-btn" @click="router.push({ name: 'home' })">
+        홈으로 돌아가기
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgb(255, 255, 255);
-  z-index: 3000;
-}
-
 .page-wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 60px 100px;
   background-color: #f7f9fc;
 }
-.container {
+
+.contract-document {
   background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  max-width: 680px;
+  border: 2px solid #000;
+  max-width: 800px;
   width: 100%;
-  padding: 60px 90px;
+  padding: 40px;
   box-sizing: border-box;
 }
-.header-box {
-  margin-bottom: 16px;
-}
-.header-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 20px;
-  margin-left: 10px;
-}
-.header-title .blue-text {
-  color: #1a80e5;
+
+.document-title {
+  font-family: "Malgun Gothic", "Nanum Gothic", sans-serif;
+  font-size: 36px; /* 폰트 크기 확대 */
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-.header-sub {
-  font-size: 14px;
-  color: #555;
-  margin-left: 10px;
-}
-.contract-name {
-  margin: 20px 0 20px 10px;
-}
-.contract-name h3 {
-  font-size: 20px;
-  font-weight: 670;
-  color: #000000;
-  text-align: left;
-}
-.divider {
-  border: none;
-  border-top: 1.4px solid #a6a6a6;
-  margin: 24px 0;
-}
-.table-box {
-  margin-bottom: 24px;
-  font-size: 14px;
-  color: #222;
-}
-.info-table {
+.document-table {
   width: 100%;
   border-collapse: collapse;
 }
-.info-table td {
-  padding: 12px;
-  border: none;
-  vertical-align: top;
+
+.document-table tr {
+  border: 1px solid #000;
 }
-.label {
-  font-size: 15px;
+
+.document-table tr.table-header-row {
+  background-color: #e9ecef;
+  text-align: left; /* 왼쪽 정렬 */
+  font-weight: bold;
+}
+.document-table tr.table-header-row td {
+  padding: 15px 20px; /* 패딩 확대 */
+  font-size: 18px; /* 폰트 크기 확대 */
+  border-bottom: 2px solid #000;
+}
+
+
+.table-label {
+  width: 140px;
+  font-size: 16px; /* 폰트 크기 확대 */
   font-weight: 600;
-  color: #4e4e4e;
-  margin-bottom: 6px;
-}
-.value {
-  font-size: 14px;
-  color: #222222;
-  line-height: 1.5;
-  white-space: pre-line;
-}
-.special-section {
-  margin-top: 16px;
-}
-.special-section h3 {
-  font-weight: 700;
-  font-size: 16px;
-  margin-bottom: 12px;
-  color: #111;
-}
-.special-section p {
-  font-size: 14px;
-  color: #333;
-  line-height: 1.6;
-  margin-bottom: 10px;
+  background-color: #f7f9fc;
+  padding: 15px; /* 패딩 확대 */
+  border-right: 1px solid #000;
+  text-align: center;
 }
 
-.clause-box {
+.table-value {
+  padding: 15px; /* 패딩 확대 */
+  font-size: 16px; /* 폰트 크기 확대 */
+  border-right: 1px solid #000;
+}
+.document-table tr:last-child td.table-value {
+  border-bottom: none;
+}
+
+.special-clauses-cell {
+  padding: 15px; /* 패딩 확대 */
+  font-size: 16px; /* 폰트 크기 확대 */
+  line-height: 1.6; /* 줄 간격 확대 */
+}
+.special-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+.special-list li {
+  margin-bottom: 6px; /* 마진 확대 */
+  line-height: 1.6; /* 줄 간격 확대 */
+}
+
+.button-area {
+  margin-top: 24px;
   display: flex;
-  align-items: center;
-  background-color: #f0f4ff;
+  gap: 10px;
+}
+
+.download-btn {
+  background-color: #1a80e5;
+  color: white;
+  border: none;
+  padding: 12px 24px; /* 패딩 확대 */
   border-radius: 6px;
-  padding: 8px 12px;
-  margin-bottom: 8px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-.clause-number {
-  font-size: 13px;
-  color: #4b6cb7;
-  margin-right: 8px;
-  font-weight: 500;
+.home-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px; /* 패딩 확대 */
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-.clause-text {
-  font-size: 14px;
-  color: #111;
-  flex: 1;
-}
-
-.info-table .row-divider td {
-  border-bottom: 1.3px solid #efefef;
-}
-
-.info-table td {
-  padding: 12px;
-  vertical-align: top;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.title-with-button {
+.lessor-lessee-info {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin: 20px 0;
-}
-
-.title-with-button .btn {
-  margin-left: auto;
+  font-size: 1.2rem; /* 폰트 크기 확대 */
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  padding: 12px 0; /* 패딩 확대 */
 }
 </style>

@@ -268,11 +268,19 @@ async function downloadPDF() {
 .document-table {
   width: 100%;
   border-collapse: collapse;
+  border: 2px solid #000;
 }
 
 .document-table tr {
   border: 1px solid #000;
 }
+
+.document-table td{
+  border: 1px solid #000;
+  padding:15px;
+  font-size:16px;
+}
+
 
 .document-table tr.table-header-row {
   background-color: #e9ecef;
@@ -280,6 +288,9 @@ async function downloadPDF() {
   font-weight: bold;
 }
 .document-table tr.table-header-row td {
+  background-color:#e9ecef;
+  text-align: left;
+  font-weight: bold;
   padding: 15px 20px; /* 패딩 확대 */
   font-size: 18px; /* 폰트 크기 확대 */
   border-bottom: 2px solid #000;

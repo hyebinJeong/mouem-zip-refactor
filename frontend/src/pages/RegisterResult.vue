@@ -528,9 +528,9 @@ onMounted(async () => {
   gap: 16px;
 }
 
-/* 확인 버튼 */
+/* 예 버튼 */
 .confirm-button {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -543,14 +543,14 @@ onMounted(async () => {
 }
 
 .confirm-button:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-/* 취소 버튼 */
+/* 아니오 버튼 */
 .cancel-button {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -563,11 +563,12 @@ onMounted(async () => {
 }
 
 .cancel-button:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
 }
 
+/* 버튼 폭 동일 */
 .confirm-button,
 .cancel-button {
   width: 100%;

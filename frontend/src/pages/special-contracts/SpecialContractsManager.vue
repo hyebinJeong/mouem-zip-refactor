@@ -42,9 +42,11 @@
         >
           <td class="text-body">{{ contract.category }}</td>
           <td>{{ truncateText(contract.description, 30) }}</td>
-          <td class="d-flex align-items-center gap-2">
-            <span :class="importanceDot(contract.importance)"></span>
-            <span>{{ importanceLabel(contract.importance) }}</span>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span :class="importanceDot(contract.importance)"></span>
+              <span>{{ importanceLabel(contract.importance) }}</span>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -106,7 +108,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useSpecialContractsStore } from '@/stores/specialContractsStore';
+import { useSpecialContractsStore } from '@/stores/specialcontractsStore';
 
 const router = useRouter();
 const search = ref('');

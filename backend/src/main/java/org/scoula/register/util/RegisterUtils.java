@@ -225,8 +225,8 @@ public class RegisterUtils {
 
         for (List<String> row : tableData) {
             if (row.size() < 4) continue;
-            String buildingNumber = normalizeText(row.get(2)); // 제1층 제디디01-0101호
-            String buildingDetails = normalizeText(row.get(3)); // 철근콘크리트구조 40.87㎡
+            String buildingNumber = normalizeText(row.get(2));
+            String buildingDetails = normalizeText(row.get(3));
 
             // 건물번호에 층 정보(제1층 or 1층)가 포함되어 있는지 확인
             if (buildingNumber.contains(floor) || buildingNumber.contains("제" + floor)) {

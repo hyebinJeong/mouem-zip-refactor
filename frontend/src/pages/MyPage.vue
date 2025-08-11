@@ -10,18 +10,11 @@ const clientId = '88a530611ac6fa5a18f5747f67b6a359';
 const redirectUri = 'http://localhost:8080/';
 const auth = useAuthStore();
 const user = ref({ name: '', email: '', kakaoId: '' });
-// 임시 로그아웃 함수
+// 로그아웃 함수
 function onKakaoLogout() {
   auth.logout();
   const kakaoAuthUrl2 = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${redirectUri}`;
   window.location.href = kakaoAuthUrl2;
-}
-// 리포트 목록 클릭시 이동
-function onReportClick(item) {
-  router.push({
-    name: 'finalReportPage',
-    query: { reportId: item.reportId, from: 'myPage' },
-  });
 }
 
 const reportPreview = ref([]);
@@ -87,19 +80,12 @@ onMounted(async () => {
 });
 
 async function onWithdraw() {
-  const kakaoAccessToken = sessionStorage.getItem('kakaoAccessToken');
-  if (!kakaoAccessToken) {
-    alert('카카오 access token이 없습니다.');
-    return;
-  }
-
+  if (!auth.isLoggedIn) return alert('로그인이 필요합니다.');
   if (confirm('정말로 회원 탈퇴하시겠습니까?')) {
     try {
       await axios.post(
         '/api/oauth/kakao/unlink',
-        {
-          kakaoAccessToken,
-        },
+        {},
         {
           headers: {
             Authorization: `Bearer ${auth.token}`,
@@ -109,7 +95,6 @@ async function onWithdraw() {
 
       alert('회원 탈퇴가 완료되었습니다.');
       auth.logout();
-      sessionStorage.removeItem('kakaoAccessToken');
       window.location.href = '/';
     } catch (error) {
       alert('회원 탈퇴에 실패했습니다.');

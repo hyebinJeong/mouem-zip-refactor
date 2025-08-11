@@ -14,19 +14,19 @@ const gradeColorStyle = computed(() => getGradeColor(props.jeonseRatioRating));
 </script>
 
 <template>
-  <div class="FinalJeonseCard">
+  <article class="FinalJeonseCard h-100">
     <div
-      class="rounded-3 shadow-sm mx-auto pt-3 pb-3"
-      style="max-width: 640px; width: 100%; background-color: #f8f9fa"
+      class="rounded-3 shadow-sm mx-auto d-flex flex-column justify-content-center py-4 px-4 bg-light w-100"
+      style="max-width: 640px"
     >
-      <div class="px-4 text-start">
-        <p class="mb-0 fs-6 fw-semibold">
+      <div class="text-start">
+        <p class="mb-2 fs-6 fw-semibold lh-lg">
           예상 매매가 : {{ (salePrice || 0).toLocaleString() }}만원
         </p>
-        <p class="mb-0 fs-6 fw-semibold">
+        <p class="mb-2 fs-6 fw-semibold lh-lg">
           전세 보증금 : {{ (jeonseDeposit || 0).toLocaleString() }}만원
         </p>
-        <p class="mb-0 fs-6 fw-semibold">
+        <p class="mb-2 fs-6 fw-semibold lh-lg">
           예상 전세가율 : {{ (jeonseRatio || 0).toLocaleString() }}%
         </p>
       </div>
@@ -42,7 +42,7 @@ const gradeColorStyle = computed(() => getGradeColor(props.jeonseRatioRating));
         >입니다.</span
       >
     </h5>
-  </div>
+  </article>
 </template>
 
 <style scoped>

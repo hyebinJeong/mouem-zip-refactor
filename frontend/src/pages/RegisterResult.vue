@@ -9,6 +9,23 @@
           <span style="color: #fe5252">위험 요소</span>는 없는지,
           <span style="color: #1a80e5">꼼꼼히</span> 살펴봤어요.
         </p>
+        <p class="text-muted mb-4">
+          모든 등급은
+          <span
+            class="text-primary text-decoration-underline"
+            role="button"
+            style="cursor: pointer"
+            @click="openInfoModal"
+            aria-label="등급 판정 기준 안내 모달 열기"
+            aria-haspopup="dialog"
+            aria-controls="diagnosis-grade-info-modal"
+            >판정기준</span
+          >에 의해 설정된 등급입니다.
+        </p>
+        <DiagnosisGradeInfoModal
+          :show="showInfoModal"
+          @close="closeInfoModal"
+        />
       </div>
       <!-- 등급 표시 원형 -->
       <div
@@ -53,6 +70,9 @@
               >{{ result.jeonseRate }} %</span
             >
             <span v-else style="color: gray">판단 불가</span>
+          </p>
+          <p class="prior-info">
+            선순위 채권총액: {{ formatCurrency(result.totalPriorAmount) }}원
           </p>
           <hr class="my-3" />
           <p class="fw-bold fs-5 mb-1" style="color: #151fae">주의 사항</p>
@@ -100,12 +120,19 @@ import AnalysisCards from '@/components/AnalysisCards.vue';
 import BuddyHelper from '@/components/BuddyHelper.vue';
 import TermViewModal from '@/components/TermViewModal.vue';
 import { useAuthStore } from '@/stores/auth';
+import DiagnosisGradeInfoModal from '@/components/final-report/DiagnosisGradeInfoModal.vue';
 
 const route = useRoute();
 const router = useRouter();
 const result = ref(null);
 const auth = useAuthStore();
 const user = ref(null);
+
+// 금액 쉼표 표시
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return '';
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
 
 const analysisItems = [
   { label: '경매', key: 'auctionInfos' },
@@ -133,9 +160,9 @@ const getGradeMessage = (rating) => {
     case '안전':
       return `${userName}님이 올려주신 등기부등본은 안전합니다.`;
     case '보통':
-      return `${userName}님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 2년 안에 기재됐던 내역이 있습니다.`;
+      return `${userName}님이 올려주신 등기부등본은 보통입니다.`;
     case '주의':
-      return `${userName}님이 올려주신 등기부등본은 위험 요소가 현재 말소됐지만 최근 1년 안에 기재됐던 내역이 있습니다.`;
+      return `${userName}님이 올려주신 등기부등본은 주의가 필요합니다.`;
     case '위험':
       return `${userName}님이 올려주신 등기부등본은 위험합니다.`;
     default:
@@ -143,11 +170,22 @@ const getGradeMessage = (rating) => {
   }
 };
 
+// 판정기준 모달 표시 상태
+const showInfoModal = ref(false);
+
 // 용어 모달 표시 상태
 const showDictionaryModal = ref(false);
 
 // 체크리스트 모달 표시 상태
 const showModal = ref(false);
+
+// 판정 기준 모달
+const openInfoModal = () => {
+  showInfoModal.value = true;
+};
+const closeInfoModal = () => {
+  showInfoModal.value = false;
+};
 
 // 용어모달 열기/닫기 함수
 const openDictionaryModal = () => {
@@ -219,7 +257,8 @@ onMounted(async () => {
 
 /* 기본 정보 스타일 */
 .address-info,
-.jeonse-rate-info {
+.jeonse-rate-info,
+.prior-info {
   font-size: 1.25rem;
 }
 
@@ -489,9 +528,9 @@ onMounted(async () => {
   gap: 16px;
 }
 
-/* 확인 버튼 */
+/* 예 버튼 */
 .confirm-button {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -504,14 +543,14 @@ onMounted(async () => {
 }
 
 .confirm-button:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-/* 취소 버튼 */
+/* 아니오 버튼 */
 .cancel-button {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -524,11 +563,12 @@ onMounted(async () => {
 }
 
 .cancel-button:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
 }
 
+/* 버튼 폭 동일 */
 .confirm-button,
 .cancel-button {
   width: 100%;

@@ -39,10 +39,19 @@
 
     <div class="input-group">
       <label>4. 등기부등본을 업로드해주세요.</label>
-      <div class="upload-box" @click="$refs.fileInput.click()">
+      <div
+        class="upload-box"
+        :class="{ dragover: isDragOver }"
+        @click="$refs.fileInput.click()"
+        @dragover.prevent="onDragOver"
+        @dragenter.prevent="onDragEnter"
+        @dragleave="onDragLeave"
+        @drop.prevent="onDrop"
+      >
         <input
           type="file"
           ref="fileInput"
+          accept=".pdf,application/pdf"
           @change="handleFileUpload"
           style="display: none"
         />
@@ -109,7 +118,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted  } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -129,6 +138,35 @@ const areaValue = ref('');
 const showManualInput = ref(false);
 const registerIdRef = ref(null);
 
+const isDragOver = ref(false);
+
+const onDragOver = (e) => { isDragOver.value = true; };
+const onDragEnter = (e) => { isDragOver.value = true; };
+const onDragLeave = (e) => { isDragOver.value = false; };
+
+const onDrop = (e) => {
+  isDragOver.value = false;
+  const dt = e.dataTransfer;
+  if (!dt || !dt.files || !dt.files.length) return;
+
+  const picked = dt.files[0];
+  if (!/pdf$/i.test(picked.type) && !picked.name.toLowerCase().endsWith('.pdf')) {
+    alert('PDF 파일만 업로드할 수 있어요.');
+    return;
+  }
+  file.value = picked;   // 기존 file ref
+};
+
+// 브라우저 기본 “파일 열기” 동작 방지(전역)
+const preventDefaults = (e) => { e.preventDefault(); };
+onMounted(() => {
+  window.addEventListener('dragover', preventDefaults);
+  window.addEventListener('drop', preventDefaults);
+});
+onUnmounted(() => {
+  window.removeEventListener('dragover', preventDefaults);
+  window.removeEventListener('drop', preventDefaults);
+});
 
 const openPostcode = () => {
   new window.daum.Postcode({
@@ -261,13 +299,13 @@ const proceedToLeaseAnalysis = async (registerId) => {
 
 // 직접 면적 입력 후 저장 및 다음 단계 진행
 const saveManualArea = async () => {
-  const raw = String(manualArea.value ?? '').trim(); 
+  const raw = String(manualArea.value ?? '').trim();
   // 쉼표 소수점을 점으로 변환 (예: 56,88 -> 56.88)
   const num = Number(raw.replace(',', '.'));
   if (!Number.isFinite(num) || num <= 0) {
-  alert('면적은 숫자만 입력 가능하며, 0보다 커야 합니다. (예: 56.88)');
-  return;
-}
+    alert('면적은 숫자만 입력 가능하며, 0보다 커야 합니다. (예: 56.88)');
+    return;
+  }
 
   // 중복 클릭 방지
   if (isSubmitting.value) return;
@@ -382,6 +420,11 @@ label {
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
+}
+.upload-box.dragover{
+  border-color:#1a80e5;
+  background:#f0f6ff;
+  color:#1a80e5;
 }
 .address-box button {
   flex-shrink: 0;

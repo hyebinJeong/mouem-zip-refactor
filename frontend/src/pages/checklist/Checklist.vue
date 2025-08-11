@@ -8,7 +8,6 @@
         </h1>
 
         <div class="content-box">
-          <!-- 슬라이더 -->
           <div class="slider-wrapper">
             <button class="arrow left" @click="prevSlide">
               <svg viewBox="0 0 24 24" width="50" height="50" fill="#888">
@@ -31,32 +30,52 @@
             </button>
           </div>
 
-          <!-- 체크리스트 -->
-          <div class="checklist-box">
-            <ul class="checklist">
-              <li v-for="(item, index) in checklistItems" :key="index">
-                <label :for="`todo-${index}`" class="item">
-                  <input
-                      type="checkbox"
-                      :id="`todo-${index}`"
-                      class="hidden"
-                      v-model="checked[index]"
-                  />
-                  <label :for="`todo-${index}`" class="cbx">
-                    <svg width="14px" height="12px" viewBox="0 0 14 12">
-                      <polyline points="1 7.6 5 11 13 1"></polyline>
-                    </svg>
+
+          <div class="checklist-area">
+            <div class="checklist-box">
+              <ul class="checklist">
+                <li v-for="(item, index) in checklistItems" :key="index">
+                  <label :for="`todo-${index}`" class="item">
+                    <input
+                        type="checkbox"
+                        :id="`todo-${index}`"
+                        class="hidden"
+                        v-model="checked[index]"
+                    />
+                    <label :for="`todo-${index}`" class="cbx">
+                      <svg width="14px" height="12px" viewBox="0 0 14 12">
+                        <polyline points="1 7.6 5 11 13 1"></polyline>
+                      </svg>
+                    </label>
+
+                    <!-- 위험도 컬러 원 -->
+                    <span
+                        class="risk-indicator"
+                        :class="{
+                        red: item.riskColor === 'red',
+                        yellow: item.riskColor === 'yellow',
+                        green: item.riskColor === 'green'
+                      }"
+                    ></span>
+
+                    <label :for="`todo-${index}`" class="cbx-lbl">
+                      {{ item.text }}
+                      <span v-if="!checked[index]" v-html="item.span"></span>
+                    </label>
                   </label>
-                  <label :for="`todo-${index}`" class="cbx-lbl">
-                    {{ item.text }}
-                    <span v-if="!checked[index]" v-html="item.span"></span>
-                  </label>
-                </label>
-              </li>
-            </ul>
+                </li>
+              </ul>
+            </div>
+            <div class="risk-legend">
+              <span class="risk-indicator red"></span> 중요
+              <span class="risk-indicator yellow"></span> 주의
+              <span class="risk-indicator green"></span> 참조
+            </div>
+            <div class="button-row">
+              <button class="next-button" @click="goNext">확인 완료</button>
+            </div>
           </div>
         </div>
-        <button class="next-button-fixed" @click="goNext">확인 완료</button>
       </div>
 
       <Buddy @open-dictionary="openDictionaryModal" />
@@ -138,16 +157,15 @@ onMounted(() => window.addEventListener('keydown', onEscPress))
 onBeforeUnmount(() => window.removeEventListener('keydown', onEscPress))
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $main: #1A80E5;
 
 .checklist-page {
   .wrapper {
     width: 100%;
-    min-height: calc(100vh - 130px);
+    min-height: calc(100vh - 140px);
     display: flex;
     justify-content: center;
-    background-color:white;
   }
 
   .container {
@@ -155,8 +173,6 @@ $main: #1A80E5;
     max-width: 1200px;
     padding: 20px;
     box-sizing: border-box;
-    background-color:white;
-
   }
 
   .main-title {
@@ -174,75 +190,112 @@ $main: #1A80E5;
 
   .content-box {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    width: 100%;
     justify-content: center;
+    gap: 70px;
   }
 
-  // === 슬라이더 영역 ===
   .slider-wrapper {
     position: relative;
-    width: 320px;
-    // height: 180px; ← ❌ 삭제
+    max-width: 600px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 24px;
-    max-height: 450px;
-    margin-top: 20px;
+    flex: none;
+    max-height: calc(100vh - 300px);
 
     .arrow {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: none;
       border: none;
       cursor: pointer;
       z-index: 2;
+      padding: 8px;
+      border-radius: 50%;
+      transition: background 0.2s ease;
+      background-color: white;
 
       svg {
         width: 32px;
         height: 32px;
-        fill: #888;
+        fill: #9e9e9e;
       }
 
       &.left {
-        left: -40px;
+        left: -50px;
       }
 
       &.right {
-        right: -40px;
+        right: -50px;
       }
     }
   }
 
   .slider {
     width: 100%;
-    // height: 100%; ← ❌ 삭제
     display: flex;
     justify-content: center;
     align-items: center;
 
     .slider-img {
       max-width: 100%;
-      max-height: 450px; // ✅ 이미지가 너무 크지 않게 제한
+      max-height: calc(100vh - 300px);
       border-radius: 10px;
       cursor: zoom-in;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      object-fit: contain; // ✅ 비율 유지하며 여백 없이
+      object-fit: contain;
     }
   }
 
+  .checklist-area {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
 
-  // === 체크리스트 영역 ===
+    .risk-legend {
+      margin-bottom: 16px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #444;
+      user-select: none;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+
+      .risk-indicator {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+        flex-shrink: 0;
+      }
+
+      .risk-indicator.red {
+        background-color: #ff6161;
+      }
+
+      .risk-indicator.yellow {
+        background-color: yellow;
+      }
+
+      .risk-indicator.green {
+        background-color: #72ff5d;
+      }
+    }
+  }
+
   .checklist-box {
     background-color: #f7f9fc;
     padding: 20px;
     border-radius: 16px;
-    margin-left:80px;
-    width: 90%;
-    max-width: 800px;
+    width: 100%;
+    max-width: 1000px;
     min-height: 300px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     margin-bottom: 30px;
@@ -253,7 +306,7 @@ $main: #1A80E5;
       li {
         margin-bottom: 16px;
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         font-size: 17px;
         gap: 12px;
         line-height: 2.2;
@@ -265,6 +318,7 @@ $main: #1A80E5;
         user-select: none;
       }
 
+      /* 체크박스 커스텀 */
       .cbx {
         position: relative;
         width: 18px;
@@ -367,14 +421,36 @@ $main: #1A80E5;
           }
         }
       }
+
+      /* 위험도 컬러 원 스타일 */
+      .risk-indicator {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        margin-left: 8px;
+        flex-shrink: 0;
+      }
+      .risk-indicator.red {
+        background-color: #ff6161;
+      }
+      .risk-indicator.yellow {
+        background-color: yellow;
+      }
+      .risk-indicator.green {
+        background-color: #72ff5d;
+      }
     }
   }
 
-  // === 버튼 ===
-  .next-button-fixed {
-    position: fixed; // ✅ 고정 위치
-    right: 100px;     // ✅ 오른쪽 여백
-    bottom: 10px;    // ✅ 아래 여백
+  .button-row {
+    display: flex;
+    justify-content: flex-end;
+    width: 90%;
+    max-width: 800px;
+  }
+
+  .next-button {
     background-color: $main;
     color: white;
     font-weight: 600;
@@ -390,7 +466,6 @@ $main: #1A80E5;
     }
   }
 
-  // === 이미지 모달 ===
   .image-modal {
     position: fixed;
     top: 0;
@@ -412,5 +487,4 @@ $main: #1A80E5;
     }
   }
 }
-
 </style>

@@ -5,7 +5,6 @@
         <img class="logo" :src="logo" alt="HomeBuddy Logo" />
       </div>
 
-      <!-- 모바일 햄버거 버튼 -->
       <div class="hamburger" @click="toggleMenu">
         <span></span>
         <span></span>
@@ -21,6 +20,7 @@
         <div class="menu-item" @click="goSafetyCheck">매물 안전성 진단</div>
         <div class="menu-item" @click="goChecklist">체크리스트</div>
 
+        <!-- 계약 가이드 -->
         <div
             class="menu-item dropdown"
             @mouseenter="!isMobile && (showContractGuide = true)"
@@ -28,6 +28,12 @@
             @click="toggleContractGuide"
         >
           계약 가이드
+
+          <!-- 데스크탑 전용 드롭다운 -->
+          <ul class="dropdown-list" v-if="!isMobile && showContractGuide">
+            <li @click.stop="goReferenceContract">참고계약서 작성</li>
+            <li @click.stop="goReferenceGuidebook">참고 가이드북</li>
+          </ul>
         </div>
 
         <div class="menu-item" @click="goGlossary">용어해설집</div>
@@ -50,7 +56,7 @@
         </button>
       </div>
 
-      <!-- 모바일 전용 드롭다운 패널 (메뉴 왼쪽에 뜸) -->
+      <!-- 모바일 전용 드롭다운 패널 -->
       <div
           v-if="isMobile && showContractGuide"
           class="dropdown-panel"
@@ -96,8 +102,8 @@ const toggleMenu = () => {
 const toggleContractGuide = () => {
   if (isMobile.value) {
     const rect = menuContainerRef.value.getBoundingClientRect();
-    dropdownPos.value.top = rect.top + 130; // 메뉴 아래 위치
-    dropdownPos.value.right = window.innerWidth - rect.left + 10; // 메뉴 왼쪽으로 튀어나오게
+    dropdownPos.value.top = rect.top + 130;
+    dropdownPos.value.right = window.innerWidth - rect.left + 10;
     showContractGuide.value = !showContractGuide.value;
   }
 };
@@ -111,7 +117,7 @@ const dropdownStyle = computed(() => ({
 const updateIsMobile = () => {
   isMobile.value = window.innerWidth <= 768;
   if (!isMobile.value) {
-    showContractGuide.value = false; // 데스크탑 전환 시 초기화
+    showContractGuide.value = false;
   }
 };
 
@@ -231,6 +237,40 @@ const goLogin = () => router.push('/login');
   border-radius: 3px;
 }
 
+/* 데스크탑 전용 드롭다운 */
+.dropdown-list {
+  background-color: #ececec;
+  font-size: 18px;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 170px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  z-index: 10;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.dropdown-list li {
+  font-weight: normal;
+  height: 3em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.dropdown-list li:hover {
+  background-color: white;
+}
+
+/* 모바일 전용 드롭다운 패널 */
 .dropdown-panel {
   width: 180px;
   background: white;
@@ -292,6 +332,5 @@ const goLogin = () => router.push('/login');
     padding: 10px;
     align-self: center;
   }
-
 }
 </style>

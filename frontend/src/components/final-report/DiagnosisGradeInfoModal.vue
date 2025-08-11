@@ -60,18 +60,18 @@ const gradeList = [
     aria-labelledby="modal-title"
     aria-describedby="modal-desc"
   >
-    <div
+    <section
       class="diagnosis-box bg-white rounded-4 shadow-sm p-4 d-flex flex-column"
     >
       <h1 class="fs-4 fw-bold text-center mb-3 my-2" id="modal-title">
         진단 등급 판정 기준
       </h1>
 
-      <div
+      <section
         class="diagnosis-content flex-grow-1 overflow-auto px-1 py-2"
         id="modal-desc"
       >
-        <div
+        <article
           v-for="(grade, index) in gradeList"
           :key="index"
           class="mb-4 text-start"
@@ -84,8 +84,8 @@ const gradeList = [
               <p class="mb-1">{{ item }}</p>
             </div>
           </div>
-        </div>
-      </div>
+        </article>
+      </section>
 
       <div class="text-center mt-3">
         <button
@@ -95,7 +95,7 @@ const gradeList = [
           확인 완료
         </button>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 

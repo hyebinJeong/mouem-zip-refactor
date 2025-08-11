@@ -14,7 +14,7 @@ const gradeColorStyle = computed(() => getGradeColor(props.jeonseRatioRating));
 </script>
 
 <template>
-  <div class="FinalJeonseCard h-100">
+  <article class="FinalJeonseCard h-100">
     <div
       class="rounded-3 shadow-sm mx-auto d-flex flex-column justify-content-center py-4 px-4 bg-light w-100"
       style="max-width: 640px"
@@ -42,7 +42,7 @@ const gradeColorStyle = computed(() => getGradeColor(props.jeonseRatioRating));
         >입니다.</span
       >
     </h5>
-  </div>
+  </article>
 </template>
 
 <style scoped>

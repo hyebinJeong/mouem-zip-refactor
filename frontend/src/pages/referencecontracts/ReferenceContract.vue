@@ -26,22 +26,24 @@ const buildingArea = ref('');
 const leasePart = ref('');
 const leaseArea = ref('');
 
-// 숫자를 억/만원/원 단위로 변환해주는 함수
+// 숫자를 억/만원/원 단위로 변환해주는 함수 (버그 수정)
 const formatPrice = (value) => {
-  if (!value) return '0원';
-  const num = parseInt(value, 10);
+  if (value === null || value === undefined || String(value).trim() === '') return '0원';
+  const s = String(value).replace(/,/g, '').trim();
+  if (s === '') return '0원';
+  const num = Number(s);
+  if (Number.isNaN(num) || num === 0) return '0원';
 
-  const billion = Math.floor(num / 100000000); // 억 단위
-  const million = Math.floor((num % 100000000) / 10000); // 만원 단위
-  const won = num % 10000; // 나머지 원
+  const won = Math.abs(Math.floor(num));
+  const billion = Math.floor(won / 100000000); // 억 단위
+  const million = Math.floor((won % 100000000) / 10000); // 만단위
+  const rest = won % 10000; // 나머지 원
 
-  let result = [];
-  if (billion > 0) result.push(`${billion}억`);
-  if (million > 0) result.push(`${million}만`);
-  if (won > 0) result.push(`${won.toLocaleString()}원`);
-
-  if (result.length === 0) return '0원';
-  return result.join(' ');
+  const parts = [];
+  if (billion > 0) parts.push(`${billion}억`);
+  if (million > 0) parts.push(`${million}만`);
+  if (rest > 0) parts.push(`${rest.toLocaleString()}원`);
+  return parts.join(' ') || '0원';
 };
 
 // ✅ 모달 상태
@@ -151,15 +153,29 @@ const isHardReload = () => {
   return navType === 'reload' || navType === 'navigate';
 };
 
-//유효성 검사
-const allowOnlyNumbers = (event, modelRef) => {
-  const value = event.target.value;
-  if (/^\d*$/.test(value)) {
-    modelRef.value = value;
+// 입력 제어: 정수 또는 소수 허용(allowDecimal)
+const allowOnlyNumbers = (event, modelRef, allowDecimal = false) => {
+  // 원본값(붙여넣기 포함)
+  let value = String(event.target.value || '').replace(/,/g, '').trim();
+
+  if (allowDecimal) {
+    // 숫자와 점(.)만 허용, 점은 하나만
+    value = value.replace(/[^0-9.]/g, '');
+    const firstDot = value.indexOf('.');
+    if (firstDot !== -1) {
+      // 첫 번째 점 이후 모든 점 제거
+      value = value.slice(0, firstDot + 1) + value.slice(firstDot + 1).replace(/\./g, '');
+      // '.'로 시작하면 앞에 0 붙이기
+      if (value.startsWith('.')) value = '0' + value;
+    }
   } else {
-    console.log('유효성에 어긋납니다!');
-    event.target.value = modelRef.value;
+    // 정수만 허용
+    value = value.replace(/\D/g, '');
   }
+
+  modelRef.value = value;
+  // 입력 표시 동기화
+  event.target.value = value;
 };
 
 const allowOnlyText = (event, modelRef) => {
@@ -167,8 +183,9 @@ const allowOnlyText = (event, modelRef) => {
   if (/^[ㄱ-ㅎ가-힣a-zA-Z\s]*$/.test(value)) {
     modelRef.value = value;
   } else {
-    console.log('유효성에 어긋납니다!');
-    event.target.value = modelRef.value;
+    const sanitized = value.replace(/[^ㄱ-ㅎ가-힣a-zA-Z\s]/g, '');
+    modelRef.value = sanitized;
+    event.target.value = sanitized;
   }
 };
 
@@ -270,29 +287,49 @@ const removeSpecialTerm = (index) => {
   else special.value = [''];
 };
 
+// 숫자 변환 헬퍼 (안전)
+const toInt = (v) => {
+  if (v === null || v === undefined) return 0;
+  const s = String(v).replace(/,/g, '').trim();
+  if (s === '') return 0;
+  const n = parseInt(s, 10);
+  return Number.isNaN(n) ? 0 : n;
+};
+const toFloat = (v) => {
+  if (v === null || v === undefined) return 0;
+  const s = String(v).replace(/,/g, '').trim();
+  if (s === '') return 0;
+  const n = parseFloat(s);
+  return Number.isNaN(n) ? 0 : n;
+};
+
 // ✅ 제출 로직
 const onSubmit = async () => {
   // 필수 입력 검증
-  const requiredFields = [
-    contractName.value,
-    lessor.value,
-    lessee.value,
-    address.value,
-    contractAmount.value,
-    deposit.value,
-    rent.value,
-    structure.value,
-    maintenanceFee.value,
-    startDate.value,
-    endDate.value,
-    landCategory.value,
-    landArea.value,
-    buildingArea.value,
-    leasePart.value,
-    leaseArea.value,
-  ];
-  if (requiredFields.some((field) => !field || field.trim() === '')) {
-    alert('모든 필수 항목을 입력해주세요.');
+  const requiredFieldsMap = {
+    '계약서 이름': contractName.value,
+    '임대인': lessor.value,
+    '임차인': lessee.value,
+    '소재지': address.value,
+    '계약금': contractAmount.value,
+    '보증금': deposit.value,
+    '잔금': rent.value,
+    '건물 구조·용도': structure.value,
+    '관리비': maintenanceFee.value,
+    '임대 시작일': startDate.value,
+    '임대 종료일': endDate.value,
+    '토지 지목': landCategory.value,
+    '토지 면적': landArea.value,
+    '건물 면적': buildingArea.value,
+    '임차할 부분': leasePart.value,
+    '임차할 면적': leaseArea.value,
+  };
+
+  const missing = Object.keys(requiredFieldsMap).find(
+    (k) => requiredFieldsMap[k] === null || requiredFieldsMap[k] === undefined || String(requiredFieldsMap[k]).trim() === ''
+  );
+  if (missing) {
+    alert(`${missing}을(를) 입력해주세요.`);
     return;
   }
 
@@ -304,6 +341,25 @@ const onSubmit = async () => {
     alert('특약사항을 최소 1개 이상 입력하거나 선택해주세요.');
     return;
   }
+  
+  // 보증금 = 계약금 + 잔금 (정수 비교)
+  const depositNum = toInt(deposit.value);
+  const downPaymentNum = toInt(contractAmount.value); // 계약금
+  const balanceNum = toInt(rent.value); // 잔금
+  if (depositNum !== downPaymentNum + balanceNum) {
+    alert('보증금은 계약금과 잔금의 합과 같아야 합니다.');
+    return;
+  }
+
+  // 면적 비교 (소수점 허용)
+  const landAreaNum = toFloat(landArea.value);
+  const buildingAreaNum = toFloat(buildingArea.value);
+  const leaseAreaNum = toFloat(leaseArea.value);
+
+  if (!(landAreaNum >= buildingAreaNum && buildingAreaNum >= leaseAreaNum)) {
+    alert('토지면적 ≥ 건물면적 ≥ 임대면적 이어야 합니다.');
+    return;
+  }
 
   try {
     // ✅ 백엔드 DTO와 맞춘 payload
@@ -313,15 +369,15 @@ const onSubmit = async () => {
       lesseeName: lessee.value,
       address: address.value,
       landCategory: landCategory.value,
-      landArea: parseFloat(landArea.value),
+      landArea: landAreaNum,
       buildingUsage: structure.value,
-      buildingArea: parseFloat(buildingArea.value),
+      buildingArea: buildingAreaNum,
       leasedPart: leasePart.value,
-      leasedArea: parseFloat(leaseArea.value),
-      deposit: parseInt(deposit.value),
-      downPayment: parseInt(contractAmount.value),
-      balance: parseInt(rent.value),
-      maintenanceCost: parseInt(maintenanceFee.value),
+      leasedArea: leaseAreaNum,
+      deposit: depositNum,
+      downPayment: downPaymentNum,
+      balance: balanceNum,
+      maintenanceCost: toInt(maintenanceFee.value),
       leaseStart: startDate.value,
       leaseEnd: endDate.value,
       specialClauses: validSpecials, // ✅ JSON 배열
@@ -440,7 +496,7 @@ const openPostcode = () => {
               v-model="landArea"
               type="text"
               placeholder="m²"
-              @input="allowOnlyNumbers($event, landArea)"
+              @input="allowOnlyNumbers($event, landArea, true)"
             />
           </div>
         </div>
@@ -464,7 +520,7 @@ const openPostcode = () => {
               v-model="buildingArea"
               type="text"
               placeholder="m²"
-              @input="allowOnlyNumbers($event, buildingArea)"
+              @input="allowOnlyNumbers($event, buildingArea, true)"
             />
           </div>
         </div>
@@ -481,7 +537,7 @@ const openPostcode = () => {
               v-model="leaseArea"
               type="text"
               placeholder="m²"
-              @input="allowOnlyNumbers($event, leaseArea)"
+              @input="allowOnlyNumbers($event, leaseArea, true)"
             />
           </div>
         </div>
@@ -1014,7 +1070,6 @@ input[type='date'] {
     padding: 10px;
   }
 }
-/* 버튼 디자인*/
 .input-with-button {
   display: flex;
   align-items: center;
@@ -1062,7 +1117,6 @@ input[type='date'] {
   padding: 8px;
   cursor: pointer;
 }
-/* 모달 디자인 */
 .modal-overlay {
   position: fixed;
   inset: 0;

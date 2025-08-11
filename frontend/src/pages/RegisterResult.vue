@@ -29,12 +29,15 @@
       </div>
       <!-- 등급 표시 원형 -->
       <div
-        class="rounded-circle d-flex align-items-center justify-content-center fw-bold mb-3 donut-thin"
+        class="rounded-circle d-flex align-items-center justify-content-center fw-bold mb-5"
         :style="{
-          borderColor: gradeColor[result.rating] || '#6c757d',
+          border: `12px solid ${gradeColor[result.rating] || '#6c757d'}`,
           color: gradeColor[result.rating] || '#6c757d',
+          // borderWidth: '12px',
+          width: '13rem',
+          height: '13rem',
+          fontSize: '2.2rem',
         }"
-        style="width: 10rem; height: 10rem; font-size: 1.5rem"
       >
         {{ result.rating }}
       </div>
@@ -45,43 +48,47 @@
         class="text-center px-4 py-3 mb-4"
         style="background-color: #f0f6ff; border-radius: 1rem; max-width: 640px"
       >
-        <span class="fw-bold">{{ getGradeMessage(result.rating) }}</span>
+        <span v-html="getGradeMessage(result.rating)"></span>
       </div>
 
       <!-- 좌우분할 → 반응형으로 변경 -->
-      <div class="row w-100 align-items-start analysis-container">
-        <!-- PDF 뷰어 섹션 -->
-        <div class="col-lg-6 col-12 pdf-section">
-          <p class="fw-bold fs-5 mb-2" style="color: #151fae">
-            어떤 점이 위험한지 하나씩 확인해보세요.
-          </p>
-          <div v-if="result?.fileUrl" class="pdf-wrapper">
-            <PDFView :pdfUrl="result.fileUrl" />
-          </div>
-        </div>
+      <div class="analysis-outer">
+        <div class="two-col-card">
+          <div class="row w-100 align-items-start analysis-container">
+            <!-- PDF 뷰어 섹션 -->
+            <div class="col-lg-6 col-12 pdf-section">
+              <p class="fw-bold fs-5 mb-2" style="color: #1A80E5">
+                어떤 점이 위험한지 하나씩 확인해보세요.
+              </p>
+              <div v-if="result?.fileUrl" class="pdf-wrapper">
+                <PDFView :pdfUrl="result.fileUrl" />
+              </div>
+            </div>
 
-        <!-- 분석 결과 섹션 -->
-        <div class="col-lg-6 col-12 analysis-section">
-          <p class="fw-bold fs-5 mb-2" style="color: #151fae">기본 정보</p>
-          <p class="address-info">주소: {{ result.address }}</p>
-          <p class="jeonse-rate-info">
-            예상 전세가율:
-            <span v-if="result.jeonseRate !== -1"
-              >{{ result.jeonseRate }} %</span
-            >
-            <span v-else style="color: gray">판단 불가</span>
-          </p>
-          <p class="prior-info">
-            선순위 채권총액: {{ formatCurrency(result.totalPriorAmount) }}원
-          </p>
-          <hr class="my-3" />
-          <p class="fw-bold fs-5 mb-1" style="color: #151fae">주의 사항</p>
-          <div class="analysis-cards-wrapper">
-            <AnalysisCards
-              v-if="result && result.analysis"
-              :analysis="result.analysis"
-              :analysisItems="analysisItems"
-            />
+            <!-- 분석 결과 섹션 -->
+            <div class="col-lg-6 col-12 analysis-section">
+              <p class="fw-bold fs-5 mb-2" style="color: #1A80E5">기본 정보</p>
+              <p class="address-info">주소: {{ result.address }}</p>
+              <p class="jeonse-rate-info">
+                예상 전세가율:
+                <span v-if="result.jeonseRate !== -1"
+                  >{{ result.jeonseRate }} %</span
+                >
+                <span v-else style="color: gray">판단 불가</span>
+              </p>
+              <p class="prior-info">
+                선순위 채권총액: {{ formatCurrency(result.totalPriorAmount) }}원
+              </p>
+              <hr class="my-3" />
+              <p class="fw-bold fs-5 mb-1" style="color: #1A80E5">주의 사항</p>
+              <div class="analysis-cards-wrapper">
+                <AnalysisCards
+                  v-if="result && result.analysis"
+                  :analysis="result.analysis"
+                  :analysisItems="analysisItems"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -156,18 +163,32 @@ const gradeColor = {
 // 등급별 메시지 반환 함수
 const getGradeMessage = (rating) => {
   const userName = user.value?.name || '사용자';
-  switch (rating) {
-    case '안전':
-      return `${userName}님이 올려주신 등기부등본은 안전합니다.`;
-    case '보통':
-      return `${userName}님이 올려주신 등기부등본은 보통입니다.`;
-    case '주의':
-      return `${userName}님이 올려주신 등기부등본은 주의가 필요합니다.`;
-    case '위험':
-      return `${userName}님이 올려주신 등기부등본은 위험합니다.`;
-    default:
-      return '등기부등본을 분석 중입니다...';
+  const colors = {
+    안전: '#31BDF9',
+    보통: '#1ABE5F',
+    주의: '#FF8400',
+    위험: '#FF3838',
+    '판단 보류': '#FFCF64', 
+  };
+  const endings = {
+    안전: '안전합니다.',
+    보통: '보통입니다.',
+    주의: '주의가 필요합니다.',
+    위험: '위험합니다.',
+    '판단 보류': '판단 보류입니다.',
+  };
+  if (['안전', '보통', '주의', '위험'].includes(rating)) {
+    // 등급 키워드만 색상 span으로 감싸기
+    const coloredEnding = endings[rating].replace(
+      rating,
+      `<span style="color:${colors[rating]}; font-weight:800;">${rating}</span>`
+    );
+
+    return `<span style="font-size:1.3rem; font-weight:800;">
+      ${userName}님이 올려주신 등기부등본은 ${coloredEnding}
+    </span>`;
   }
+  return '등기부등본을 분석 중입니다...';
 };
 
 // 판정기준 모달 표시 상태
@@ -573,4 +594,59 @@ onMounted(async () => {
 .cancel-button {
   width: 100%;
 }
+
+
+/* 전체 폭 제한 + 중앙 정렬 */
+.analysis-outer{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  padding:0 1rem;
+}
+.two-col-card{
+  width:100%;
+  max-width: 1440px;         /* 🔹 데스크톱에서 두 칼럼이 한눈에 */
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 12px 14px;        /* 얇은 카드 느낌 */
+  box-shadow: 0 6px 18px rgba(0,0,0,.04);
+}
+
+/* 상단 원 주변 여백 살짝 축소 */
+.mb-5{ margin-bottom:2rem !important; } /* 원 아래 간격 줄이기 */
+
+/* 데스크톱 레이아웃 높이 통일 + 스크롤 */
+@media (min-width: 992px){
+  .analysis-container { min-height: auto; }
+
+  /* 기존 80vh 높이 무효화 */
+  .pdf-section,
+  .analysis-section {
+    height: auto !important;
+    padding: .5rem .75rem;
+  }
+
+  /* 내부만 스크롤(두 칼럼 같은 높이) */
+  .pdf-wrapper{
+    position: sticky;
+    top: 12px;
+    max-height: 74vh;
+    overflow: auto;
+  }
+  .analysis-section{
+    max-height: 74vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .analysis-cards-wrapper{
+    flex: 1;
+    overflow: auto;
+    margin-top: .75rem;
+  }
+}
+
+/* 텍스트 살짝 컴팩트하게 */
+.address-info,.jeonse-rate-info,.prior-info{ font-size:1.2rem; }
 </style>

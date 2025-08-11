@@ -223,20 +223,18 @@ public class RegisterUtils {
         String floor = detailInfo.get("층");
 //        System.out.println("층 정보: " + floor);
 
-        Pattern pattern = Pattern.compile("((지하)?\\d+층)\\s*(\\d+(?:\\.\\d+)?)m2?");
-
         for (List<String> row : tableData) {
             if (row.size() < 4) continue;
+            String buildingNumber = normalizeText(row.get(2));
             String buildingDetails = normalizeText(row.get(3));
-//            System.out.println("불러오는 데이터: " + buildingDetails);
 
-            Matcher matcher = pattern.matcher(buildingDetails);
-            while (matcher.find()) {
-                String foundFloor = matcher.group(1); // ex: 3층
-                String area = matcher.group(3);       // ex: 630.44
-
-                if (foundFloor.equals(floor)) {
-                    return area; // 면적 반환
+            // 건물번호에 층 정보(제1층 or 1층)가 포함되어 있는지 확인
+            if (buildingNumber.contains(floor) || buildingNumber.contains("제" + floor)) {
+                // 면적 추출
+                Pattern pattern = Pattern.compile("(\\d+(?:\\.\\d+)?)m2?");
+                Matcher matcher = pattern.matcher(buildingDetails);
+                if (matcher.find()) {
+                    return matcher.group(1); // 면적 값만 반환
                 }
             }
         }

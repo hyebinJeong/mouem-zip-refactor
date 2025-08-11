@@ -64,6 +64,7 @@ public class TabulaController {
 
             // 면적 추출
             String area = RegisterUtils.getArea(table, detail);
+//            System.out.println("면적 값: " + area);
             int registerId = tabulaService.saveAnalysis(userId, address, response, registryName, registryRating, uploadedFileName, totalPriorAmount);
 
             Map<String, Object> result = new HashMap<>();

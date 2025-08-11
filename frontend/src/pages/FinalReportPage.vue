@@ -207,20 +207,24 @@ onMounted(async () => {
             class="d-flex flex-column flex-md-row justify-content-center align-items-end"
             style="max-width: 960px; margin: 0 auto; height: auto"
           >
-            <div class="final-jeonse-col" style="width: 100%; max-width: 480px">
-              <FinalJeonse
-                :jeonseRatio="reportData.jeonseRatio"
-                :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
-              />
+            <div class="final-jeonse-col w-100" style="max-width: 480px">
+              <div class="h-100 d-flex align-items-end">
+                <FinalJeonse
+                  :jeonseRatio="reportData.jeonseRatio"
+                  :regionAvgJeonseRatio="reportData.regionAvgJeonseRatio"
+                />
+              </div>
             </div>
-            <div class="final-jeonse-col ms-md-4 mt-4 mt-md-0">
-              <FinalJeonseCard
-                :salePrice="reportData.expectedSellingPrice"
-                :jeonseDeposit="reportData.deposit"
-                :jeonseRatio="reportData.jeonseRatio"
-                :jeonseRatioRating="reportData.jeonseRatioRating"
-                :username="reportData.username"
-              />
+            <div class="final-jeonse-col w-100" style="max-width: 480px">
+              <div class="d-flex h-100">
+                <FinalJeonseCard
+                  :salePrice="reportData.expectedSellingPrice"
+                  :jeonseDeposit="reportData.deposit"
+                  :jeonseRatio="reportData.jeonseRatio"
+                  :jeonseRatioRating="reportData.jeonseRatioRating"
+                  :username="reportData.username"
+                />
+              </div>
             </div>
           </div>
         </div>

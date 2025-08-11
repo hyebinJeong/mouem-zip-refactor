@@ -7,12 +7,12 @@ export default [
     {
         text: '계약금·중도금·잔금 지급일 및 금액이 일치하는지 확인하셨습니까?',
         span: null,
-        riskColor: 'green'
+        riskColor: 'red'
     },
     {
         text: '입주 전 수리에 대해 확인하셨습니까?',
         span: null,
-        riskColor: 'yellow'
+        riskColor: 'green'
     },
     {
         text: '임대인이 등기부등본 상 소유주와 일치하는지 확인하셨습니까?',
@@ -27,7 +27,7 @@ export default [
     {
         text: '임차주택의 사용·관리·수선 내용을 확인하셨습니까?',
         span: null,
-        riskColor: 'yellow'
+        riskColor: 'green'
     },
     {
         text: '불리한 특약이 없는지 확인하셨습니까?',

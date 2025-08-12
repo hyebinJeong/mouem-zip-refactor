@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import api from '@/api/index.js';
+import { useAuthStore } from '@/stores/auth';
 
 export const useTermStore = defineStore('term', {
   state: () => ({
@@ -26,6 +27,7 @@ export const useTermStore = defineStore('term', {
 
     async addTerm(newTerm) {
       try {
+        const auth = useAuthStore();
         await axios.post('/api/term-manager', newTerm, {
           headers: { Authorization: `Bearer ${auth.token}` },
         });
@@ -38,6 +40,7 @@ export const useTermStore = defineStore('term', {
 
     async updateTerm(id, updatedTerm) {
       try {
+        const auth = useAuthStore();
         await axios.put(`/api/term-manager/${id}`, updatedTerm, {
           headers: { Authorization: `Bearer ${auth.token}` },
         });
@@ -50,6 +53,7 @@ export const useTermStore = defineStore('term', {
 
     async deleteTerm(id) {
       try {
+        const auth = useAuthStore();
         await axios.delete(`/api/term-manager/${id}`, {
           headers: { Authorization: `Bearer ${auth.token}` },
         });

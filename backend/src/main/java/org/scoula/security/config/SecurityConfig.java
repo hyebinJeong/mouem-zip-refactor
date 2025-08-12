@@ -102,7 +102,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/check-access/admin").hasRole("ADMIN")      // 관리자 접근 체크
                 .antMatchers("/api/check-access/category/**").hasRole("ADMIN")
                 .antMatchers("/api/check-access/**").hasRole("USER")          // 유저 전용 API 보호
-                .antMatchers("/api/**").authenticated()                       // api 요청은 인증필요
+//                .antMatchers("/api/**").authenticated()                       // api 요청은 인증필요
                 .anyRequest().permitAll();
 
         http.cors();

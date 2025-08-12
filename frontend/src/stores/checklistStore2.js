@@ -7,7 +7,7 @@ export default [
     {
         text: '계약금·중도금·잔금 지급일 및 금액이 일치하는지 확인하셨습니까?',
         span: null,
-        riskColor: 'red'
+        riskColor: 'yellow'
     },
     {
         text: '입주 전 수리에 대해 확인하셨습니까?',

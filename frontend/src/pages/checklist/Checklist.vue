@@ -48,8 +48,8 @@
                       </svg>
                     </label>
 
-                    <!-- 위험도 컬러 원 -->
                     <span
+                        v-if="!checked[index]"
                         class="risk-indicator"
                         :class="{
                         red: item.riskColor === 'red',

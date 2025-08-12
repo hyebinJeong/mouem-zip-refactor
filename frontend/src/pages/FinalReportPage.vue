@@ -15,7 +15,9 @@ import checklistStore from '@/stores/checklistStore';
 import AnalysisCards from '@/components/AnalysisCards.vue';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useAuthStore } from '@/stores/auth';
 
+const auth = useAuthStore();
 const route = useRoute();
 const showModal = ref(false);
 const reportData = ref(null);
@@ -102,6 +104,9 @@ onMounted(async () => {
       // final_report에 저장 (없으면 생성)
       await fetch(`/api/reports?userId=${userId}&registryId=${registryId}`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${auth.token}`,
+        },
       });
 
       // 저장 후 조회

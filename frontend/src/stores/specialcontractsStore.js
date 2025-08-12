@@ -1,6 +1,6 @@
-// src/stores/specialContractsStore.js
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import api from '@/api';
+import { useAuthStore } from '@/stores/auth';
 
 export const useSpecialContractsStore = defineStore('specialContracts', {
   state: () => ({
@@ -14,8 +14,8 @@ export const useSpecialContractsStore = defineStore('specialContracts', {
       this.loading = true;
       this.error = null;
       try {
-        const res = await axios.get('/api/specialcontracts-manager');
-        this.contracts = res.data;
+        const res = await api.get('/api/specialcontracts-manager');
+        this.contracts = res.data ?? [];
       } catch (err) {
         this.error = err;
         console.error('특약사항 목록 조회 오류:', err);
@@ -26,7 +26,7 @@ export const useSpecialContractsStore = defineStore('specialContracts', {
 
     async fetchContractById(id) {
       try {
-        const res = await axios.get(`/api/specialcontracts-manager/${id}`);
+        const res = await api.get(`/api/specialcontracts-manager/${id}`);
         return res.data;
       } catch (err) {
         this.error = err;
@@ -41,8 +41,11 @@ export const useSpecialContractsStore = defineStore('specialContracts', {
 
     async addContract(newContract) {
       try {
-        await axios.post('/api/specialcontracts-manager', newContract);
-        await this.fetchContracts(); // 목록 최신화
+        const auth = useAuthStore();
+        await api.post('/api/specialcontracts-manager', newContract, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        await this.fetchContracts();
       } catch (err) {
         this.error = err;
         console.error('특약사항 추가 오류:', err);
@@ -52,8 +55,11 @@ export const useSpecialContractsStore = defineStore('specialContracts', {
 
     async updateContract(id, updatedContract) {
       try {
-        await axios.put(`/api/specialcontracts-manager/${id}`, updatedContract);
-        await this.fetchContracts(); // 목록 최신화
+        const auth = useAuthStore();
+        await api.put(`/api/specialcontracts-manager/${id}`, updatedContract, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        await this.fetchContracts();
       } catch (err) {
         this.error = err;
         console.error('특약사항 수정 오류:', err);
@@ -63,7 +69,10 @@ export const useSpecialContractsStore = defineStore('specialContracts', {
 
     async deleteContract(id) {
       try {
-        await axios.delete(`/api/specialcontracts-manager/${id}`);
+        const auth = useAuthStore();
+        await api.delete(`/api/specialcontracts-manager/${id}`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
         this.contracts = this.contracts.filter((c) => c.contractId !== id);
       } catch (err) {
         this.error = err;

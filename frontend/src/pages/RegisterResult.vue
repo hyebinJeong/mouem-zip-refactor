@@ -57,7 +57,7 @@
           <div class="row w-100 align-items-start analysis-container">
             <!-- PDF 뷰어 섹션 -->
             <div class="col-lg-6 col-12 pdf-section">
-              <p class="fw-bold fs-5 mb-2" style="color: #1A80E5">
+              <p class="fw-bold fs-5 mb-2" style="color: #1a80e5">
                 어떤 점이 위험한지 하나씩 확인해보세요.
               </p>
               <div v-if="result?.fileUrl" class="pdf-wrapper">
@@ -67,7 +67,7 @@
 
             <!-- 분석 결과 섹션 -->
             <div class="col-lg-6 col-12 analysis-section">
-              <p class="fw-bold fs-5 mb-2" style="color: #1A80E5">기본 정보</p>
+              <p class="fw-bold fs-5 mb-2" style="color: #1a80e5">기본 정보</p>
               <p class="address-info">주소: {{ result.address }}</p>
               <p class="jeonse-rate-info">
                 예상 전세가율:
@@ -80,7 +80,7 @@
                 선순위 채권총액: {{ formatCurrency(result.totalPriorAmount) }}원
               </p>
               <hr class="my-3" />
-              <p class="fw-bold fs-5 mb-1" style="color: #1A80E5">주의 사항</p>
+              <p class="fw-bold fs-5 mb-1" style="color: #1a80e5">주의 사항</p>
               <div class="analysis-cards-wrapper">
                 <AnalysisCards
                   v-if="result && result.analysis"
@@ -121,7 +121,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '@/api/index.js';
 import PDFView from '@/components/PDFView.vue';
 import AnalysisCards from '@/components/AnalysisCards.vue';
 import BuddyHelper from '@/components/BuddyHelper.vue';
@@ -168,7 +168,7 @@ const getGradeMessage = (rating) => {
     보통: '#1ABE5F',
     주의: '#FF8400',
     위험: '#FF3838',
-    '판단 보류': '#FFCF64', 
+    '판단 보류': '#FFCF64',
   };
   const endings = {
     안전: '안전합니다.',
@@ -244,7 +244,7 @@ onMounted(async () => {
   try {
     // 사용자 정보 가져오기
     if (auth.token) {
-      const userRes = await axios.get('/api/user/me', {
+      const userRes = await api.get('/api/user/me', {
         headers: {
           Authorization: `Bearer ${auth.token}`,
         },
@@ -254,8 +254,8 @@ onMounted(async () => {
 
     // 두 개의 API 요청을 병렬로 처리
     const [safetyRes, jeonseRes] = await Promise.all([
-      axios.get(`/api/safety-check/${registerId}`),
-      axios.get(`/api/diagnosis/result?registerId=${registerId}`),
+      api.get(`/api/safety-check/${registerId}`),
+      api.get(`/api/diagnosis/result?registerId=${registerId}`),
     ]);
 
     // jeonseRate를 기존 결과에 병합
@@ -595,58 +595,65 @@ onMounted(async () => {
   width: 100%;
 }
 
-
 /* 전체 폭 제한 + 중앙 정렬 */
-.analysis-outer{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  padding:0 1rem;
+.analysis-outer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0 1rem;
 }
-.two-col-card{
-  width:100%;
-  max-width: 1440px;         /* 🔹 데스크톱에서 두 칼럼이 한눈에 */
-  background:#fff;
-  border:1px solid #e5e7eb;
+.two-col-card {
+  width: 100%;
+  max-width: 1440px; /* 🔹 데스크톱에서 두 칼럼이 한눈에 */
+  background: #fff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 12px 14px;        /* 얇은 카드 느낌 */
-  box-shadow: 0 6px 18px rgba(0,0,0,.04);
+  padding: 12px 14px; /* 얇은 카드 느낌 */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
 }
 
 /* 상단 원 주변 여백 살짝 축소 */
-.mb-5{ margin-bottom:2rem !important; } /* 원 아래 간격 줄이기 */
+.mb-5 {
+  margin-bottom: 2rem !important;
+} /* 원 아래 간격 줄이기 */
 
 /* 데스크톱 레이아웃 높이 통일 + 스크롤 */
-@media (min-width: 992px){
-  .analysis-container { min-height: auto; }
+@media (min-width: 992px) {
+  .analysis-container {
+    min-height: auto;
+  }
 
   /* 기존 80vh 높이 무효화 */
   .pdf-section,
   .analysis-section {
     height: auto !important;
-    padding: .5rem .75rem;
+    padding: 0.5rem 0.75rem;
   }
 
   /* 내부만 스크롤(두 칼럼 같은 높이) */
-  .pdf-wrapper{
+  .pdf-wrapper {
     position: sticky;
     top: 12px;
     max-height: 74vh;
     overflow: auto;
   }
-  .analysis-section{
+  .analysis-section {
     max-height: 74vh;
     overflow: auto;
     display: flex;
     flex-direction: column;
   }
-  .analysis-cards-wrapper{
+  .analysis-cards-wrapper {
     flex: 1;
     overflow: auto;
-    margin-top: .75rem;
+    margin-top: 0.75rem;
   }
 }
 
 /* 텍스트 살짝 컴팩트하게 */
-.address-info,.jeonse-rate-info,.prior-info{ font-size:1.2rem; }
+.address-info,
+.jeonse-rate-info,
+.prior-info {
+  font-size: 1.2rem;
+}
 </style>

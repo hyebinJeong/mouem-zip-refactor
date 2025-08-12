@@ -1,19 +1,13 @@
-import axios from 'axios';
-import { useAuthStore } from '@/stores/auth';
+import api from '@/api/index.js';
 
 export const getFinalReport = async (reportId) => {
-  const auth = useAuthStore();
-  const res = await axios.get(`/api/reports/${reportId}`, {
-    headers: { Authorization: `Bearer ${auth.token}` },
-  });
+  const res = await api.get(`/api/reports/${reportId}`, {});
   return res.data;
 };
 
 export const getFinalReportByUserAndRegistry = async (userId, registryId) => {
-  const auth = useAuthStore();
-  const res = await axios.get('/api/reports', {
+  const res = await api.get('/api/reports', {
     params: { userId, registryId },
-    headers: { Authorization: `Bearer ${auth.token}` },
   });
   return res.data;
 };

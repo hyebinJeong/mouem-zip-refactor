@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api/index.js';
 
 export default {
   name: 'SpecialContractsRecommendation',
@@ -112,7 +112,7 @@ export default {
   methods: {
     async fetchRecommendations() {
       try {
-        const response = await axios.get('/api/recommendation');
+        const response = await api.get('/api/recommendation');
         const data = response.data;
         const importanceMap = {
           높음: 'red',

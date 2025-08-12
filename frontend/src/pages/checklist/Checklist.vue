@@ -47,10 +47,10 @@
                       </svg>
                     </label>
 
-                    <!-- 위험도 컬러 원 -->
                     <span
-                      class="risk-indicator"
-                      :class="{
+                        v-if="!checked[index]"
+                        class="risk-indicator"
+                        :class="{
                         red: item.riskColor === 'red',
                         yellow: item.riskColor === 'yellow',
                         green: item.riskColor === 'green',

@@ -118,7 +118,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
-import { ref, onMounted, onUnmounted  } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -140,9 +140,15 @@ const registerIdRef = ref(null);
 
 const isDragOver = ref(false);
 
-const onDragOver = (e) => { isDragOver.value = true; };
-const onDragEnter = (e) => { isDragOver.value = true; };
-const onDragLeave = (e) => { isDragOver.value = false; };
+const onDragOver = (e) => {
+  isDragOver.value = true;
+};
+const onDragEnter = (e) => {
+  isDragOver.value = true;
+};
+const onDragLeave = (e) => {
+  isDragOver.value = false;
+};
 
 const onDrop = (e) => {
   isDragOver.value = false;
@@ -150,15 +156,20 @@ const onDrop = (e) => {
   if (!dt || !dt.files || !dt.files.length) return;
 
   const picked = dt.files[0];
-  if (!/pdf$/i.test(picked.type) && !picked.name.toLowerCase().endsWith('.pdf')) {
+  if (
+    !/pdf$/i.test(picked.type) &&
+    !picked.name.toLowerCase().endsWith('.pdf')
+  ) {
     alert('PDF 파일만 업로드할 수 있어요.');
     return;
   }
-  file.value = picked;   // 기존 file ref
+  file.value = picked; // 기존 file ref
 };
 
 // 브라우저 기본 “파일 열기” 동작 방지(전역)
-const preventDefaults = (e) => { e.preventDefault(); };
+const preventDefaults = (e) => {
+  e.preventDefault();
+};
 onMounted(() => {
   window.addEventListener('dragover', preventDefaults);
   window.addEventListener('drop', preventDefaults);
@@ -245,6 +256,9 @@ const submitForm = async () => {
     // 1단계: 등기부등본 분석
     const response = await fetch('http://localhost:8080/api/safety-check', {
       method: 'POST',
+      headers: {
+        Authorization: `Bearer ${auth.token}`,
+      },
       body: formData,
     });
 
@@ -270,13 +284,15 @@ const submitForm = async () => {
     alert('분석 실패: ' + e.message);
   }
 };
-
 // 2단계: 전세가율 분석
 const proceedToLeaseAnalysis = async (registerId) => {
   try {
     const leaseRes = await fetch('/api/diagnosis/leasePer', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${auth.token}`,
+      },
       body: JSON.stringify({
         registerId: registerId,
         excluUseAr: areaValue.value,
@@ -421,10 +437,10 @@ label {
   text-overflow: ellipsis;
   display: block;
 }
-.upload-box.dragover{
-  border-color:#1a80e5;
-  background:#f0f6ff;
-  color:#1a80e5;
+.upload-box.dragover {
+  border-color: #1a80e5;
+  background: #f0f6ff;
+  color: #1a80e5;
 }
 .address-box button {
   flex-shrink: 0;

@@ -17,9 +17,9 @@
 
             <div class="slider">
               <img
-                  :src="images[currentIndex]"
-                  class="slider-img"
-                  @click="openModal"
+                :src="images[currentIndex]"
+                class="slider-img"
+                @click="openModal"
               />
             </div>
 
@@ -30,17 +30,16 @@
             </button>
           </div>
 
-
           <div class="checklist-area">
             <div class="checklist-box">
               <ul class="checklist">
                 <li v-for="(item, index) in checklistItems" :key="index">
                   <label :for="`todo-${index}`" class="item">
                     <input
-                        type="checkbox"
-                        :id="`todo-${index}`"
-                        class="hidden"
-                        v-model="checked[index]"
+                      type="checkbox"
+                      :id="`todo-${index}`"
+                      class="hidden"
+                      v-model="checked[index]"
                     />
                     <label :for="`todo-${index}`" class="cbx">
                       <svg width="14px" height="12px" viewBox="0 0 14 12">
@@ -54,7 +53,7 @@
                         :class="{
                         red: item.riskColor === 'red',
                         yellow: item.riskColor === 'yellow',
-                        green: item.riskColor === 'green'
+                        green: item.riskColor === 'green',
                       }"
                     ></span>
 
@@ -90,75 +89,90 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import Buddy from '@/components/BuddyHelper.vue'
-import checklistItems from '@/stores/checklistStore2.js'
-import TermViewModal from "@/components/TermViewModal.vue"
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import Buddy from '@/components/BuddyHelper.vue';
+import checklistItems from '@/stores/checklistStore2.js';
+import TermViewModal from '@/components/TermViewModal.vue';
+import { useAuthStore } from '@/stores/auth';
+const route = useRoute();
+const userId = Number(route.query.userId);
+const registryId = Number(route.query.registryId);
 
-const route = useRoute()
-const userId = Number(route.query.userId)
-const registryId = Number(route.query.registryId)
+const showDictionaryModal = ref(false);
+const openDictionaryModal = () => {
+  showDictionaryModal.value = true;
+};
+const closeDictionaryModal = () => {
+  showDictionaryModal.value = false;
+};
 
-const showDictionaryModal = ref(false)
-const openDictionaryModal = () => { showDictionaryModal.value = true }
-const closeDictionaryModal = () => { showDictionaryModal.value = false }
-
-const router = useRouter()
-
+const router = useRouter();
+const auth = useAuthStore();
 const images = [
   new URL('@/assets/표준계약서1.png', import.meta.url).href,
   new URL('@/assets/표준계약서2.png', import.meta.url).href,
-  new URL('@/assets/표준계약서3.png', import.meta.url).href
-]
+  new URL('@/assets/표준계약서3.png', import.meta.url).href,
+];
 
-const currentIndex = ref(0)
-const nextSlide = () => { currentIndex.value = (currentIndex.value + 1) % images.length }
-const prevSlide = () => { currentIndex.value = (currentIndex.value - 1 + images.length) % images.length }
+const currentIndex = ref(0);
+const nextSlide = () => {
+  currentIndex.value = (currentIndex.value + 1) % images.length;
+};
+const prevSlide = () => {
+  currentIndex.value = (currentIndex.value - 1 + images.length) % images.length;
+};
 
-const checked = ref(Array(checklistItems.length).fill(false))
+const checked = ref(Array(checklistItems.length).fill(false));
 
 const goNext = async () => {
   if (!registryId) {
-    router.push('/')
-    return
+    router.push('/');
+    return;
   }
 
-  const payload = { userId, registryId, checked: checked.value }
+  const payload = { userId, registryId, checked: checked.value };
 
   try {
     const res = await fetch('http://localhost:8080/api/checklist', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${auth.token}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-    if (!res.ok) throw new Error('전송 실패')
-    alert('체크리스트 저장 완료!')
+    if (!res.ok) throw new Error('전송 실패');
+    alert('체크리스트 저장 완료!');
     router.push({
       path: '/final-report',
-      query: { userId, registryId }
-    })
+      query: { userId, registryId },
+    });
   } catch (e) {
-    console.error(e)
-    alert('저장에 실패했습니다.')
+    console.error(e);
+    alert('저장에 실패했습니다.');
   }
-}
+};
 
-const showModal = ref(false)
-const openModal = () => { showModal.value = true }
-const closeModal = () => { showModal.value = false }
+const showModal = ref(false);
+const openModal = () => {
+  showModal.value = true;
+};
+const closeModal = () => {
+  showModal.value = false;
+};
 
 const onEscPress = (e) => {
-  if (e.key === 'Escape') closeModal()
-}
+  if (e.key === 'Escape') closeModal();
+};
 
-onMounted(() => window.addEventListener('keydown', onEscPress))
-onBeforeUnmount(() => window.removeEventListener('keydown', onEscPress))
+onMounted(() => window.addEventListener('keydown', onEscPress));
+onBeforeUnmount(() => window.removeEventListener('keydown', onEscPress));
 </script>
 
 <style lang="scss" scoped>
-$main: #1A80E5;
+$main: #1a80e5;
 
 .checklist-page {
   .wrapper {
@@ -364,8 +378,8 @@ $main: #1A80E5;
           height: 2px;
           border-radius: 2px;
           box-shadow: 0 -18px 0 $main, 12px -12px 0 $main, 18px 0 0 $main,
-          12px 12px 0 $main, 0 18px 0 $main, -12px 12px 0 $main,
-          -18px 0 0 $main, -12px -12px 0 $main;
+            12px 12px 0 $main, 0 18px 0 $main, -12px 12px 0 $main,
+            -18px 0 0 $main, -12px -12px 0 $main;
           transform: scale(0);
         }
       }

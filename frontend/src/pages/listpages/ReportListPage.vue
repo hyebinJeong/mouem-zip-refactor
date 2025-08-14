@@ -4,7 +4,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import fileIcon from '@/assets/fileicon.png';
 import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
+import api from '@/api';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -13,7 +13,7 @@ const reports = ref([]);
 
 onMounted(async () => {
   if (!auth.isLoggedIn) return;
-  const res = await axios.get('/api/reports/list', {
+  const res = await api.get('/api/reports/list', {
     params: { userId: auth.userId },
   });
   reports.value = res.data.map((item) => ({

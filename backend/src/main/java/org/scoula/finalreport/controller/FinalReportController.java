@@ -8,6 +8,7 @@ import org.scoula.finalreport.dto.FinalReportRawDTO;
 import org.scoula.finalreport.dto.FinalReportSummaryDTO;
 import org.scoula.finalreport.service.FinalReportService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class FinalReportController {
             notes = "Returns a single final report using the given reportId."
     )
     @GetMapping("/{reportId}")
+    @PreAuthorize("@accessChecker.canViewFinalReport(#reportId, authentication)")
     public ResponseEntity<FinalReportDTO> getFinalReport(@PathVariable Long reportId) {
         FinalReportDTO dto = finalReportService.getFinalReport(reportId);
         return ResponseEntity.ok(dto);
@@ -39,6 +41,7 @@ public class FinalReportController {
             notes = "Fetches an existing final report using userId and registryId."
     )
     @GetMapping
+    @PreAuthorize("@accessChecker.canViewFinalReportByRegistry(#registryId, authentication)")
     public ResponseEntity<FinalReportDTO> getReportByUserAndRegistry(
             @RequestParam("userId") Long userId,
             @RequestParam("registryId") Long registryId) {

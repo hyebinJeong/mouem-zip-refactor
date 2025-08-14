@@ -6,6 +6,7 @@ import org.scoula.contract.service.ContractService;
 import org.scoula.security.util.JwtProcessor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +48,7 @@ public class ContractController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@accessChecker.canViewContract(#contractId, authentication)")
     public ResponseEntity<ContractDTO> getContractDetail(@PathVariable int id, HttpServletRequest request) {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
         int userId = Integer.parseInt(jwtProcessor.getUserId(token));

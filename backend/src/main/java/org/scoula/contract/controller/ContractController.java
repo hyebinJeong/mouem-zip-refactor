@@ -48,7 +48,7 @@ public class ContractController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@accessChecker.canViewContract(#contractId, authentication)")
+    @PreAuthorize("@accessChecker.canViewContract(#id, authentication)")
     public ResponseEntity<ContractDTO> getContractDetail(@PathVariable int id, HttpServletRequest request) {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
         int userId = Integer.parseInt(jwtProcessor.getUserId(token));

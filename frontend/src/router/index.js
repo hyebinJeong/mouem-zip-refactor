@@ -222,7 +222,7 @@ router.beforeEach(async (to, from, next) => {
       else if (to.name === 'ReferenceContractSuccess') {
         const id = to.params.id ?? to.query.id;
         if (!id) throw new Error('contract id 누락');
-        await api.get(`/api/check-access/contract/${id}`);
+        await api.get(`/api/contracts/${id}`);
       }
 
       // 나머지 일반 페이지(USER 권한만 필요)

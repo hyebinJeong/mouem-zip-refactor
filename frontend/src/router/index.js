@@ -221,7 +221,6 @@ router.beforeEach(async (to, from, next) => {
       // 계약서 성공 페이지
       else if (to.name === 'ReferenceContractSuccess') {
         const id = to.params.id ?? to.query.id;
-        if (!id) throw new Error('contract id 누락');
         await api.get(`/api/contracts/${id}`);
       }
 

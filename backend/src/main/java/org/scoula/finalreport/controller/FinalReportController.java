@@ -41,12 +41,15 @@ public class FinalReportController {
             notes = "Fetches an existing final report using userId and registryId."
     )
     @GetMapping
-    @PreAuthorize("@accessChecker.canViewFinalReportByRegistry(#registryId, authentication)")
+    @PreAuthorize("@accessChecker.isSelf(#userId, authentication)")
     public ResponseEntity<FinalReportDTO> getReportByUserAndRegistry(
             @RequestParam("userId") Long userId,
             @RequestParam("registryId") Long registryId) {
 
         Long reportId = finalReportService.findReportIdByUserAndRegistry(userId, registryId);
+        if (reportId == null) {
+                reportId = finalReportService.createFinalReport(userId, registryId); // ← 기존 서비스 그대로 사용
+        }
         FinalReportDTO dto = finalReportService.getFinalReport(reportId);
         return ResponseEntity.ok(dto);
     }
@@ -56,6 +59,7 @@ public class FinalReportController {
             notes = "Creates a new final report with the specified userId and registryId."
     )
     @PostMapping
+    @PreAuthorize("@accessChecker.isSelf(#userId, authentication)")
     public ResponseEntity<Long> createFinalReport(@RequestParam Long userId,
                                                   @RequestParam Long registryId) {
         Long reportId = finalReportService.createFinalReport(userId, registryId);

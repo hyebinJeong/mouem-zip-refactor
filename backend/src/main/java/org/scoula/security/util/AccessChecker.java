@@ -45,12 +45,9 @@ public class AccessChecker {
     }
 
 
-    public boolean canViewFinalReportByRegistry(Long registryId, Authentication authentication) {
+    public boolean isSelf(Long userId, Authentication authentication) {
         Long uid = currentUserId(authentication);
-        if (uid == null) return false;
-
-        Long found = finalReportService.findReportIdByUserAndRegistry(uid, registryId);
-        return found != null;
+        return uid != null && uid.longValue() == userId.longValue();
     }
 
 

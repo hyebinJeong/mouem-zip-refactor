@@ -56,7 +56,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useSpecialContractsStore } from '@/stores/specialContractsStore';
+import { useSpecialContractsStore } from '@/stores/specialcontractsStore';
 
 const router = useRouter();
 const store = useSpecialContractsStore();

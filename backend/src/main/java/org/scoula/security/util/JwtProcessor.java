@@ -15,7 +15,8 @@ import java.util.Date;
 
 @Component
 public class JwtProcessor {
-    static private final long TOKEN_VALID_MILISECOND = 1000L * 60 * 60; // 60 분
+    static private final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 10; // 10 분
+    private static final long REFRESH_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 14; // 14일
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -28,47 +29,59 @@ public class JwtProcessor {
     }
 // private Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); -- 운영시 사용
 
-    // JWT 생성
-    public String generateToken(String subject, String kakaoId, String role) {
+    // Access 토큰 생성
+    public String generateAccessToken(String userId, String kakaoId, String role) {
         return Jwts.builder()
-                .setSubject(subject)
+                .setSubject(userId) // sub = userId
                 .claim("kakaoId", kakaoId)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + TOKEN_VALID_MILISECOND))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY))
                 .signWith(key)
                 .compact();
     }
 
-    // JWT Subject(username) 추출- 해석 불가인 경우 예외 발생
-    // 예외 ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException,
-    // IllegalArgumentException
-    public String getUserId(String token) {
-            String subject = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject();
-
-            return subject;
+    // Refresh 토큰 생성
+    public String generateRefreshToken(String userId) {
+        return Jwts.builder()
+                .setSubject(userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_VALIDITY))
+                .signWith(key)
+                .compact();
     }
 
-    public String getKakaoId(String token) {
+    // 공통 Claims 파싱
+    private Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .get("kakaoId", String.class);
+                .getBody();
     }
 
-    // JWT 검증(유효 기간 검증) - 해석 불가인 경우 예외 발생
+    public String getUserId(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    public String getKakaoId(String token) {
+        return getClaims(token).get("kakaoId", String.class);
+    }
+
+    public String getRole(String token) {
+        return getClaims(token).get("role", String.class);
+    }
+
+    // Access / Refresh 둘 다 유효성 검사 기능
     public boolean validateToken(String token) {
-        Jws<Claims> claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token);
-        return true;
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+            return !claims.getBody().getExpiration().before(new Date());
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

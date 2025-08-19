@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import fileIcon from '@/assets/fileicon.png';
 import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
+import api from '@/api/index.js';
 import { onMounted } from 'vue';
 
 const router = useRouter();
@@ -14,9 +14,7 @@ const contracts = ref([]);
 onMounted(async () => {
   if (!auth.isLoggedIn) return;
 
-  const res = await axios.get('/api/contract/list', {
-    headers: { Authorization: `Bearer ${auth.token}` },
-  });
+  const res = await api.get('/api/contract/list');
 
   contracts.value = res.data.map((item) => ({
     contractId: item.contractId,

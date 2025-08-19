@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
+import api from '@/api/index.js';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -28,7 +28,8 @@ const leaseArea = ref('');
 
 // 숫자를 억/만원/원 단위로 변환해주는 함수 (버그 수정)
 const formatPrice = (value) => {
-  if (value === null || value === undefined || String(value).trim() === '') return '0원';
+  if (value === null || value === undefined || String(value).trim() === '')
+    return '0원';
   const s = String(value).replace(/,/g, '').trim();
   if (s === '') return '0원';
   const num = Number(s);
@@ -156,7 +157,9 @@ const isHardReload = () => {
 // 입력 제어: 정수 또는 소수 허용(allowDecimal)
 const allowOnlyNumbers = (event, modelRef, allowDecimal = false) => {
   // 원본값(붙여넣기 포함)
-  let value = String(event.target.value || '').replace(/,/g, '').trim();
+  let value = String(event.target.value || '')
+    .replace(/,/g, '')
+    .trim();
 
   if (allowDecimal) {
     // 숫자와 점(.)만 허용, 점은 하나만
@@ -164,7 +167,9 @@ const allowOnlyNumbers = (event, modelRef, allowDecimal = false) => {
     const firstDot = value.indexOf('.');
     if (firstDot !== -1) {
       // 첫 번째 점 이후 모든 점 제거
-      value = value.slice(0, firstDot + 1) + value.slice(firstDot + 1).replace(/\./g, '');
+      value =
+        value.slice(0, firstDot + 1) +
+        value.slice(firstDot + 1).replace(/\./g, '');
       // '.'로 시작하면 앞에 0 붙이기
       if (value.startsWith('.')) value = '0' + value;
     }
@@ -308,14 +313,14 @@ const onSubmit = async () => {
   // 필수 입력 검증
   const requiredFieldsMap = {
     '계약서 이름': contractName.value,
-    '임대인': lessor.value,
-    '임차인': lessee.value,
-    '소재지': address.value,
-    '계약금': contractAmount.value,
-    '보증금': deposit.value,
-    '잔금': rent.value,
+    임대인: lessor.value,
+    임차인: lessee.value,
+    소재지: address.value,
+    계약금: contractAmount.value,
+    보증금: deposit.value,
+    잔금: rent.value,
     '건물 구조·용도': structure.value,
-    '관리비': maintenanceFee.value,
+    관리비: maintenanceFee.value,
     '임대 시작일': startDate.value,
     '임대 종료일': endDate.value,
     '토지 지목': landCategory.value,
@@ -326,7 +331,10 @@ const onSubmit = async () => {
   };
 
   const missing = Object.keys(requiredFieldsMap).find(
-    (k) => requiredFieldsMap[k] === null || requiredFieldsMap[k] === undefined || String(requiredFieldsMap[k]).trim() === ''
+    (k) =>
+      requiredFieldsMap[k] === null ||
+      requiredFieldsMap[k] === undefined ||
+      String(requiredFieldsMap[k]).trim() === ''
   );
   if (missing) {
     alert(`${missing}을(를) 입력해주세요.`);
@@ -341,7 +349,7 @@ const onSubmit = async () => {
     alert('특약사항을 최소 1개 이상 입력하거나 선택해주세요.');
     return;
   }
-  
+
   // 보증금 = 계약금 + 잔금 (정수 비교)
   const depositNum = toInt(deposit.value);
   const downPaymentNum = toInt(contractAmount.value); // 계약금
@@ -383,9 +391,7 @@ const onSubmit = async () => {
       specialClauses: validSpecials, // ✅ JSON 배열
     };
 
-    const res = await axios.post('/api/contract', payload, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    });
+    const res = await api.post('/api/contract', payload);
 
     alert('계약서가 저장되었습니다.');
     const contractId = res.data; // 백엔드에서 생성된 contractId 반환
@@ -548,10 +554,10 @@ const openPostcode = () => {
             <label>보증금</label>
             <div class="input-with-tip">
               <input
-                  v-model="deposit"
-                  type="text"
-                  placeholder="원"
-                  @input="allowOnlyNumbers($event, deposit)"
+                v-model="deposit"
+                type="text"
+                placeholder="원"
+                @input="allowOnlyNumbers($event, deposit)"
               />
               <p class="m-tip" v-show="deposit">
                 입력하신 금액: <strong>{{ formatPrice(deposit) }}</strong>
@@ -563,10 +569,10 @@ const openPostcode = () => {
             <label>계약금</label>
             <div class="input-with-tip">
               <input
-                  v-model="contractAmount"
-                  type="text"
-                  placeholder="원"
-                  @input="allowOnlyNumbers($event, contractAmount)"
+                v-model="contractAmount"
+                type="text"
+                placeholder="원"
+                @input="allowOnlyNumbers($event, contractAmount)"
               />
               <p class="m-tip" v-show="contractAmount">
                 입력하신 금액:
@@ -582,10 +588,10 @@ const openPostcode = () => {
             <label>잔금</label>
             <div class="input-with-tip">
               <input
-                  v-model="rent"
-                  type="text"
-                  placeholder="원"
-                  @input="allowOnlyNumbers($event, rent)"
+                v-model="rent"
+                type="text"
+                placeholder="원"
+                @input="allowOnlyNumbers($event, rent)"
               />
               <p class="m-tip" v-show="rent">
                 입력하신 금액:
@@ -598,10 +604,10 @@ const openPostcode = () => {
             <label>관리비</label>
             <div class="input-with-tip">
               <input
-                  v-model="maintenanceFee"
-                  type="text"
-                  placeholder="원"
-                  @input="allowOnlyNumbers($event, maintenanceFee)"
+                v-model="maintenanceFee"
+                type="text"
+                placeholder="원"
+                @input="allowOnlyNumbers($event, maintenanceFee)"
               />
               <p class="m-tip" v-show="maintenanceFee">
                 입력하신 금액:
@@ -688,14 +694,16 @@ const openPostcode = () => {
             <h3>토지 지목 선택</h3>
             <ul class="list-style">
               <li
-                  v-for="(item, i) in landCategories"
-                  :key="i"
-                  @click="selectLandCategory(item)"
+                v-for="(item, i) in landCategories"
+                :key="i"
+                @click="selectLandCategory(item)"
               >
                 {{ item }}
               </li>
             </ul>
-            <button class="close-btn" @click="showLandModal = false">닫기</button>
+            <button class="close-btn" @click="showLandModal = false">
+              닫기
+            </button>
           </div>
         </div>
 
@@ -712,7 +720,9 @@ const openPostcode = () => {
                 {{ item }}
               </li>
             </ul>
-            <button class="close-btn" @click="showBuildingModal = false">닫기</button>
+            <button class="close-btn" @click="showBuildingModal = false">
+              닫기
+            </button>
           </div>
         </div>
       </form>
@@ -783,7 +793,6 @@ const openPostcode = () => {
   width: 120px;
   margin-bottom: 0px;
 }
-
 
 label {
   width: 105px;
@@ -899,12 +908,12 @@ input[type='date'] {
   text-shadow: 0 0 1px #fff, 0 0 1px #fff;
 }
 
-.sel-btn{
+.sel-btn {
   min-width: 45px;
   margin-left: 10px;
 }
 
-.sel-btn:hover{
+.sel-btn:hover {
   background-color: rgb(33, 112, 193);
   transform: scale(1.02);
   transition: all 0.1s ease-in-out;
@@ -1007,7 +1016,6 @@ input[type='date'] {
   font-weight: bold;
 }
 
-
 /* 반응형: 화면이 768px 이하일 때 (태블릿·모바일) */
 @media (max-width: 768px) {
   .form-row.full {
@@ -1097,9 +1105,9 @@ input[type='date'] {
   font-weight: 500;
   border: none;
   border-radius: 6px;
-  padding: 0 15px;    /* 좌우 길게 */
+  padding: 0 15px; /* 좌우 길게 */
   height: 44px;
-  min-width: 100px;   /* 길이 확보 */
+  min-width: 100px; /* 길이 확보 */
   cursor: pointer;
 }
 

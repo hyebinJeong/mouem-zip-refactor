@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
+import api from '@/api/index.js';
 import { useAuthStore } from '@/stores/auth';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -53,7 +53,7 @@ onMounted(async () => {
     const contractId = route.params.id || route.query.id;
     if (!contractId || !auth.isLoggedIn) return;
 
-    const res = await axios.get(`/api/contract/${contractId}`, {
+    const res = await api.get(`/api/contract/${contractId}`, {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
 

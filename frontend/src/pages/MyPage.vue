@@ -2,7 +2,7 @@
 import Header from '../components/Header.vue';
 import { useAuthStore } from '@/stores/auth';
 import { onMounted, ref } from 'vue';
-import axios from 'axios';
+import api from '@/api/index.js';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
@@ -11,10 +11,15 @@ const redirectUri = 'http://localhost:8080/';
 const auth = useAuthStore();
 const user = ref({ name: '', email: '', kakaoId: '' });
 // 로그아웃 함수
-function onKakaoLogout() {
-  auth.logout();
-  const kakaoAuthUrl2 = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${redirectUri}`;
-  window.location.href = kakaoAuthUrl2;
+async function onKakaoLogout() {
+  try {
+    auth.logout();
+    await api.post('/api/oauth/kakao/logout');
+    const kakaoAuthUrl2 = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${redirectUri}`;
+    window.location.href = kakaoAuthUrl2;
+  } catch (err) {
+    console.error('Logout failed', err);
+  }
 }
 
 const reportPreview = ref([]);
@@ -22,22 +27,15 @@ const contractPreview = ref([]);
 
 onMounted(async () => {
   if (auth.token) {
-    const res = await axios.get('/api/user/me', {
-      headers: {
-        Authorization: `Bearer ${auth.token}`,
-      },
-    });
+    const res = await api.get('/api/user/me');
     user.value = res.data; // { name, email } 구조라고 가정
 
     // 리포트 미리보기
-    const reportRes = await axios.get('/api/reports/list', {
-      headers: { Authorization: `Bearer ${auth.token}` },
-      params: { userId: auth.userId }, // ✅ 쿼리로 userId 전달
+    const reportRes = await api.get('/api/reports/list', {
+      params: { userId: auth.userId },
     });
     // 계약서 미리보기
-    const contractRes = await axios.get('/api/contract/list', {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    });
+    const contractRes = await api.get('/api/contract/list');
 
     reportPreview.value = Array.isArray(reportRes.data)
       ? reportRes.data.slice(0, 3).map((item) => {
@@ -83,15 +81,7 @@ async function onWithdraw() {
   if (!auth.isLoggedIn) return alert('로그인이 필요합니다.');
   if (confirm('정말로 회원 탈퇴하시겠습니까?')) {
     try {
-      await axios.post(
-        '/api/oauth/kakao/unlink',
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        }
-      );
+      await api.post('/api/oauth/kakao/unlink');
 
       alert('회원 탈퇴가 완료되었습니다.');
       auth.logout();

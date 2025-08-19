@@ -42,9 +42,7 @@ export const useSpecialContractsStore = defineStore('specialContracts', {
     async addContract(newContract) {
       try {
         const auth = useAuthStore();
-        await api.post('/api/specialcontracts-manager', newContract, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        await api.post('/api/specialcontracts-manager');
         await this.fetchContracts();
       } catch (err) {
         this.error = err;
@@ -56,9 +54,7 @@ export const useSpecialContractsStore = defineStore('specialContracts', {
     async updateContract(id, updatedContract) {
       try {
         const auth = useAuthStore();
-        await api.put(`/api/specialcontracts-manager/${id}`, updatedContract, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        await api.put(`/api/specialcontracts-manager/${id}`);
         await this.fetchContracts();
       } catch (err) {
         this.error = err;
@@ -70,9 +66,7 @@ export const useSpecialContractsStore = defineStore('specialContracts', {
     async deleteContract(id) {
       try {
         const auth = useAuthStore();
-        await api.delete(`/api/specialcontracts-manager/${id}`, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        await api.delete(`/api/specialcontracts-manager/${id}`);
         this.contracts = this.contracts.filter((c) => c.contractId !== id);
       } catch (err) {
         this.error = err;

@@ -26,9 +26,7 @@ export const useCategoryStore = defineStore('category', {
     async addCategory(newCategory) {
       try {
         const auth = useAuthStore();
-        const res = await api.post('/api/category-manager', newCategory, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        const res = await api.post('/api/category-manager', newCategory);
         this.categories.push(res.data);
       } catch (err) {
         this.error = err;
@@ -40,9 +38,7 @@ export const useCategoryStore = defineStore('category', {
     async updateCategory(id, updatedCategory) {
       try {
         const auth = useAuthStore();
-        await api.put(`/api/category-manager/${id}`, updatedCategory, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        await api.put(`/api/category-manager/${id}`);
         const i = this.categories.findIndex((c) => c.categoryId === id);
         if (i !== -1)
           this.categories[i] = { categoryId: id, ...updatedCategory };
@@ -56,9 +52,7 @@ export const useCategoryStore = defineStore('category', {
     async deleteCategory(id) {
       try {
         const auth = useAuthStore();
-        await api.delete(`/api/category-manager/${id}`, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        await api.delete(`/api/category-manager/${id}`);
         this.categories = this.categories.filter((c) => c.categoryId !== id);
       } catch (err) {
         this.error = err;

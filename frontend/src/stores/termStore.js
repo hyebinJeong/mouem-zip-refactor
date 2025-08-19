@@ -27,9 +27,7 @@ export const useTermStore = defineStore('term', {
     async addTerm(newTerm) {
       try {
         const auth = useAuthStore();
-        await api.post('/api/term-manager', newTerm, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        await api.post('/api/term-manager', newTerm);
         await this.fetchTerms(); // 최신 목록 반영
       } catch (err) {
         this.error = err;
@@ -40,9 +38,7 @@ export const useTermStore = defineStore('term', {
     async updateTerm(id, updatedTerm) {
       try {
         const auth = useAuthStore();
-        await api.put(`/api/term-manager/${id}`, updatedTerm, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        await api.put(`/api/term-manager/${id}`, updatedTerm);
         await this.fetchTerms(); // 최신 목록 반영
       } catch (err) {
         this.error = err;
@@ -53,9 +49,7 @@ export const useTermStore = defineStore('term', {
     async deleteTerm(id) {
       try {
         const auth = useAuthStore();
-        await api.delete(`/api/term-manager/${id}`, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        await api.delete(`/api/term-manager/${id}`);
         this.terms = this.terms.filter((t) => t.termId !== id);
       } catch (err) {
         this.error = err;

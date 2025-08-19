@@ -64,6 +64,7 @@
 <script setup>
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import api from '@/api/index.js';
 // 로그아웃 함수
 const auth = useAuthStore();
 const clientId = '88a530611ac6fa5a18f5747f67b6a359';

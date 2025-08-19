@@ -173,7 +173,7 @@ const router = createRouter({
 });
 
 // 라우터 가드 설정
-import axios from 'axios';
+import api from '@/api';
 import { useAuthStore } from '@/stores/auth';
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
@@ -193,24 +193,51 @@ router.beforeEach(async (to, from, next) => {
     if (to.meta.requiresAdmin) {
       if (payload.role !== 'ROLE_ADMIN') {
         alert('관리자만 접근 가능한 페이지입니다.');
-        return next('/'); // 일반 회원은 홈으로
+        return next('/');
       }
-    }
-    // 2) 회원 전용 페이지
-    else {
+    } else {
       if (payload.role === 'ROLE_ADMIN') {
         alert('회원 전용 페이지입니다.');
-        return next('/category'); // 관리자면 카테고리로 보내기
+        return next('/category');
       }
     }
 
+    // 2) 회원 전용 페이지
     try {
-      await axios.get('/api/check-access' + to.path, {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
+      // 소유권 필요한 라우트 분기
+
+      // 최종 리포트
+      if (to.name === 'finalReportPage') {
+        const { reportId, registryId } = to.query;
+        if (reportId) {
+          await api.get(`/api/reports/${reportId}`);
+        } else if (registryId) {
+          const auth = useAuthStore();
+          const payload = JSON.parse(atob(auth.token.split('.')[1]));
+          await api.get('/api/reports', {
+            params: { userId: payload.sub, registryId },
+          });
+        } else {
+          throw new Error('reportId/registryId 누락');
+        }
+      }
+
+      // 계약서 성공 페이지
+      else if (to.name === 'ReferenceContractSuccess') {
+        const id = to.params.id ?? to.query.id;
+        await api.get(`/api/contracts/${id}`);
+      }
+
+      // 나머지 일반 페이지(USER 권한만 필요)
+      else {
+        await api.get(`/api/check-access${to.path}`);
+      }
+
       return next();
-    } catch {
-      return next('/login');
+    } catch (e) {
+      // 401/403 또는 위의 누락 에러도 여기로
+      alert('잘못된 접근입니다');
+      return next('/');
     }
   }
 

@@ -4,61 +4,53 @@ import router from '@/router';
 
 const api = axios.create({
   baseURL: 'http://localhost:8080',
-  withCredentials: true,
+  withCredentials: true, // 쿠키 포함 필수
 });
 
-//요청 인터셉터: /api/** 중에서도 공개 엔드포인트는 제외
-const PUBLIC_ENDPOINTS = [
-  /^\/api\/oauth\//, // 소셜 로그인 교환 엔드포인트
-];
+const PUBLIC_ENDPOINTS = [/^\/api\/oauth\//];
+const REFRESH_URL = '/api/oauth/kakao/refresh';
+
+// api url 판별
+function isApiUrl(url = '') {
+  const u = url.toString();
+  return u.startsWith('/api') || u.startsWith('api') || u.includes('/api/');
+}
 
 api.interceptors.request.use((config) => {
-  const rawUrl = (config.url || '').toString();
-  const path = rawUrl.startsWith('http') ? new URL(rawUrl).pathname : rawUrl;
+  const url = (config.url || '').toString();
+  const publicHit = PUBLIC_ENDPOINTS.some((re) => re.test(url));
 
-  const isApi = path.startsWith('/api');
-  const isPublic = PUBLIC_ENDPOINTS.some((re) => re.test(path));
-
-  if (isApi && !isPublic) {
+  if (isApiUrl(url) && !publicHit) {
     const auth = useAuthStore();
-    if (auth.token) {
+    if (auth?.token) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${auth.token}`;
+      console.debug('[api] attach token to', url);
+    } else {
+      console.debug('[api] no token for', url);
     }
   }
+
   return config;
 });
-<<<<<<< Updated upstream
 
-// 응답 인터셉터 -> 401/403 공통 처리
-=======
-const REFRESH_URL = '/api/oauth/kakao/refresh';
->>>>>>> Stashed changes
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const status = error?.response?.status;
-<<<<<<< Updated upstream
-    if (status === 401) {
-      // 토큰 만료 또는 미인증시 로그아웃 처리 -> 추후 리프레시 토큰 발급 시 삭제
-      const auth = useAuthStore();
-      auth.logout();
-      if (router.currentRoute.value.path !== '/login') {
-        alert('다시 로그인이 필요합니다.');
-        router.push('/login');
-=======
     const auth = useAuthStore();
     const originalRequest = error.config;
 
+    // refresh 호출 자체에서 에러난 경우 → 바로 reject
     if (originalRequest?.url?.includes(REFRESH_URL)) {
       return Promise.reject(error);
     }
 
+    // 401 → refresh 시도
     if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        // refresh 요청 (쿠키에 refresh_token 있으니 body/헤더 필요 없음)
-        const res = await api.post('/api/oauth/kakao/refresh');
+        const res = await api.post(REFRESH_URL);
         const newAccess = res.data.accessToken;
 
         // 새로운 Access 저장
@@ -68,20 +60,19 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // refresh도 실패하면 진짜 로그아웃
+        // refresh 실패 → 로그아웃 처리
         auth.logout();
         if (router.currentRoute.value.path !== '/login') {
           alert('다시 로그인이 필요합니다.');
           router.push('/login');
         }
         return Promise.reject(refreshError);
->>>>>>> Stashed changes
       }
     } else if (status === 403) {
-      // 권한 부족
       alert('접근 권한이 없습니다.');
       router.push('/');
     }
+
     return Promise.reject(error);
   }
 );

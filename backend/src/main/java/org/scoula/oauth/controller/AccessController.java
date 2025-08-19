@@ -11,24 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/check-access")
 public class AccessController {
 
-
-    // 회원 전용
+    // 사용자 전용
     @GetMapping({
-            "/safety-check",
-            "/safety-check/{id}",
-            "/agreement",
-            "/my",
-            "/contract-list",
-            "/report-list",
-            "/final-report",
-            "/referencecontracts",
-            "/referencecontracts/**"
+            "/safety-check","/safety-check/{id}",
+            "/agreement","/my",
+            "/contract-list","/report-list",
+            "/final-report", // 이건 화면 진입만, 실제 데이터는 컨트롤러에서 체크
+            "/referencecontracts","/referencecontracts/**"
     })
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> checkUserAccess() {
         return ResponseEntity.ok("AUTHORIZED");
     }
-
     // 관리자 전용
     @GetMapping({
             "/category",

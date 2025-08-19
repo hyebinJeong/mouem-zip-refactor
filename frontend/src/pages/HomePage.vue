@@ -3,7 +3,7 @@ import { useRouter, useRoute } from 'vue-router';
 // 라우트, AuthStore, onMounted 임시 사용
 import { useAuthStore } from '@/stores/auth';
 import { onMounted } from 'vue';
-import axios from 'axios';
+import api from '@/api/index.js';
 
 const route = useRoute();
 const auth = useAuthStore();
@@ -27,10 +27,7 @@ async function goToAnalysis() {
 
   try {
     //  로그인 상태라면 백엔드 권한 확인
-    await axios.get('/api/check-access/agreement', {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    });
-
+    await api.get('/api/check-access/agreement');
     // 200 OK면 진단 페이지로 이동
     router.push('/agreement');
   } catch (err) {

@@ -1,6 +1,5 @@
 // src/stores/termStore.js
 import { defineStore } from 'pinia';
-import axios from 'axios';
 import api from '@/api/index.js';
 import { useAuthStore } from '@/stores/auth';
 
@@ -28,7 +27,7 @@ export const useTermStore = defineStore('term', {
     async addTerm(newTerm) {
       try {
         const auth = useAuthStore();
-        await axios.post('/api/term-manager', newTerm, {
+        await api.post('/api/term-manager', newTerm, {
           headers: { Authorization: `Bearer ${auth.token}` },
         });
         await this.fetchTerms(); // 최신 목록 반영
@@ -41,7 +40,7 @@ export const useTermStore = defineStore('term', {
     async updateTerm(id, updatedTerm) {
       try {
         const auth = useAuthStore();
-        await axios.put(`/api/term-manager/${id}`, updatedTerm, {
+        await api.put(`/api/term-manager/${id}`, updatedTerm, {
           headers: { Authorization: `Bearer ${auth.token}` },
         });
         await this.fetchTerms(); // 최신 목록 반영
@@ -54,7 +53,7 @@ export const useTermStore = defineStore('term', {
     async deleteTerm(id) {
       try {
         const auth = useAuthStore();
-        await axios.delete(`/api/term-manager/${id}`, {
+        await api.delete(`/api/term-manager/${id}`, {
           headers: { Authorization: `Bearer ${auth.token}` },
         });
         this.terms = this.terms.filter((t) => t.termId !== id);

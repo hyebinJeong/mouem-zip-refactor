@@ -58,9 +58,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useSpecialContractsStore } from '@/stores/specialContractsStore';
+import { useSpecialContractsStore } from '@/stores/specialcontractsStore';
 
-const props = defineProps(['id']);  // 라우터에서 props로 받음
+const props = defineProps(['id']); // 라우터에서 props로 받음
 const router = useRouter();
 const store = useSpecialContractsStore();
 
@@ -74,7 +74,9 @@ const importanceColorMap = {
   낮음: '#00FF00',
 };
 
-const importanceColor = computed(() => importanceColorMap[importance.value] || '');
+const importanceColor = computed(
+  () => importanceColorMap[importance.value] || ''
+);
 
 const goBack = () => router.back();
 
@@ -105,7 +107,7 @@ onMounted(async () => {
     router.back();
     return;
   }
-  const contract = await store.fetchContractById(Number(props.id));//숫자변환
+  const contract = await store.fetchContractById(Number(props.id)); //숫자변환
   if (contract) {
     category.value = contract.category || '';
     importance.value = contract.importance || '';
@@ -116,4 +118,3 @@ onMounted(async () => {
   }
 });
 </script>
-

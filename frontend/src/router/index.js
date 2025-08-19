@@ -180,6 +180,10 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.meta.requiresAuth) {
     if (!auth.isLoggedIn) {
+      await auth.tryRefresh();
+    }
+
+    if (!auth.isLoggedIn) {
       return next('/login');
     }
 

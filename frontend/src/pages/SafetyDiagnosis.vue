@@ -254,6 +254,9 @@ const submitForm = async () => {
 
   try {
     // 1단계: 등기부등본 분석
+    if (!auth.token) {
+      await auth.tryRefresh();
+    }
     const response = await fetch('http://localhost:8080/api/safety-check', {
       method: 'POST',
       headers: {
@@ -287,6 +290,9 @@ const submitForm = async () => {
 // 2단계: 전세가율 분석
 const proceedToLeaseAnalysis = async (registerId) => {
   try {
+    if (!auth.token) {
+      await auth.tryRefresh();
+    }
     const leaseRes = await fetch('/api/diagnosis/leasePer', {
       method: 'POST',
       headers: {

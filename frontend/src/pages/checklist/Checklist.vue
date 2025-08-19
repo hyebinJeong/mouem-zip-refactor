@@ -48,9 +48,9 @@
                     </label>
 
                     <span
-                        v-if="!checked[index]"
-                        class="risk-indicator"
-                        :class="{
+                      v-if="!checked[index]"
+                      class="risk-indicator"
+                      :class="{
                         red: item.riskColor === 'red',
                         yellow: item.riskColor === 'yellow',
                         green: item.riskColor === 'green',
@@ -134,6 +134,9 @@ const goNext = async () => {
   const payload = { userId, registryId, checked: checked.value };
 
   try {
+    if (!auth.token) {
+      await auth.tryRefresh();
+    }
     const res = await fetch('http://localhost:8080/api/checklist', {
       method: 'POST',
       headers: {

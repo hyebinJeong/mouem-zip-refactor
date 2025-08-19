@@ -102,6 +102,9 @@ onMounted(async () => {
 
     if (userId && registryId) {
       // final_report에 저장 (없으면 생성)
+      if (!auth.token) {
+        await auth.tryRefresh();
+      }
       await fetch(`/api/reports?userId=${userId}&registryId=${registryId}`, {
         method: 'POST',
         headers: {

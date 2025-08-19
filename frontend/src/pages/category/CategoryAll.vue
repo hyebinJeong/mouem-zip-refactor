@@ -46,7 +46,9 @@
             </router-link>
           </li>
           <li class="nav-item mb-2">
-            <button @click="onKakaoLogout" class="nav-link logout-button">로그아웃</button>
+            <button @click="onKakaoLogout" class="nav-link logout-button">
+              로그아웃
+            </button>
           </li>
         </ul>
       </div>
@@ -67,10 +69,15 @@ const auth = useAuthStore();
 const clientId = '88a530611ac6fa5a18f5747f67b6a359';
 const redirectUri = 'http://localhost:8080/';
 
-function onKakaoLogout() {
-  auth.logout();
-  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${redirectUri}`;
-  window.location.href = kakaoAuthUrl;
+async function onKakaoLogout() {
+  try {
+    auth.logout();
+    await api.post('/api/oauth/kakao/logout');
+    const kakaoAuthUrl2 = `https://kauth.kakao.com/oauth/logout?client_id=${clientId}&logout_redirect_uri=${redirectUri}`;
+    window.location.href = kakaoAuthUrl2;
+  } catch (err) {
+    console.error('Logout failed', err);
+  }
 }
 
 const route = useRoute();

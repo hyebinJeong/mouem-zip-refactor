@@ -9,6 +9,9 @@ import org.scoula.jeonseRate.enums.KosisRegionCode;
 import org.scoula.jeonseRate.enums.KosisRegionDistrictCode;
 import org.scoula.jeonseRate.enums.SafetyGrade;
 import org.scoula.jeonseRate.mapper.JeonseAnalysisMapper;
+import org.scoula.jeonseRate.service.address.AddressServiceImpl;
+import org.scoula.jeonseRate.service.deal.DealSearchServiceImpl;
+import org.scoula.jeonseRate.service.kosis.KosisJeonseRateServiceImple;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,9 +24,9 @@ import java.util.*;
 @Slf4j
 public class LeaseDiagnosisService {
 
-    private final AddressService addressService;
-    private final DealSearchService dealSearchService;
-    private final KosisJeonseRateService kosisJeonseRateService;
+    private final AddressServiceImpl addressServiceImpl;
+    private final DealSearchServiceImpl dealSearchServiceImpl;
+    private final KosisJeonseRateServiceImple kosisJeonseRateServiceImple;
     private final JeonseAnalysisMapper jeonseAnalysisMapper;
 
     public ResponseEntity<?> analyzeLease(JeonseRateDTO request) {
@@ -39,7 +42,7 @@ public class LeaseDiagnosisService {
         }
 
         // 1. 주소 정보 조회
-        AddressInfoDTO addressInfo = addressService.lookupAddress(keyword);
+        AddressInfoDTO addressInfo = addressServiceImpl.lookupAddress(keyword);
         log.debug("주소 조회 완료: 시={}, 구/군={}, 법정동코드={}, 지번='{}', 건물명='{}'",
                 addressInfo.getSiNm(), addressInfo.getSggNm(), addressInfo.getAdmCd(),
                 addressInfo.getJibunAddr(), addressInfo.getBdNm());
@@ -60,7 +63,7 @@ public class LeaseDiagnosisService {
         Double targetArea = request.getExcluUseAr();
 
         // 6. 해당 주소에 대한 매매가 평균 조회
-        Optional<JeonseRateDTO> averageDealPriceOpt = dealSearchService.getDealAmount(
+        Optional<JeonseRateDTO> averageDealPriceOpt = dealSearchServiceImpl.getDealAmount(
                 lawdCode, jibun, buildingName, recentMonths, targetArea
         );
         log.info("매매가 평균 조회 결과: 존재여부={}, 기준(법정동/지번/건물/면적)={}/{}/{}/{}",
@@ -119,13 +122,13 @@ public class LeaseDiagnosisService {
         // 8-1. 구 단위 코드 먼저 시도
         if (guCodeOpt.isPresent()) {
             log.debug("KOSIS 구 단위 코드 조회 시도: {}", guCodeOpt.get());
-            kosisData = kosisJeonseRateService.fetchKosisData(averageDealPriceOpt, guCodeOpt.get());
+            kosisData = kosisJeonseRateServiceImple.fetchKosisData(averageDealPriceOpt, guCodeOpt.get());
         }
 
         // 8-2. 구 코드 결과가 없으면 시도 단위로 fallback
         if ((kosisData == null || kosisData.isEmpty()) && siCodeOpt.isPresent()) {
             log.debug("구 단위 실패 → 시 단위 코드로 재시도: {}", siCodeOpt.get());
-            kosisData = kosisJeonseRateService.fetchKosisData(averageDealPriceOpt, siCodeOpt.get());
+            kosisData = kosisJeonseRateServiceImple.fetchKosisData(averageDealPriceOpt, siCodeOpt.get());
         }
 
         // 8-3. 둘 다 없으면 판단보류 처리

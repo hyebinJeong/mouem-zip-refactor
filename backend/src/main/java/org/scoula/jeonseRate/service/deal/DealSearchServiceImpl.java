@@ -1,4 +1,4 @@
-package org.scoula.jeonseRate.service;
+package org.scoula.jeonseRate.service.deal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class DealSearchService {
+public class DealSearchServiceImpl implements DealSearchService{
     // 공공데이터 포털 API 호출용 WebClient (baseUrl은 WebClientConfig에서 설정)
     private final WebClient webClient;
     // JSON 응답을 DealResponseDTO로 파싱하기 위한 Jackson ObjectMapper

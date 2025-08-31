@@ -1,4 +1,4 @@
-package org.scoula.jeonseRate.service;
+package org.scoula.jeonseRate.service.address;
 
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
@@ -7,13 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-/**
- * 도로명 또는 지번 주소를 입력 받아 행정안전부 주소 API를 통해
- * 법정동 코드와 지번 정보를 조회하는 서비스
- */
 @Service
 @RequiredArgsConstructor
-public class AddressService {
+public class AddressServiceImpl implements AddressService {
 
     // 주소 검색용 WebClient
     private final WebClient jusoWebClient;
@@ -23,8 +19,8 @@ public class AddressService {
     private String jusoApiKey;
 
     // 사용자가 입력한 키워드(주소)를 기반으로 주소 정보 조회(법정동 코드, 지번, 건물명)
+    @Override
     public AddressInfoDTO lookupAddress(String keyword) {
-
         String response = jusoWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/addrlink/addrLinkApi.do")
@@ -44,11 +40,11 @@ public class AddressService {
                 .getJSONObject(0);
 
         String admCd = json.getString("admCd");               // 법정동 코드
-        String lnbrMnnm = json.getString("lnbrMnnm");         // 지번 본번 (예: "595")
-        String lnbrSlno = json.getString("lnbrSlno");         // 지번 부번 (예: "28")
-        String bdNm = json.optString("bdNm", "");  // 건물명 (없으면 빈 문자열)
+        String lnbrMnnm = json.getString("lnbrMnnm");         // 지번 본번
+        String lnbrSlno = json.getString("lnbrSlno");         // 지번 부번
+        String bdNm = json.optString("bdNm", "");   // 건물명
 
-        // 부번이 0이면 생략, 아니면 "본번-부번" 형태로 조합
+        // 부번이 0이면 생략, 아니면 "본번-부번" 형태
         String jibun = lnbrSlno.equals("0") ? lnbrMnnm : lnbrMnnm + "-" + lnbrSlno;
 
         String sggNm = json.getString("sggNm");

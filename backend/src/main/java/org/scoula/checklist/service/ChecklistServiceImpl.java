@@ -3,6 +3,7 @@ package org.scoula.checklist.service;
 import org.scoula.checklist.domain.dto.ChecklistDTO;
 import org.scoula.checklist.mapper.ChecklistMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,9 +25,8 @@ public class ChecklistServiceImpl implements ChecklistService {
             String checkedJson = objectMapper.writeValueAsString(dto.getChecked());
             String checklistRating = calculateRating(dto.getChecked());
             mapper.insertChecklist(dto.getRegistryId(), dto.getUserId(), checkedJson, checklistRating);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("체크리스트 저장 실패", e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e); // List<Boolean>에서는 절대 발생하지 않음
         }
     }
 

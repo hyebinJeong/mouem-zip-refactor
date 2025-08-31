@@ -20,16 +20,8 @@ public class RegistryAnalysisController {
 
     // 사용자 ID를 파라미터로 받는 방식
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getRegistriesByUserId(@PathVariable int userId) {
-        try {
-            List<RegisterDTO> list = service.findByUserId(userId);
-
-            return ResponseEntity.ok(list);
-        } catch (NullPointerException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("분석 결과를 찾을 수 없습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<List<RegisterDTO>> getRegistriesByUserId(@PathVariable int userId) {
+        List<RegisterDTO> list = service.findByUserId(userId);
+        return ResponseEntity.ok(list);
     }
 }

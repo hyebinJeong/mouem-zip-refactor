@@ -1,68 +1,57 @@
 // k6/helpers.js
 import http from 'k6/http';
 
-// BASE URL: 환경변수(BASE_URL) 우선, 없으면 기본값
 export const BASE = __ENV.BASE_URL || 'http://localhost:8080';
 
-// 각 VU(가상유저)마다 독립적인 런타임이므로, 아래 변수들은 VU별로 분리됩니다.
 let accessToken = null;
 
-// JWT를 발급 (GET /api/auth/test-token 사용)
 export function refreshToken() {
     const res = http.get(`${BASE}/api/auth/test-token`);
     if (res.status === 200) {
         accessToken = JSON.parse(res.body).accessToken;
-        // 초기 디버깅에만 로그. 시끄러우면 주석 처리하세요.
-        console.log('🔑 새 토큰 발급:', accessToken.substring(0, 20) + '...');
+        console.log('새 토큰 발급:', accessToken.substring(0, 20) + '...');
     } else {
-        console.error('❌ 토큰 발급 실패:', res.status, res.body);
+        console.error('토큰 발급 실패:', res.status, res.body);
     }
 }
 
-// 토큰이 없으면 발급
 export function ensureToken() {
     if (!accessToken) refreshToken();
 }
 
-// 인증 헤더 생성(추가 헤더 병합 가능)
-export function authHeaders(extra = {}) {
-    return {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-            ...extra,
-        },
+function withAuthParams(params = {}) {
+    const headers = {
+        Accept: 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        ...(params.headers || {}),
     };
+    return { ...params, headers };
 }
 
-// 401이면 1회 자동 갱신 후 재시도하는 범용 요청 함수
-export function requestWithAuth(method, url, body = null, extraHeaders = {}) {
+export function requestWithAuth(method, url, body = null, params = {}) {
     ensureToken();
-
-    let params = authHeaders(extraHeaders);
-    let res = send(method, url, body, params);
-
+    let p = withAuthParams(params);
+    let res = send(method, url, body, p);
     if (res.status === 401) {
-        console.log('⚠️ 401 감지 → 토큰 갱신 후 재시도:', url);
         refreshToken();
-        params = authHeaders(extraHeaders);
-        res = send(method, url, body, params);
+        p = withAuthParams(params);
+        res = send(method, url, body, p);
     }
     return res;
 }
 
-// 편의 래퍼들
-export const getWithAuth    = (url, extra = {}) => requestWithAuth('GET',    url, null, extra);
-export const delWithAuth    = (url, extra = {}) => requestWithAuth('DELETE', url, null, extra);
-export const postWithAuth   = (url, json, extra = {}) =>
-    requestWithAuth('POST', url, json, { 'Content-Type': 'application/json', ...extra });
-export const putWithAuth    = (url, json, extra = {}) =>
-    requestWithAuth('PUT',  url, json, { 'Content-Type': 'application/json', ...extra });
+// 래퍼들: 이제 두 번째 인자는 k6 params 전체(tags, headers 등)
+export const getWithAuth  = (url, params = {}) => requestWithAuth('GET', url, null, params);
+export const delWithAuth  = (url, params = {}) => requestWithAuth('DELETE', url, null, params);
+export const postWithAuth = (url, json, params = {}) =>
+    requestWithAuth('POST', url, json ? JSON.stringify(json) : null, { ...params, headers: { 'Content-Type': 'application/json', ...(params.headers||{}) }});
+export const putWithAuth  = (url, json, params = {}) =>
+    requestWithAuth('PUT',  url, json ? JSON.stringify(json) : null, { ...params, headers: { 'Content-Type': 'application/json', ...(params.headers||{}) }});
 
-// 내부 전송 유틸
 function send(method, url, body, params) {
     if (method === 'GET')    return http.get(url, params);
     if (method === 'DELETE') return http.del(url, null, params);
-    if (method === 'POST')   return http.post(url, body ? JSON.stringify(body) : null, params);
-    if (method === 'PUT')    return http.put(url,  body ? JSON.stringify(body) : null, params);
+    if (method === 'POST')   return http.post(url, body, params);
+    if (method === 'PUT')    return http.put(url, body, params);
     throw new Error(`Unsupported method: ${method}`);
 }

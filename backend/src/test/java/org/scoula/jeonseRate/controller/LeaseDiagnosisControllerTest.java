@@ -6,9 +6,9 @@ import org.scoula.jeonseRate.dto.AddressInfoDTO;
 import org.scoula.jeonseRate.dto.JeonseRateDTO;
 import org.scoula.jeonseRate.enums.SafetyGrade;
 import org.scoula.jeonseRate.mapper.JeonseAnalysisMapper;
-import org.scoula.jeonseRate.service.AddressService;
-import org.scoula.jeonseRate.service.DealSearchService;
-import org.scoula.jeonseRate.service.KosisJeonseRateService;
+import org.scoula.jeonseRate.service.address.AddressServiceImpl;
+import org.scoula.jeonseRate.service.deal.DealSearchServiceImpl;
+import org.scoula.jeonseRate.service.kosis.KosisJeonseRateServiceImple;
 import org.springframework.http.ResponseEntity;
 
 import java.util.*;
@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LeaseDiagnosisControllerTest {
 
     // DealSearchService - 면적 필터링 검증
-    class DealServiceWithAreaCheck extends DealSearchService {
-        public DealServiceWithAreaCheck() { super(null, null); }
+    class DealServiceImplWithAreaCheck extends DealSearchServiceImpl {
+        public DealServiceImplWithAreaCheck() { super(null, null); }
 
         @Override
         public Optional<JeonseRateDTO> getDealAmount(
@@ -39,8 +39,8 @@ public class LeaseDiagnosisControllerTest {
     }
 
     // AddressService - 건물명 없게 처리
-    class NoBuildingNameAddressService extends AddressService {
-        public NoBuildingNameAddressService() { super(null); }
+    class NoBuildingNameAddressServiceImpl extends AddressServiceImpl {
+        public NoBuildingNameAddressServiceImpl() { super(null); }
         @Override
         public AddressInfoDTO lookupAddress(String keyword) {
             return new AddressInfoDTO("11710", "123", "서울특별시", null, "송파구");
@@ -48,8 +48,8 @@ public class LeaseDiagnosisControllerTest {
     }
 
     // DealSearchService - 지번만으로 처리되었는지 확인
-    class DealServiceExpectJibunOnly extends DealSearchService {
-        public DealServiceExpectJibunOnly() { super(null, null); }
+    class DealServiceImplExpectJibunOnly extends DealSearchServiceImpl {
+        public DealServiceImplExpectJibunOnly() { super(null, null); }
         @Override
         public Optional<JeonseRateDTO> getDealAmount(String lawdCode, String jibun, String buildingName, List<String> recentMonths, Double targetArea) {
             assertNull(buildingName);
@@ -62,8 +62,8 @@ public class LeaseDiagnosisControllerTest {
     }
 
     // DealSearchService - 매물 없음
-    class DealServiceNoDeal extends DealSearchService {
-        public DealServiceNoDeal() { super(null, null); }
+    class DealServiceNoDealImpl extends DealSearchServiceImpl {
+        public DealServiceNoDealImpl() { super(null, null); }
         @Override
         public Optional<JeonseRateDTO> getDealAmount(String lawdCode, String jibun, String buildingName, List<String> recentMonths, Double targetArea) {
             return Optional.empty();
@@ -71,9 +71,9 @@ public class LeaseDiagnosisControllerTest {
     }
 
     // KOSIS - 구 → 시 fallback
-    class FallbackKosisService extends KosisJeonseRateService {
+    class FallbackKosisServiceImple extends KosisJeonseRateServiceImple {
         List<String> logs = new ArrayList<>();
-        public FallbackKosisService() { super(null); }
+        public FallbackKosisServiceImple() { super(null); }
         @Override
         public List<Map<String, Object>> fetchKosisData(Optional<JeonseRateDTO> deal, String objL2) {
             logs.add(objL2);
@@ -85,8 +85,8 @@ public class LeaseDiagnosisControllerTest {
     }
 
     // KOSIS - 구, 시 모두 실패
-    class KosisNoData extends KosisJeonseRateService {
-        public KosisNoData() { super(null); }
+    class KosisNoDataImple extends KosisJeonseRateServiceImple {
+        public KosisNoDataImple() { super(null); }
         @Override
         public List<Map<String, Object>> fetchKosisData(Optional<JeonseRateDTO> deal, String objL2) {
             return List.of();
@@ -116,9 +116,9 @@ public class LeaseDiagnosisControllerTest {
         System.out.println("\n테스트: 건물명 없을 때 지번 기반 조회");
         TestMapper mapper = new TestMapper();
         LeaseDiagnosisController controller = new LeaseDiagnosisController(
-                new NoBuildingNameAddressService(),
-                new DealServiceExpectJibunOnly(),
-                new KosisNoData(),
+                new NoBuildingNameAddressServiceImpl(),
+                new DealServiceImplExpectJibunOnly(),
+                new KosisNoDataImple(),
                 mapper
         );
 
@@ -137,9 +137,9 @@ public class LeaseDiagnosisControllerTest {
     void 실거래가_없으면_판단보류() {
         System.out.println("\n테스트: 실거래가 없음 → 판단보류");
         LeaseDiagnosisController controller = new LeaseDiagnosisController(
-                new NoBuildingNameAddressService(),
-                new DealServiceNoDeal(),
-                new KosisNoData(),
+                new NoBuildingNameAddressServiceImpl(),
+                new DealServiceNoDealImpl(),
+                new KosisNoDataImple(),
                 new TestMapper()
         );
 
@@ -160,12 +160,12 @@ public class LeaseDiagnosisControllerTest {
     @Test
     void KOSIS_구단위_실패시_시단위_fallback_조회() {
         System.out.println("\n테스트: 구단위 실패 → 시도 fallback");
-        FallbackKosisService kosis = new FallbackKosisService();
+        FallbackKosisServiceImple kosis = new FallbackKosisServiceImple();
         TestMapper mapper = new TestMapper();
 
         LeaseDiagnosisController controller = new LeaseDiagnosisController(
-                new NoBuildingNameAddressService(),
-                new DealServiceExpectJibunOnly(),
+                new NoBuildingNameAddressServiceImpl(),
+                new DealServiceImplExpectJibunOnly(),
                 kosis,
                 mapper
         );
@@ -189,9 +189,9 @@ public class LeaseDiagnosisControllerTest {
         System.out.println("\n테스트: KOSIS 구/시 모두 실패 → 판단보류");
         TestMapper mapper = new TestMapper();
         LeaseDiagnosisController controller = new LeaseDiagnosisController(
-                new NoBuildingNameAddressService(),
-                new DealServiceExpectJibunOnly(),
-                new KosisNoData(),
+                new NoBuildingNameAddressServiceImpl(),
+                new DealServiceImplExpectJibunOnly(),
+                new KosisNoDataImple(),
                 mapper
         );
 
@@ -210,7 +210,7 @@ public class LeaseDiagnosisControllerTest {
     void 전세가율_계산_및_등급_판별_정확성_검증() {
         System.out.println("\n테스트: 전세가율 계산 및 등급 판단 정확성 검증");
         // KOSIS 서비스 - 평균 53.9% 반환
-        KosisJeonseRateService kosis = new KosisJeonseRateService(null) {
+        KosisJeonseRateServiceImple kosis = new KosisJeonseRateServiceImple(null) {
             @Override
             public List<Map<String, Object>> fetchKosisData(Optional<JeonseRateDTO> deal, String objL2) {
                 return List.of(Map.of("DT", "53.9"));
@@ -218,7 +218,7 @@ public class LeaseDiagnosisControllerTest {
         };
 
         // 실거래가 평균 1억 2500만, 타입: 아파트
-        DealSearchService deal = new DealSearchService(null, null) {
+        DealSearchServiceImpl deal = new DealSearchServiceImpl(null, null) {
             @Override
             public Optional<JeonseRateDTO> getDealAmount(String lawdCode, String jibun, String buildingName, List<String> recentMonths, Double targetArea) {
                 JeonseRateDTO dto = new JeonseRateDTO();
@@ -229,7 +229,7 @@ public class LeaseDiagnosisControllerTest {
         };
 
         // 주소 (지번만 존재)
-        AddressService address = new AddressService(null) {
+        AddressServiceImpl address = new AddressServiceImpl(null) {
             @Override
             public AddressInfoDTO lookupAddress(String keyword) {
                 return new AddressInfoDTO("11710", "88", "서울특별시", null, "송파구");
@@ -267,9 +267,9 @@ public class LeaseDiagnosisControllerTest {
         System.out.println("\n테스트: 면적 값 전달 확인");
         TestMapper mapper = new TestMapper();
         LeaseDiagnosisController controller = new LeaseDiagnosisController(
-                new NoBuildingNameAddressService(),
-                new DealServiceWithAreaCheck(),
-                new KosisNoData(),
+                new NoBuildingNameAddressServiceImpl(),
+                new DealServiceImplWithAreaCheck(),
+                new KosisNoDataImple(),
                 mapper
         );
 

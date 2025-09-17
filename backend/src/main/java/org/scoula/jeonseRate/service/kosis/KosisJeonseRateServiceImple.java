@@ -1,4 +1,4 @@
-package org.scoula.jeonseRate.service;
+package org.scoula.jeonseRate.service.kosis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,12 +12,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class KosisJeonseRateService {
+public class KosisJeonseRateServiceImple implements KosisJeonseRateService{
 
     private final WebClient webClient;
 

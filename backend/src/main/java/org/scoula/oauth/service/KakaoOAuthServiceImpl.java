@@ -2,6 +2,7 @@ package org.scoula.oauth.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.scoula.oauth.domain.DTO.KakaoApiResponse;
 import org.scoula.oauth.domain.DTO.KakaoTokenResponseDTO;
 import org.scoula.oauth.domain.DTO.KakaoUserDTO;
@@ -14,6 +15,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KakaoOAuthServiceImpl implements KakaoOAuthService {
@@ -22,8 +24,6 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
     private final UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final UserMapper userMapper;
-
-
 
     @Override
     public String getAccessTokenFromKakao(String code) {
@@ -44,7 +44,6 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
             bw.flush();
             bw.close();
 
-
             BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder sb = new StringBuilder();
             String line;
@@ -54,20 +53,22 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
             br.close();
 
             String result = sb.toString();
-            System.out.println("[카카오 토큰 응답] " + result); // JSON 전체 응답 출력
+            // System.out.println("[카카오 토큰 응답] " + result);
+            log.debug("[카카오 토큰 응답] {}", result);
 
             // JSON 파싱해서 access_token 추출
             KakaoTokenResponseDTO tokenResponse = objectMapper.readValue(result, KakaoTokenResponseDTO.class);
             return tokenResponse.getAccess_token();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            log.error("카카오 토큰 요청 실패", e);
             throw new RuntimeException("카카오 토큰 요청 실패", e);
         }
     }
 
     @Override
-    public KakaoUserDTO  loginWithKakao(String kakaoAccessToken) {
+    public KakaoUserDTO loginWithKakao(String kakaoAccessToken) {
         // 카카오 사용자 정보 가져오기
         KakaoUserDTO kakaoUser = requestKakaoUserInfo(kakaoAccessToken);
 
@@ -86,7 +87,7 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
             conn.setRequestProperty("Authorization", "Bearer " + token);
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
 
-            // 로그 확인용
+            // 응답 수신
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder responses = new StringBuilder();
             String line;
@@ -94,12 +95,12 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
                 responses.append(line);
             }
             String json = responses.toString();
-            System.out.println("[카카오 응답] " + json); // 👈 추가
+            // System.out.println("[카카오 응답] " + json);
+            log.debug("[카카오 응답] {}", json);
 
             // 요청 받은 json DTO 형식으로 파싱
             ObjectMapper objectMapper = new ObjectMapper();
             KakaoApiResponse response = objectMapper.readValue(json, KakaoApiResponse.class);
-
 
             String kakaoId = response.getId();
             String name = response.getProperties().getNickname();
@@ -107,7 +108,8 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
             return new KakaoUserDTO(kakaoId, name, email, true);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            log.error("사용자 정보 요청 실패", e);
             throw new RuntimeException("사용자 정보 요청 실패", e);
         }
     }
@@ -139,12 +141,16 @@ public class KakaoOAuthServiceImpl implements KakaoOAuthService {
             int code = conn.getResponseCode();
             if (code != 200) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
-                    throw new IllegalStateException("Kakao unlink failed: " + br.readLine());
+                    String errorBody = br.readLine();
+                    log.error("Kakao unlink failed. status={}, body={}", code, errorBody);
+                    throw new IllegalStateException("Kakao unlink failed: " + errorBody);
                 }
+            } else {
+                log.debug("Kakao unlink success. kakaoId={}", kakaoId);
             }
         } catch (IOException e) {
+            log.error("카카오 회원 탈퇴 요청 실패", e);
             throw new RuntimeException("카카오 회원 탈퇴 요청 실패", e);
         }
     }
-
 }

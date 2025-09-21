@@ -13,7 +13,7 @@ import javax.servlet.ServletRegistration;
 @Slf4j
 @Configuration
 public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
-    final String LOCATION = "/Users/leegaeun/Desktop/r_home/mouem-zip-refactor/upload";
+    final String LOCATION = "C:\\upload";
     final long MAX_FILE_SIZE = 1024 * 1024 * 10L;
     final long MAX_REQUEST_SIZE = 1024 * 1024 * 20L;
     final int FILE_SIZE_THRESHOLD = 1024 * 1024 * 5;

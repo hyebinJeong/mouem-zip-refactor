@@ -1,4 +1,4 @@
-// k6/helpers.js
+// k6/cache-helpers1.js
 import http from 'k6/http';
 
 export const BASE = __ENV.BASE_URL || 'http://localhost:8080';

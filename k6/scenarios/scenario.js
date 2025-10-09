@@ -1,6 +1,6 @@
 // k6/scenario.js
 import { check, sleep } from 'k6';
-import { BASE, ensureToken, getWithAuth, postWithAuth } from './helpers.js';
+import { BASE, ensureToken, getWithAuth, postWithAuth } from '../helpers/cache-helpers1.js';
 import http from 'k6/http';
 
 const USER_ID   = parseInt(__ENV.USER_ID || '1', 10);

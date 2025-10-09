@@ -1,5 +1,7 @@
+// 회귀 테스트
+// 목적: 캐시 전/후 비교, 엔드포인트별 회귀
 import {check, sleep} from 'k6';
-import {getWithAuth, postWithAuth, ensureToken, BASE} from "./helpers.js";
+import {getWithAuth, postWithAuth, ensureToken, BASE} from "../helpers/cache-helpers1.js";
 
 // 테스트 옵션
 export const options = {
@@ -18,7 +20,7 @@ export const options = {
     },
 };
 
-const USER_ID = 1;
+const USER_ID = Number(__ENV.USER_ID || 1);
 const WARMUP_CREATE  = __ENV.WARMUP_CREATE === '1';
 const WARMUP_LIMIT   = Number(__ENV.WARMUP_LIMIT || 5);
 
@@ -118,6 +120,7 @@ function getContractDetail(data) {
 
 // 체크리스트 저장 (랜덤 9개, 과도한 POST 방지 확률 제어)
 function saveChecklist(data) {
+    if (!data.registryIds?.length) return;
     // 과도한 데이터 변경 방지: 일정 확률로만 POST
     if (Math.random() > CHECKLIST_POST_RATE) return;
 
@@ -130,6 +133,11 @@ function saveChecklist(data) {
 
     const res = postWithAuth(`${BASE}/api/checklist`, payload, { tags: { name: 'checklist_save' } });
     check(res, { 'POST /api/checklist 200|201': r => r.status === 200 || r.status === 201 });
+    // check(res, { 'POST /api/checklist 200|201': r => {
+    //         const ok = r.status === 200 || r.status === 201;
+    //         if (!ok) console.error('[CHECKLIST_FAIL]', 'id=', id, 'status=', r.status, String(r.body).slice(0, 200));
+    //         return ok;
+    //     }});
 }
 
 // 랜덤 선택 유틸
@@ -154,4 +162,19 @@ export default function (data) {
 
 
     sleep(1);
+}
+
+// ========== 결과 파일 저장(전/후 비교·회귀 추적용) ==========
+export function handleSummary(summary) {
+    if (summary && summary.setup_data && summary.setup_data.token) {
+        summary.setup_data.token = '***masked***';
+    }
+
+    const label = __ENV.LABEL || 'run';
+    const dir   = '../results';
+
+    return {
+        stdout: JSON.stringify(summary, null, 2),
+        [`${dir}/summary-cache-${label}.json`]: JSON.stringify(summary, null, 2),
+    };
 }

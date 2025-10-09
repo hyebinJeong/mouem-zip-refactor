@@ -1,0 +1,31 @@
+# === 빌드 산출물 및 캐시 ===
+target/
+build/
+!target/*.jar
+*.log
+*.out
+*.tmp
+
+# === IDE 관련 ===
+.idea/
+*.iml
+.vscode/
+
+# === Git ===
+.git
+.gitignore
+
+# === OS/에디터 캐시 파일 ===
+.DS_Store
+Thumbs.db
+
+# === Maven/Gradle ===
+.mvn/
+.gradle/
+
+# === Docker Compose / Secrets ===
+docker-compose*.yml
+**/secrets/
+application-secret.yml
+*.env
+.env*

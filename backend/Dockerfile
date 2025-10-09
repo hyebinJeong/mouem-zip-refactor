@@ -1,27 +1,24 @@
-# Gradle 빌드용 이미지
-FROM gradle:8.5-jdk17 AS builder
-
-# 작업 디렉토리 설정
+# ==== 1) 빌드 스테이지: Gradle로 WAR 만들기 ====
+FROM gradle:8.10.2-jdk17 AS build
 WORKDIR /app
-
-# 프로젝트 복사
 COPY . .
+# 테스트는 일단 건너뛰고 WAR 생성
+RUN gradle clean war -x test
 
-# Gradle 캐시 활용 안 함 (확실히 새로 빌드)
-RUN gradle clean build -x test
+# ==== 2) 실행 스테이지: Tomcat에 WAR 배포 ====
+FROM tomcat:9.0-jdk17-temurin
 
-# 실행용 JDK 이미지를 별도로 지정 (Slim)
-FROM openjdk:17-jdk-slim
+# 기본 ROOT 앱 제거(선택이지만 깔끔함)
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-#  컨테이너 내 작업 디렉토리
-WORKDIR /app
+# 우리 WAR을 ROOT로 배치 → 컨텍스트 경로 '/'
+COPY --from=build /app/build/libs/*.war /usr/local/tomcat/webapps/ROOT.war
 
-# builder에서 결과물만 복사 (WAR or JAR 선택)
-# 만약 Spring Legacy WAR 프로젝트면 build/libs/*.war 로 변경
-COPY --from=builder /app/build/libs/*.war app.war
+# 타임존(선택)
+ENV TZ=Asia/Seoul
 
-# 포트 설정 (Tomcat 내장 시 8080)
 EXPOSE 8080
 
-# 실행 명령
-ENTRYPOINT ["java", "-jar", "app.war"]
+# 헬스체크(원하면 엔드포인트 바꿔도 됨)
+HEALTHCHECK --interval=30s --timeout=5s --retries=5 \
+  CMD curl -fs http://localhost:8080/ || exit 1

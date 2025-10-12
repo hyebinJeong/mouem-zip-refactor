@@ -8,7 +8,7 @@ COPY . .
 # gradle wrapper가 있으면 그걸 쓰고, 없으면 컨테이너 내 gradle 사용
 # - wrapper를 쓰면 프로젝트가 명시한 Gradle 버전으로 빌드되어 "버전 차이" 이슈를 피함
 RUN if [ -f gradlew ]; then \
-      chmod +x gradlew && ./gradlew --no-daemon clean war -x test ; \
+      sed -i 's/\r$//' gradlew && chmod +x gradlew && ./gradlew --no-daemon clean war -x test ; \
     else \
       gradle --no-daemon clean war -x test ; \
     fi

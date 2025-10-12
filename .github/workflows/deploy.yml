@@ -3,10 +3,10 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin   # ← 배포 트리거 브랜치 (필요시 main으로 변경 가능)
+      - feat/refactor-hyebin
 
 env:
-  ECR_REPOSITORY: homebuddy           # ECR 리포지토리 이름
+  ECR_REPOSITORY: homebuddy
   IMAGE_TAG_SHA: sha-${{ github.sha }}
   IMAGE_TAG_LATEST: latest
 
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write   # GitHub → AWS OIDC 연동용
+      id-token: write
       contents: read
 
     steps:
@@ -25,8 +25,11 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: arn:aws:iam::875636132220:role/github-ecr-role
+          aws-region: ap-northeast-2
+
+      - name: Check AWS connection
+        run: aws sts get-caller-identity
 
       - name: Login to Amazon ECR
         id: ecr
@@ -37,12 +40,9 @@ jobs:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
           cd backend
-          # Gradle로 WAR 빌드 후 Tomcat에 배포되는 이미지 생성
           docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }} \
                        -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
                        .
-
-          # 이미지 푸시 (SHA + latest)
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}
 

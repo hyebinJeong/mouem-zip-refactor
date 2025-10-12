@@ -3,51 +3,66 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin   # ← 배포 트리거 브랜치 (필요시 main으로 변경 가능)
+      - feat/refactor-hyebin   # 트리거 브랜치
 
 env:
-  ECR_REPOSITORY: homebuddy           # ECR 리포지토리 이름
+  ECR_REPOSITORY: homebuddy
   IMAGE_TAG_SHA: sha-${{ github.sha }}
   IMAGE_TAG_LATEST: latest
+  AWS_REGION: ap-northeast-2       # ← 리전 상수(Secrets 써도 됨)
+
+permissions:
+  id-token: write                  # OIDC 토큰 발급 허용(필수)
+  contents: read
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write   # GitHub → AWS OIDC 연동용
-      contents: read
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # (진단) 런타임 값 확인 → Trust Policy의 sub과 1:1 비교
+      - name: Print GitHub runtime refs (compare with Trust Policy)
+        run: |
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+          echo "GITHUB_REF       =$GITHUB_REF"
+          echo "Expected sub     =repo:hyebinJeong/mouem-zip-refactor:ref:$GITHUB_REF"
+
+      # AWS 자격 구성 (OIDC 역할 가정)
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # (진단) Assume 성공 확인
+      - name: STS - who am I
+        run: aws sts get-caller-identity
+
+      # ECR 로그인
       - name: Login to Amazon ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Docker Build & Push
       - name: Build & Push Docker Image
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
           cd backend
-          # Gradle로 WAR 빌드 후 Tomcat에 배포되는 이미지 생성
+          # Dockerfile이 ./backend 에 있다고 가정
           docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }} \
                        -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
                        .
-
-          # 이미지 푸시 (SHA + latest)
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}
 
       - name: Print pushed image URIs
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
           echo "Image pushed successfully:"
-          echo "${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}"
-          echo "${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}"
+          echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}"
+          echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}"

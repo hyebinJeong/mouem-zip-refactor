@@ -1,53 +1,27 @@
-name: Build WAR (Gradle) & Push Docker to ECR
+name: Diagnose OIDC & ECR
 
 on:
   push:
-    branches:
-      - feat/refactor-hyebin
+    branches: [ "feat/refactor-hyebin" ]
 
-env:
-  ECR_REPOSITORY: homebuddy
-  IMAGE_TAG_SHA: sha-${{ github.sha }}
-  IMAGE_TAG_LATEST: latest
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  build-and-push:
+  diag:
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::875636132220:role/github-ecr-role
-          aws-region: ap-northeast-2
+          role-to-assume: arn:aws:iam::875636132220:role/github-ecr-role   # ← 정확한 역할 ARN
+          aws-region: ap-northeast-2                                      # ← 리전 고정
 
-      - name: Check AWS connection
+      - name: STS - who am I
         run: aws sts get-caller-identity
 
-      - name: Login to Amazon ECR
-        id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build & Push Docker Image
-        env:
-          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
-        run: |
-          cd backend
-          docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }} \
-                       -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
-                       .
-          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}
-          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}
-
-      - name: Print pushed image URIs
-        run: |
-          echo "Image pushed successfully:"
-          echo "${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}"
-          echo "${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}"
+      - name: Check ECR repo
+        run: aws ecr describe-repositories --repository-names homebuddy

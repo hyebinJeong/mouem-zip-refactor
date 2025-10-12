@@ -5,20 +5,20 @@ WORKDIR /app
 # 전체 복사 (간단하게 진행)
 COPY . .
 
-# gradle wrapper가 있으면 그걸 쓰고, 없으면 컨테이너 내 gradle 사용
-# - wrapper를 쓰면 프로젝트가 명시한 Gradle 버전으로 빌드되어 "버전 차이" 이슈를 피함
-RUN set -eux; \
+# gradlew가 있으면 BOM과 CRLF를 제거하고 실행 (없으면 gradle CLI 사용)
+RUN set -eu; \
     if [ -f gradlew ]; then \
-      echo "== before fix: head -n3 gradlew =="; sed -n '1,3p' gradlew | cat -A; \
-      # CRLF 제거 + 실행권한
-      sed -i 's/\r$//' gradlew; chmod +x gradlew; \
-      echo "== after fix: head -n3 gradlew =="; sed -n '1,3p' gradlew | cat -A; \
-      # gradle/환경 확인
-      ./gradlew --version; \
-      # 빌드 자세히(원인 추적용)
+      # 1) BOM 제거 (EF BB BF가 있으면 앞 3바이트 삭제)
+      (head -c3 gradlew | od -An -t x1 | grep -q 'ef bb bf' \
+        && tail -c +4 gradlew > gradlew.nobom && mv gradlew.nobom gradlew || true); \
+      # 2) CRLF의 CR 제거
+      sed -i 's/\r$//' gradlew; \
+      # 3) 실행권한 부여
+      chmod +x gradlew; \
+      # 4) wrapper로 WAR 빌드 (로그 자세히)
       ./gradlew --no-daemon clean war -x test --stacktrace --info; \
     else \
-      gradle --version; \
+      # wrapper가 없으면 컨테이너 내 gradle 사용
       gradle --no-daemon clean war -x test --stacktrace --info; \
     fi
 

@@ -46,16 +46,23 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Docker Build & Push
+      # 1️⃣ 진단: 레포에 gradlew 및 wrapper 디렉토리 존재 확인
+      - name: Sanity - wrapper exists in repo
+        run: |
+          ls -al backend/gradlew || true
+          ls -al backend/gradle/wrapper/ || true
+
+      # 2️⃣ Docker Build & Push (로그 확장 버전)
       - name: Build & Push Docker Image
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
           cd backend
           # Dockerfile이 ./backend 에 있다고 가정
-          docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }} \
-                       -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
-                       .
+          docker build --progress=plain --no-cache \
+            -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }} \
+            -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
+            .
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}
 

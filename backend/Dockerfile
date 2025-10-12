@@ -7,10 +7,19 @@ COPY . .
 
 # gradle wrapper가 있으면 그걸 쓰고, 없으면 컨테이너 내 gradle 사용
 # - wrapper를 쓰면 프로젝트가 명시한 Gradle 버전으로 빌드되어 "버전 차이" 이슈를 피함
-RUN if [ -f gradlew ]; then \
-      sed -i 's/\r$//' gradlew && chmod +x gradlew && ./gradlew --no-daemon clean war -x test ; \
+RUN set -eux; \
+    if [ -f gradlew ]; then \
+      echo "== before fix: head -n3 gradlew =="; sed -n '1,3p' gradlew | cat -A; \
+      # CRLF 제거 + 실행권한
+      sed -i 's/\r$//' gradlew; chmod +x gradlew; \
+      echo "== after fix: head -n3 gradlew =="; sed -n '1,3p' gradlew | cat -A; \
+      # gradle/환경 확인
+      ./gradlew --version; \
+      # 빌드 자세히(원인 추적용)
+      ./gradlew --no-daemon clean war -x test --stacktrace --info; \
     else \
-      gradle --no-daemon clean war -x test ; \
+      gradle --version; \
+      gradle --no-daemon clean war -x test --stacktrace --info; \
     fi
 
 # ==== 2) 실행 스테이지: Tomcat에 WAR 배포 ====

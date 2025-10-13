@@ -5,8 +5,21 @@ import {getWithAuth, postWithAuth, ensureToken, BASE} from "../helpers/cache-hel
 
 // 테스트 옵션
 export const options = {
-    vus: 20,
-    duration: '2m',
+    scenarios: {
+        ramp: {
+            executor: 'ramping-arrival-rate',
+            startRate: 50,      // 시작 시 초당 50 요청
+            timeUnit: '1s',     // 단위: 1초당 요청 수
+            preAllocatedVUs: 200, // 초기 VU 수
+            maxVUs: 400,          // 최대 동시 가상 유저 수
+            stages: [
+                { duration: '1m', target: 100 },  // 1분 동안 초당 100건까지 증가
+                { duration: '2m', target: 200 },  // 2분 동안 초당 200건 유지
+                { duration: '2m', target: 300 },  // 2분 동안 초당 300건 유지
+                { duration: '1m', target: 0 },    // 점진적 종료
+            ],
+        },
+    },
     thresholds: {
         'http_req_duration{name:reports_list}': ['p(95)<300'],
         'http_req_duration{name:reports_detail}': ['p(95)<300'],
@@ -47,6 +60,7 @@ export function setup() {
 
     //  2) 내 등기부등본 분석 목록
     const rRegs = getWithAuth(`${BASE}/api/registry/user/${USER_ID}`);
+    console.log('[DEBUG] registry 응답:', rRegs.status, rRegs.body);
     if (rRegs.headers['Content-Type']?.includes('application/json') && rRegs.status === 200) {
         try {
             const arr   = JSON.parse(rRegs.body);
@@ -88,18 +102,18 @@ function getReportDetail(data) {
 }
 
 function getDiagnosisResult(data) {
-    if (!data.registryIds.length) {
-        return;
-    }
+    // if (!data.registryIds.length) {
+    //     return;
+    // }
     const id  = pick(data.registryIds);
     const res = getWithAuth(`${BASE}/api/diagnosis/result?registerId=${id}`, { tags: { name: 'diagnosis_result' } });
     check(res, { 'GET /api/diagnosis/result 200|404|400': r => r.status === 200 || r.status === 404 || r.status === 400 });
 }
 
 function getSafetyResult(data) {
-    if (!data.registryIds.length) {
-        return;
-    }
+    // if (!data.registryIds.length) {
+    //     return;
+    // }
     const id  = pick(data.registryIds);
 
     const res = getWithAuth(`${BASE}/api/safety-check/${id}`, { tags: { name: 'safety_result' } });
@@ -144,24 +158,20 @@ function saveChecklist(data) {
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 // -------------------- VU 실행 루프 --------------------
-const actions = [
-    getReportsList,
-    getReportDetail,
-    getDiagnosisResult,
-    getSafetyResult,
-    getcontractList,
-    getContractDetail,
-    saveChecklist,
-];
-
 export default function (data) {
     ensureToken();
-    const fn = actions[Math.floor(Math.random() * actions.length)];
-    if ([getReportDetail, getDiagnosisResult, getSafetyResult, saveChecklist,getContractDetail].includes(fn)) fn(data);
-    else fn();
 
+    // 매 iteration마다 전부 실행
+    getReportsList();
+    getReportDetail(data);
+    getDiagnosisResult(data);
+    getSafetyResult(data);
+    saveChecklist(data);
+    getcontractList();
+    getContractDetail(data);
 
-    sleep(1);
+    // arrival-rate 시나리오에서는 sleep을 짧게
+    sleep(0.01);
 }
 
 // ========== 결과 파일 저장(전/후 비교·회귀 추적용) ==========
@@ -172,6 +182,10 @@ export function handleSummary(summary) {
 
     const label = __ENV.LABEL || 'run';
     const dir   = '../results';
+
+    // 현재 날짜·시간
+    const timestamp = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+    summary.testedAt = timestamp;
 
     return {
         stdout: JSON.stringify(summary, null, 2),

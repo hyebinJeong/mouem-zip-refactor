@@ -1,31 +1,10 @@
-# === 빌드 산출물 및 캐시 ===
-target/
-build/
-!target/*.jar
-*.log
-*.out
-*.tmp
+# 모든 것 제외
+**
 
-# === IDE 관련 ===
-.idea/
-*.iml
-.vscode/
+# Dockerfile은 포함
+!Dockerfile
 
-# === Git ===
-.git
-.gitignore
-
-# === OS/에디터 캐시 파일 ===
-.DS_Store
-Thumbs.db
-
-# === Maven/Gradle ===
-.mvn/
-.gradle/
-
-# === Docker Compose / Secrets ===
-docker-compose*.yml
-**/secrets/
-application-secret.yml
-*.env
-.env*
+# Gradle 산출물 중 WAR만 포함 (상위 디렉터리 단계별 재포함)
+!build/
+!build/libs/
+!build/libs/*.war

@@ -29,3 +29,8 @@ docker-compose*.yml
 application-secret.yml
 *.env
 .env*
+
+# === allow only the WAR artifact into docker context ===
+!build
+!build/libs
+!build/libs/*.war

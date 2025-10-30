@@ -3,7 +3,7 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin   # 트리거 브랜치(원하면 main/develop 추가)
+      - feat/refactor-hyebin   # 필요시 main/develop 추가
 
 env:
   ECR_REPOSITORY: homebuddy
@@ -12,7 +12,7 @@ env:
   AWS_REGION: ap-northeast-2
 
 permissions:
-  id-token: write     # OIDC 필요
+  id-token: write
   contents: read
 
 jobs:
@@ -22,17 +22,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # (선택) 런타임 값 확인 - 신뢰정책 검증용
-      - name: Print GitHub runtime refs
-        run: |
-          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
-          echo "GITHUB_REF       =$GITHUB_REF"
-
-      # AWS OIDC 자격
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}   # <- IAM Role ARN
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: STS - who am I
@@ -42,21 +35,31 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # JDK 17 설치
+      # JDK 17
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # backend에서 WAR 생성 (gradlew 사용)
-      - name: Build WAR with Gradle
-        working-directory: backend
+      # Gradle 8.10.2 설치 (wrapper 미사용)
+      - name: Install Gradle (no wrapper)
         run: |
-          chmod +x ./gradlew || true
-          ./gradlew --no-daemon clean war -x test
+          curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o gradle.zip
+          unzip -q gradle.zip
+          echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
-      # Dockerfile도 backend/ 에 있으므로 여기서 build
+      # backend 프로젝트에서 WAR 빌드
+      - name: Build WAR with Gradle
+        run: |
+          gradle -p backend --no-daemon clean war -x test
+
+      # 빌드 아티팩트 존재 확인
+      - name: Assert WAR exists
+        working-directory: backend
+        run: ls -al build/libs
+
+      # Docker 이미지 빌드 (context=backend, Dockerfile도 backend/에 있어야 함)
       - name: Build Docker Image
         working-directory: backend
         env:

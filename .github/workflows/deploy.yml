@@ -3,66 +3,74 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin   # 트리거 브랜치
+      - feat/refactor-hyebin   # 트리거 브랜치(원하면 main/develop 추가)
 
 env:
   ECR_REPOSITORY: homebuddy
   IMAGE_TAG_SHA: sha-${{ github.sha }}
   IMAGE_TAG_LATEST: latest
-  AWS_REGION: ap-northeast-2       # ← 리전 상수(Secrets 써도 됨)
+  AWS_REGION: ap-northeast-2
 
 permissions:
-  id-token: write                  # OIDC 토큰 발급 허용(필수)
+  id-token: write     # OIDC 필요
   contents: read
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # (진단) 런타임 값 확인 → Trust Policy의 sub과 1:1 비교
-      - name: Print GitHub runtime refs (compare with Trust Policy)
+      # (선택) 런타임 값 확인 - 신뢰정책 검증용
+      - name: Print GitHub runtime refs
         run: |
           echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
           echo "GITHUB_REF       =$GITHUB_REF"
-          echo "Expected sub     =repo:hyebinJeong/mouem-zip-refactor:ref:$GITHUB_REF"
 
-      # AWS 자격 구성 (OIDC 역할 가정)
+      # AWS OIDC 자격
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}   # <- IAM Role ARN
+          aws-region: ${{ env.AWS_REGION }}
 
-      # (진단) Assume 성공 확인
       - name: STS - who am I
         run: aws sts get-caller-identity
 
-      # ECR 로그인
       - name: Login to Amazon ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 1️⃣ 진단: 레포에 gradlew 및 wrapper 디렉토리 존재 확인
-      - name: Sanity - wrapper exists in repo
-        run: |
-          ls -al backend/gradlew || true
-          ls -al backend/gradle/wrapper/ || true
+      # JDK 17 설치
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
-      # 2️⃣ Docker Build & Push (로그 확장 버전)
-      - name: Build & Push Docker Image
+      # backend에서 WAR 생성 (gradlew 사용)
+      - name: Build WAR with Gradle
+        working-directory: backend
+        run: |
+          chmod +x ./gradlew || true
+          ./gradlew --no-daemon clean war -x test
+
+      # Dockerfile도 backend/ 에 있으므로 여기서 build
+      - name: Build Docker Image
+        working-directory: backend
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
-          cd backend
-          # Dockerfile이 ./backend 에 있다고 가정
-          docker build --progress=plain --no-cache \
+          docker build --progress=plain \
             -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }} \
             -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
             .
+
+      - name: Push to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}
 
@@ -70,6 +78,5 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
-          echo "Image pushed successfully:"
           echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}"
           echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}"

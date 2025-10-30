@@ -81,7 +81,7 @@ dependencies {
   // DB - mysql
   implementation 'com.mysql:mysql-connector-j:8.1.0'
   //Connection Pool
-  implementation 'com.zaxxer:HikariCP:2.7.4'
+  implementation 'com.zaxxer:HikariCP:5.1.0'
 
   // Spring JDBC
   implementation "org.springframework:spring-jdbc:${springVersion}"
@@ -122,13 +122,4 @@ dependencies {
 
 test {
   useJUnitPlatform()
-}
-
-// WAR에 runtimeClasspath JAR들을 WEB-INF/lib로 확실히 포함
-tasks.named('war') {
-    from({
-        configurations.runtimeClasspath.filter { it.name.endsWith('.jar') }
-    }) {
-        into 'WEB-INF/lib'
-    }
 }

@@ -123,3 +123,12 @@ dependencies {
 test {
   useJUnitPlatform()
 }
+
+// WAR에 runtimeClasspath JAR들을 WEB-INF/lib로 확실히 포함
+tasks.named('war') {
+    from({
+        configurations.runtimeClasspath.filter { it.name.endsWith('.jar') }
+    }) {
+        into 'WEB-INF/lib'
+    }
+}

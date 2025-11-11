@@ -9,6 +9,7 @@ import org.scoula.register.domain.RegistryRating;
 import org.scoula.register.domain.dto.RegisterAnalysisResponse;
 import org.scoula.register.domain.dto.RegisterDTO;
 import org.scoula.register.mapper.RegisterMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import technology.tabula.*;
@@ -72,6 +73,7 @@ public class TabulaService {
         return dto.getRegistryId();
     }
 
+    @Cacheable(value = "safety:result", key = "#registerId")
     public RegisterDTO findByRegisterId(Integer registerId) {
         return registerMapper.selectByRegisterId(registerId);
     }
@@ -82,6 +84,7 @@ public class TabulaService {
     }
 
     // 유저 번호로 분석된 등기부 목록 찾기(상태 true인 목록만)
+    @Cacheable(value = "registry:list", key = "#userId")
     public List<RegisterDTO> findByUserId(Integer userId) {
         return registerMapper.selectByUserId(userId);
     }

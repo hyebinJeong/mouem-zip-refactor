@@ -2,8 +2,10 @@ package org.scoula.finalreport.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.scoula.register.domain.dto.RegisterAnalysisResponse;
 
 import java.util.List;
@@ -11,6 +13,8 @@ import java.util.List;
 // 최종 응답용 dto
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(description = "Final Report response DTO")
 public class FinalReportDTO {
 

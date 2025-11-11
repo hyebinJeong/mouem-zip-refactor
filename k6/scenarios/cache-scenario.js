@@ -21,6 +21,7 @@ export const options = {
         },
     },
     thresholds: {
+        'http_req_duration{name:registry_list}': ['p(95)<300'],
         'http_req_duration{name:reports_list}': ['p(95)<300'],
         'http_req_duration{name:reports_detail}': ['p(95)<300'],
         'http_req_duration{name:diagnosis_result}': ['p(95)<300'],
@@ -32,6 +33,32 @@ export const options = {
         checks: ['rate>0.95'],
     },
 };
+
+// 간단 테스트
+// export const options = {
+//     scenarios: {
+//         cold: { // 콜드 채우기: 짧고 약하게
+//             executor: 'constant-arrival-rate',
+//             rate: 10, timeUnit: '1s',
+//             duration: '10s',
+//             preAllocatedVUs: 10, maxVUs: 50,
+//         },
+//         hot: {  // 바로 핫: 같은 엔드포인트/ID 반복
+//             startTime: '10s',
+//             executor: 'constant-arrival-rate',
+//             rate: 50, timeUnit: '1s',
+//             duration: '20s',
+//             preAllocatedVUs: 20, maxVUs: 100,
+//         },
+//     },
+//     thresholds: {
+//         // 핫 구간에서 p95가 충분히 내려오는지(임시 기준)
+//         // 'http_req_duration{name:diagnosis_result}': ['p(95)<150'],
+//         'http_req_duration{name:registry_list}': ['p(95)<300'],
+//         // 전체 엄격 기준을 잠깐 완화해도 좋음
+//         http_req_duration: ['p(95)<1000'],
+//     },
+// };
 
 const USER_ID = Number(__ENV.USER_ID || 1);
 const WARMUP_CREATE  = __ENV.WARMUP_CREATE === '1';
@@ -49,6 +76,9 @@ export function setup() {
 
     // 1) 리포트 리스트
     const rReports = getWithAuth(`${BASE}/api/reports/list?userId=${USER_ID}`, { tags: { name: 'reports_list' } });
+    console.log('[DEBUG] reports_list 응답 코드:', rReports.status);
+    console.log('[DEBUG] reports_list 응답 헤더:', rReports.headers['Content-Type']);
+    console.log('[DEBUG] reports_list 응답 바디 (앞 200자):', String(rReports.body).slice(0, 200));
     if (rReports.headers['Content-Type']?.includes('application/json') && rReports.status === 200) {
         try {
             const arr = JSON.parse(rReports.body);
@@ -89,6 +119,11 @@ export function setup() {
 
 
 // -------------------- 액션 정의 --------------------
+function getRegistryList() {
+    const res = getWithAuth(`${BASE}/api/registry/user/${USER_ID}`, { tags: { name: 'registry_list' } });
+    check(res, { 'GET /api/registry/user/{id} 200': r => r.status === 200 });
+}
+
 function getReportsList() {
     const res = getWithAuth(`${BASE}/api/reports/list?userId=${USER_ID}`, { tags: { name: 'reports_list' } });
     check(res, { 'GET /api/reports/list 200': r => r.status === 200 });
@@ -102,18 +137,22 @@ function getReportDetail(data) {
 }
 
 function getDiagnosisResult(data) {
-    // if (!data.registryIds.length) {
-    //     return;
-    // }
+    if (!data.registryIds.length) {
+        return;
+    }
+    console.log('[DEBUG] 전세가율 registryIds 개수:', data.registryIds.length);
+    console.log('[DEBUG] 전세가율 registryIds 내용 (앞 5개):', data.registryIds.slice(0, 5));
     const id  = pick(data.registryIds);
-    const res = getWithAuth(`${BASE}/api/diagnosis/result?registerId=${id}`, { tags: { name: 'diagnosis_result' } });
+    const res = getWithAuth(`${BASE}/api/diagnosis/result?registerId=1`, { tags: { name: 'diagnosis_result' } });
     check(res, { 'GET /api/diagnosis/result 200|404|400': r => r.status === 200 || r.status === 404 || r.status === 400 });
 }
 
 function getSafetyResult(data) {
-    // if (!data.registryIds.length) {
-    //     return;
-    // }
+    if (!data.registryIds.length) {
+        return;
+    }
+    console.log('[DEBUG] 등기부등본 registryIds 개수:', data.registryIds.length);
+    console.log('[DEBUG] 등기부등본 registryIds 내용 (앞 5개):', data.registryIds.slice(0, 5));
     const id  = pick(data.registryIds);
 
     const res = getWithAuth(`${BASE}/api/safety-check/${id}`, { tags: { name: 'safety_result' } });
@@ -162,6 +201,7 @@ export default function (data) {
     ensureToken();
 
     // 매 iteration마다 전부 실행
+    getRegistryList();
     getReportsList();
     getReportDetail(data);
     getDiagnosisResult(data);

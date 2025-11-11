@@ -1,7 +1,7 @@
 // k6/cache-helpers1.js
 import http from 'k6/http';
 
-export const BASE = __ENV.BASE_URL || 'http://localhost:8080';
+export const BASE = 'http://localhost:8080';
 
 let accessToken = null;
 
@@ -9,7 +9,7 @@ export function refreshToken() {
     const res = http.get(`${BASE}/api/auth/test-token`);
     if (res.status === 200) {
         accessToken = JSON.parse(res.body).accessToken;
-        console.log('새 토큰 발급:', accessToken.substring(0, 20) + '...');
+        console.log('새 토큰 발급:', accessToken);
     } else {
         console.error('토큰 발급 실패:', res.status, res.body);
     }

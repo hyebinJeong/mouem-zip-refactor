@@ -3,7 +3,7 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin   # 필요시 main/develop 추가
+      - feat/refactor-hyebin
   workflow_dispatch:
 
 permissions:
@@ -19,7 +19,6 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,46 +35,38 @@ jobs:
           unzip -q gradle.zip
           echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
-      # --- 1) WAR 빌드 (여기서 중복 JAR 때문에 실패하던 지점) ---
       - name: Build WAR with Gradle
         working-directory: backend
         run: |
           gradle --no-daemon clean war -x test
 
-      # --- 2) 사후 패치: 완성된 WAR에서 'starter' JAR만 제거 후 재패키징 ---
-      # build.gradle 수정 없이 가장 확실하게 통과됨
       - name: Strip duplicated starter from WAR (post-process)
-  working-directory: backend
-  shell: bash
-  run: |
-    set -e
+        working-directory: backend
+        shell: bash
+        run: |
+          set -e
+          WAR_PATH="$(ls build/libs/*.war | head -n1)"
+          echo "Target WAR: $WAR_PATH"
 
-    WAR_PATH="$(ls build/libs/*.war | head -n1)"
-    echo "Target WAR: $WAR_PATH"
+          command -v unzip >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y unzip)
+          command -v zip   >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y zip)
 
-    command -v unzip >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y unzip)
-    command -v zip >/dev/null 2>&1   || (sudo apt-get update && sudo apt-get install -y zip)
+          rm -rf tmp_war && mkdir -p tmp_war
+          unzip -q "$WAR_PATH" -d tmp_war
 
-    rm -rf tmp_war && mkdir -p tmp_war
-    unzip -q "$WAR_PATH" -d tmp_war
+          # ★ 중복 유발 JAR 제거
+          rm -f tmp_war/WEB-INF/lib/spring-cloud-starter-aws-2.2.6.RELEASE.jar || true
 
-    # ★ 중복 유발 JAR 제거
-    rm -f tmp_war/WEB-INF/lib/spring-cloud-starter-aws-2.2.6.RELEASE.jar || true
-
-    # 원래 WAR와 동일 폴더에 임시 파일로 재패키징
-    OUT_PATH="$(dirname "$WAR_PATH")/app-fixed.war"
-    (cd tmp_war && zip -qr "$OUT_PATH" .)
-
-    # 원래 파일 대체
-    mv -f "$OUT_PATH" "$WAR_PATH"
-    echo "Repacked WAR: $WAR_PATH"
-
+          # 원래 WAR 경로 기준으로 새 파일 만들고 교체
+          OUT_PATH="$(dirname "$WAR_PATH")/app-fixed.war"
+          (cd tmp_war && zip -qr "$OUT_PATH" .)
+          mv -f "$OUT_PATH" "$WAR_PATH"
+          echo "Repacked WAR: $WAR_PATH"
 
       - name: Assert WAR exists
         working-directory: backend
         run: ls -al build/libs
 
-      # --- ECR 로그인/푸시 ---
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:

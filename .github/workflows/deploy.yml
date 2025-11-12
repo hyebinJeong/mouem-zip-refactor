@@ -3,23 +3,25 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin   # 필요시 main/develop 추가
-
-env:
-  ECR_REPOSITORY: homebuddy
-  IMAGE_TAG_SHA: sha-${{ github.sha }}
-  IMAGE_TAG_LATEST: latest
-  AWS_REGION: ap-northeast-2
+      - feat/refactor-hyebin   # 필요 시 main/develop 추가
+  workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: homebuddy
+  IMAGE_TAG_LATEST: latest
+  IMAGE_TAG_SHA: sha-${{ github.sha }}
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials (OIDC)
@@ -28,65 +30,46 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: STS - who am I
-        run: aws sts get-caller-identity
-
       - name: Login to Amazon ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # JDK 17
-      - name: Setup JDK 17
+      - name: Setup Temurin JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # Gradle 8.10.2 설치 (wrapper 미사용)
-      - name: Install Gradle (no wrapper)
+      - name: Install Gradle 8.10.2 (use CLI, not wrapper)
         run: |
           curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o gradle.zip
           unzip -q gradle.zip
           echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
-      # (진단) WEB-INF/lib 폴더에 수동 JAR 있는지 확인
-      - name: Check manual JARs in WEB-INF/lib
+      # --- 핵심: build.gradle은 그대로 두고, CI에서만 WAR 태스크를 덮어씁니다.
+      - name: Build WAR with CI-only overrides (fix duplicate JAR)
         run: |
-          ls -al backend/src/main/webapp/WEB-INF/lib || echo "No manual libs"
+          cat > ci-war-fix.gradle <<'EOF'
+          import org.gradle.api.file.DuplicatesStrategy
+          import org.gradle.api.tasks.bundling.War
+          gradle.taskGraph.whenReady {
+            tasks.withType(War).configureEach {
+              // 같은 파일은 하나만 포함
+              duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+              // 문제의 starter JAR만 classpath에서 제거
+              doFirst {
+                classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
+              }
+            }
+          }
+          EOF
+          gradle -p backend --no-daemon -I ci-war-fix.gradle clean war -x test
 
-      # (진단) spring-cloud-starter-aws 경로 추적
-      - name: Gradle dependencyInsight (aws)
-        run: |
-          gradle -p backend dependencyInsight \
-            --configuration runtimeClasspath \
-            --dependency spring-cloud-starter-aws | tee aws-deps.txt
-
-      # (진단) 런타임 클래스패스 전체 그래프 출력
-      - name: Gradle runtime classpath graph
-        run: |
-          gradle -p backend dependencies \
-            --configuration runtimeClasspath | tee runtime-deps.txt
-
-      # (선택) 진단 결과 아티팩트로 업로드
-      - name: Upload dependency reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-dep-reports
-          path: |
-            aws-deps.txt
-            runtime-deps.txt
-      # backend 프로젝트에서 WAR 빌드
-      - name: Build WAR with Gradle
-        run: |
-          gradle -p backend --no-daemon clean war -x test
-
-      # 빌드 아티팩트 존재 확인
       - name: Assert WAR exists
         working-directory: backend
         run: ls -al build/libs
 
-      # Docker 이미지 빌드 (context=backend, Dockerfile도 backend/에 있어야 함)
-      - name: Build Docker Image
+      - name: Docker build (context=backend)
         working-directory: backend
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
@@ -103,7 +86,7 @@ jobs:
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}
           docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}
 
-      - name: Print pushed image URIs
+      - name: Print image URIs
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |

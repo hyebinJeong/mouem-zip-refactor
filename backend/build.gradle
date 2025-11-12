@@ -124,11 +124,15 @@ test {
   useJUnitPlatform()
 }
 
-// WAR 만들 때, starter JAR 하나만 빼고 싸기 + 중복은 제외
-tasks.withType(War).configureEach {
-  // 1) 중복 전략: 중복 파일이 있으면 하나만 포함
-  duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+// --- WAR 중복 JAR 안전장치 (한 번만 선언) ---
+import org.gradle.api.file.DuplicatesStrategy
 
-  // 2) 문제의 starter JAR 파일만 복사 대상에서 제외
+tasks.withType(War).configureEach {
+  // 중복 파일이 있으면 하나만 포함
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+  // 문제의 starter JAR만 WAR classpath에서 제외
   classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
 }
+
+

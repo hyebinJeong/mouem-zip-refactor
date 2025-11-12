@@ -49,6 +49,32 @@ jobs:
           unzip -q gradle.zip
           echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
+      # (진단) WEB-INF/lib 폴더에 수동 JAR 있는지 확인
+      - name: Check manual JARs in WEB-INF/lib
+        run: |
+          ls -al backend/src/main/webapp/WEB-INF/lib || echo "No manual libs"
+
+      # (진단) spring-cloud-starter-aws 경로 추적
+      - name: Gradle dependencyInsight (aws)
+        run: |
+          gradle -p backend dependencyInsight \
+            --configuration runtimeClasspath \
+            --dependency spring-cloud-starter-aws | tee aws-deps.txt
+
+      # (진단) 런타임 클래스패스 전체 그래프 출력
+      - name: Gradle runtime classpath graph
+        run: |
+          gradle -p backend dependencies \
+            --configuration runtimeClasspath | tee runtime-deps.txt
+
+      # (선택) 진단 결과 아티팩트로 업로드
+      - name: Upload dependency reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-dep-reports
+          path: |
+            aws-deps.txt
+            runtime-deps.txt
       # backend 프로젝트에서 WAR 빌드
       - name: Build WAR with Gradle
         run: |

@@ -1,26 +1,14 @@
+name: Build WAR (Gradle) & Push Docker to ECR
 
-- name: Build WAR with CI-only overrides (fix duplicate JAR)
-  working-directory: backend             # backend로 작업 디렉터리 고정
-  run: |
-    # backend/ci-war-fix.gradle 생성 (경로 중요)
-    cat > ci-war-fix.gradle <<'EOF'
-    import org.gradle.api.file.DuplicatesStrategy
-    import org.gradle.api.tasks.bundling.War
+on:
+  push:
+    branches:
+      - feat/refactor-hyebin
+  workflow_dispatch:
 
-    // CI에서만 WAR 태스크를 덮어써 중복 JAR 우회
-    gradle.taskGraph.whenReady {
-      tasks.withType(War).configureEach {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        doFirst {
-          // 문제 starter JAR만 classpath에서 제외
-          classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
-        }
-      }
-    }
-    EOF
-
-    # backend 디렉터리 안에서 실행하므로 -I 경로가 정확히 일치
-    gradle --no-daemon -I ci-war-fix.gradle clean war -x test
+permissions:
+  id-token: write
+  contents: read
 
 env:
   AWS_REGION: ap-northeast-2
@@ -31,10 +19,43 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Temurin JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Gradle 8.10.2 (CLI)
+        run: |
+          curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o gradle.zip
+          unzip -q gradle.zip
+          echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
+
+      # --- CI에서만 WAR 태스크를 덮어써서 중복 JAR 우회 ---
+      - name: Build WAR with CI-only overrides (fix duplicate JAR)
+        working-directory: backend
+        run: |
+          cat > ci-war-fix.gradle <<'EOF'
+          import org.gradle.api.file.DuplicatesStrategy
+          import org.gradle.api.tasks.bundling.War
+          gradle.taskGraph.whenReady {
+            tasks.withType(War).configureEach {
+              duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+              doFirst {
+                classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
+              }
+            }
+          }
+          EOF
+          gradle --no-daemon -I ci-war-fix.gradle clean war -x test
+
+      - name: Assert WAR exists
+        working-directory: backend
+        run: ls -al build/libs
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -45,41 +66,6 @@ jobs:
       - name: Login to Amazon ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Setup Temurin JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Install Gradle 8.10.2 (use CLI, not wrapper)
-        run: |
-          curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o gradle.zip
-          unzip -q gradle.zip
-          echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
-
-      # --- 핵심: build.gradle은 그대로 두고, CI에서만 WAR 태스크를 덮어씁니다.
-      - name: Build WAR with CI-only overrides (fix duplicate JAR)
-        run: |
-          cat > ci-war-fix.gradle <<'EOF'
-          import org.gradle.api.file.DuplicatesStrategy
-          import org.gradle.api.tasks.bundling.War
-          gradle.taskGraph.whenReady {
-            tasks.withType(War).configureEach {
-              // 같은 파일은 하나만 포함
-              duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-              // 문제의 starter JAR만 classpath에서 제거
-              doFirst {
-                classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
-              }
-            }
-          }
-          EOF
-          gradle -p backend --no-daemon -I ci-war-fix.gradle clean war -x test
-
-      - name: Assert WAR exists
-        working-directory: backend
-        run: ls -al build/libs
 
       - name: Docker build (context=backend)
         working-directory: backend

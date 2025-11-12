@@ -3,7 +3,7 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin
+      - feat/refactor-hyebin   # 필요시 main/develop 추가
   workflow_dispatch:
 
 permissions:
@@ -19,6 +19,7 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,28 +36,44 @@ jobs:
           unzip -q gradle.zip
           echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
-      # --- CI에서만 WAR 태스크를 덮어써서 중복 JAR 우회 ---
-      - name: Build WAR with CI-only overrides (fix duplicate JAR)
+      # --- 1) WAR 빌드 (여기서 중복 JAR 때문에 실패하던 지점) ---
+      - name: Build WAR with Gradle
         working-directory: backend
         run: |
-          cat > ci-war-fix.gradle <<'EOF'
-          import org.gradle.api.file.DuplicatesStrategy
-          import org.gradle.api.tasks.bundling.War
-          gradle.taskGraph.whenReady {
-            tasks.withType(War).configureEach {
-              duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-              doFirst {
-                classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
-              }
-            }
-          }
-          EOF
-          gradle --no-daemon -I ci-war-fix.gradle clean war -x test
+          gradle --no-daemon clean war -x test
+
+      # --- 2) 사후 패치: 완성된 WAR에서 'starter' JAR만 제거 후 재패키징 ---
+      # build.gradle 수정 없이 가장 확실하게 통과됨
+      - name: Strip duplicated starter from WAR (post-process)
+        working-directory: backend
+        shell: bash
+        run: |
+          set -e
+          # 대상 WAR 추출
+          WAR_PATH="$(ls build/libs/*.war | head -n1)"
+          echo "Target WAR: $WAR_PATH"
+
+          # unzip/zip은 runner에 기본 포함되어 있지만, 혹시 모르니 확인
+          command -v unzip >/dev/null 2>&1 || sudo apt-get update && sudo apt-get install -y unzip
+          command -v zip >/dev/null 2>&1 || sudo apt-get update && sudo apt-get install -y zip
+
+          rm -rf tmp_war && mkdir -p tmp_war
+          unzip -q "$WAR_PATH" -d tmp_war
+
+          # ★ 문제의 중복 JAR만 제거
+          rm -f tmp_war/WEB-INF/lib/spring-cloud-starter-aws-2.2.6.RELEASE.jar || true
+
+          # 다시 WAR로 묶기(같은 파일명으로 덮어씀)
+          (cd tmp_war && zip -qr ../app-fixed.war .)
+          mv build/libs/app-fixed.war "$WAR_PATH"
+
+          echo "Repacked WAR: $WAR_PATH"
 
       - name: Assert WAR exists
         working-directory: backend
         run: ls -al build/libs
 
+      # --- ECR 로그인/푸시 ---
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:

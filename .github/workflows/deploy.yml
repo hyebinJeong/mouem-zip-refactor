@@ -1,14 +1,26 @@
-name: Build WAR (Gradle) & Push Docker to ECR
 
-on:
-  push:
-    branches:
-      - feat/refactor-hyebin   # 필요 시 main/develop 추가
-  workflow_dispatch:
+- name: Build WAR with CI-only overrides (fix duplicate JAR)
+  working-directory: backend             # backend로 작업 디렉터리 고정
+  run: |
+    # backend/ci-war-fix.gradle 생성 (경로 중요)
+    cat > ci-war-fix.gradle <<'EOF'
+    import org.gradle.api.file.DuplicatesStrategy
+    import org.gradle.api.tasks.bundling.War
 
-permissions:
-  id-token: write
-  contents: read
+    // CI에서만 WAR 태스크를 덮어써 중복 JAR 우회
+    gradle.taskGraph.whenReady {
+      tasks.withType(War).configureEach {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        doFirst {
+          // 문제 starter JAR만 classpath에서 제외
+          classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
+        }
+      }
+    }
+    EOF
+
+    # backend 디렉터리 안에서 실행하므로 -I 경로가 정확히 일치
+    gradle --no-daemon -I ci-war-fix.gradle clean war -x test
 
 env:
   AWS_REGION: ap-northeast-2

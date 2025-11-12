@@ -3,7 +3,7 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin     # 필요 시 main/develop 추가
+      - feat/refactor-hyebin   # 필요시 main/develop 추가
   workflow_dispatch:
 
 permissions:
@@ -35,33 +35,38 @@ jobs:
           unzip -q gradle.zip
           echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
-      # 1) backend 프로젝트에서 WAR 빌드
-      - name: Build WAR with Gradle
-        working-directory: backend
-        run: |
-          gradle --no-daemon clean war -x test
-
-      # 2) 사후 패치: WAR(zip) 내부에서 중복 JAR만 삭제 (재패키징 불필요)
-      - name: Strip duplicated starter from WAR (post-process)
+      # ---- 핵심: CI 전용 init 스크립트로 war 태스크에 중복전략/필터 주입 ----
+      - name: Create CI init script for WAR
         working-directory: backend
         shell: bash
         run: |
-          set -e
-          WAR_PATH="$(ls build/libs/*.war | head -n1)"
-          echo "Target WAR: $WAR_PATH"
+          cat > ci-war-fix.gradle <<'EOF'
+          import org.gradle.api.file.DuplicatesStrategy
+          import org.gradle.api.tasks.bundling.War
 
-          command -v zip >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y zip)
+          // 모든 프로젝트/태스크가 구성된 뒤에 war 태스크를 안전하게 수정
+          gradle.projectsEvaluated {
+            allprojects {
+              tasks.withType(War).configureEach {
+                // 중복 파일은 하나만 포함
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                // 문제의 starter JAR만 classpath에서 제외 (전이 의존성 모듈은 그대로 포함됨)
+                classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
+              }
+            }
+          }
+          EOF
 
-          # ★ 문제의 중복 JAR만 제거 (버전 변경 시 파일명 업데이트 필요)
-          zip -d "$WAR_PATH" "WEB-INF/lib/spring-cloud-starter-aws-2.2.6.RELEASE.jar" || true
-
-          echo "Patched WAR: $WAR_PATH"
+      - name: Build WAR with Gradle (using CI init script)
+        working-directory: backend
+        run: |
+          gradle --no-daemon -I ci-war-fix.gradle clean war -x test
 
       - name: Assert WAR exists
         working-directory: backend
         run: ls -al build/libs
 
-      # 3) AWS OIDC 자격 구성 + ECR 로그인
+      # ---- AWS / ECR ----
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -72,7 +77,6 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4) Docker 이미지 빌드 (context=backend, Dockerfile도 backend/에 있어야 함)
       - name: Docker build (context=backend)
         working-directory: backend
         env:
@@ -83,7 +87,6 @@ jobs:
             -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
             .
 
-      # 5) ECR 푸시
       - name: Push to ECR
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}

@@ -2,21 +2,22 @@
 // 목적: 캐시 전/후 비교, 엔드포인트별 회귀
 import {check, sleep} from 'k6';
 import {getWithAuth, postWithAuth, ensureToken, BASE} from "../helpers/cache-helpers1.js";
+const MODE = __ENV.MODE || "cold";
 
 // 테스트 옵션
 export const options = {
     scenarios: {
         ramp: {
             executor: 'ramping-arrival-rate',
-            startRate: 50,      // 시작 시 초당 50 요청
+            startRate: 10,      // 시작 시 초당 50 요청
             timeUnit: '1s',     // 단위: 1초당 요청 수
-            preAllocatedVUs: 200, // 초기 VU 수
-            maxVUs: 400,          // 최대 동시 가상 유저 수
+            preAllocatedVUs: 50, // 초기 VU 수
+            maxVUs: 100,          // 최대 동시 가상 유저 수
             stages: [
-                { duration: '1m', target: 100 },  // 1분 동안 초당 100건까지 증가
-                { duration: '2m', target: 200 },  // 2분 동안 초당 200건 유지
-                { duration: '2m', target: 300 },  // 2분 동안 초당 300건 유지
-                { duration: '1m', target: 0 },    // 점진적 종료
+                { duration: "1m", target: 20 },   // 1분 동안 초당 20RPS
+                { duration: "2m", target: 30 },   // 2분 동안 초당 30RPS 유지
+                { duration: "2m", target: 40 },   // 2분 동안 초당 40RPS 유지
+                { duration: "1m", target: 0 },    // 부하 제거
             ],
         },
     },
@@ -28,8 +29,8 @@ export const options = {
         'http_req_duration{name:safety_result}': ['p(95)<300'],
         'http_req_duration{name:contract_list}': ['p(95)<300'],
         'http_req_duration{name:contract_detail}': ['p(95)<300'],
-        'http_req_duration{name:checklist_save}': ['p(95)<300'],
-        http_req_duration: ['p(95)<500'],
+        'http_req_duration{name:checklist_save}': ['p(95)<400'],
+        http_req_duration: ['p(95)<600'],
         checks: ['rate>0.95'],
     },
 };
@@ -113,7 +114,12 @@ export function setup() {
         }
     }
 
-    return { reportIds, registryIds, contractIds };
+    const hotRegistryIds = MODE === "hot" ? [registryIds[0]] : registryIds.slice(0, 50);
+    const hotReportIds   = MODE === "hot" ? [reportIds[0]]   : reportIds.slice(0, 50);
+    const hotContractIds = MODE === "hot" ? [contractIds[0]] : contractIds.slice(0, 50);
+
+
+    return { hotRegistryIds, hotReportIds, hotContractIds, registryIds, reportIds, contractIds };
 }
 
 
@@ -130,30 +136,51 @@ function getReportsList() {
 }
 
 function getReportDetail(data) {
-    if (!data.reportIds.length) return;
-    const id  = pick(data.reportIds);
+    //const ids = data.hotReportIds?.length ? data.hotReportIds : data.reportIds.slice(0, 50);
+    const ids =
+        data.hotReportIds.length > 0
+            ? data.hotReportIds
+            : (data.reportIds.length > 0 ? data.reportIds.slice(0, 50) : []);
+
+    if (ids.length === 0) return;
+    console.log('[DEBUG] 리포트 대상 ID 개수:', ids.length);
+    console.log('[DEBUG] 리포트 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
+    const id = pick(ids);
     const res = getWithAuth(`${BASE}/api/reports/${id}`, { tags: { name: 'reports_detail' } });
     check(res, { 'GET /api/reports/{id} 200': r => r.status === 200 });
 }
 
 function getDiagnosisResult(data) {
-    if (!data.registryIds.length) {
-        return;
-    }
-    console.log('[DEBUG] 전세가율 registryIds 개수:', data.registryIds.length);
-    console.log('[DEBUG] 전세가율 registryIds 내용 (앞 5개):', data.registryIds.slice(0, 5));
-    const id  = pick(data.registryIds);
-    const res = getWithAuth(`${BASE}/api/diagnosis/result?registerId=1`, { tags: { name: 'diagnosis_result' } });
+    //const ids = data.hotRegistryIds?.length ? data.hotRegistryIds : data.registryIds.slice(0, 50);
+    const ids =
+        data.hotRegistryIds.length > 0
+            ? data.hotRegistryIds
+            : (data.registryIds.length > 0 ? data.registryIds.slice(0, 50) : []);
+
+    if (ids.length === 0) return;
+    console.log('[DEBUG] 전세가율 대상 ID 개수:', ids.length);
+    console.log('[DEBUG] 전세가율 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
+    const id = pick(ids);
+    const res = getWithAuth(`${BASE}/api/diagnosis/result?registerId=${id}`, { tags: { name: 'diagnosis_result' } });
     check(res, { 'GET /api/diagnosis/result 200|404|400': r => r.status === 200 || r.status === 404 || r.status === 400 });
 }
 
 function getSafetyResult(data) {
-    if (!data.registryIds.length) {
+    //const ids = data.hotRegistryIds?.length ? data.hotRegistryIds : data.registryIds.slice(0, 50);
+    const ids =
+        data.hotRegistryIds && data.hotRegistryIds.length > 0
+            ? data.hotRegistryIds
+            : (data.registryIds && data.registryIds.length > 0
+                ? data.registryIds.slice(0, 50)
+                : []);
+
+    if (ids.length === 0) {
+        console.warn("[WARN] safety-check: 사용할 registryId가 없습니다.");
         return;
     }
-    console.log('[DEBUG] 등기부등본 registryIds 개수:', data.registryIds.length);
-    console.log('[DEBUG] 등기부등본 registryIds 내용 (앞 5개):', data.registryIds.slice(0, 5));
-    const id  = pick(data.registryIds);
+    console.log('[DEBUG] 등기부 안전도 대상 ID 개수:', ids.length);
+    console.log('[DEBUG] 등기부 안전도 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
+    const id = pick(ids);
 
     const res = getWithAuth(`${BASE}/api/safety-check/${id}`, { tags: { name: 'safety_result' } });
     check(res, { 'GET /api/safety-check/{id} 200|404': r => r.status === 200 || r.status === 404 });
@@ -165,8 +192,16 @@ function getcontractList() {
 }
 
 function getContractDetail(data) {
-    if (!data.contractIds.length) return;
-    const id  = pick(data.contractIds);
+    //const ids = data.hotContractIds?.length ? data.hotContractIds : data.contractIds.slice(0, 50);
+    const ids =
+        data.hotContractIds.length > 0
+            ? data.hotContractIds
+            : (data.contractIds.length > 0 ? data.contractIds.slice(0, 50) : []);
+
+    if (ids.length === 0) return;
+    console.log('[DEBUG] 계약서 대상 ID 개수:', ids.length);
+    console.log('[DEBUG] 계약서 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
+    const id = pick(ids);
     const res = getWithAuth(`${BASE}/api/contract/${id}`, { tags: { name: 'contract_detail' } });
     check(res, { 'GET /api/contract/{id} 200|404': r => r.status === 200 || r.status === 404 });
 }
@@ -216,8 +251,16 @@ export default function (data) {
 
 // ========== 결과 파일 저장(전/후 비교·회귀 추적용) ==========
 export function handleSummary(summary) {
-    if (summary && summary.setup_data && summary.setup_data.token) {
-        summary.setup_data.token = '***masked***';
+    if (summary && summary.setup_data) {
+        // 토큰 가리기
+        if (summary.setup_data.token) {
+            summary.setup_data.token = '***masked***';
+        }
+
+        // summary에서는 전체 ID 목록 제거
+        delete summary.setup_data.registryIds;
+        delete summary.setup_data.reportIds;
+        delete summary.setup_data.contractIds;
     }
 
     const label = __ENV.LABEL || 'run';

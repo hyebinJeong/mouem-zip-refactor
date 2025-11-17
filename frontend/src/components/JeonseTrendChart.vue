@@ -1,15 +1,21 @@
 <!-- src/components/JeonseTrendChart.vue -->
 <template>
-  <div class="wrap">
-    <h2 class="ttl">내 동네 전세가율 변화를 한눈에 쉽게 확인해보세요!</h2>
-
-    <!-- 주소/동 + 아파트 입력 영역 전체를 감싸기 -->
-    <div v-if="!hideAddressSearch">
+  <!-- 🔹 compact 모드일 땐 패딩/폭 줄이기 -->
+  <div :class="['wrap', { compact }]">
+    <!-- 제목 문구 변경 -->
+    <!-- 주소/동 + 아파트 입력 영역 -->
+    <!-- 🔹 compact 모드이거나 hideAddressSearch=true이면 숨김 -->
+    <div v-if="!hideAddressSearch && !compact">
       <!-- 주소/동 선택 -->
       <div class="row">
         <label>주소</label>
         <div class="address">
-          <input class="inp addr-inp" v-model="selectedAddr" placeholder="   도로명/지번" readonly />
+          <input
+              class="inp addr-inp"
+              v-model="selectedAddr"
+              placeholder="   도로명/지번"
+              readonly
+          />
           <button class="btn" @click="openPostcode">주소 검색</button>
         </div>
         <small v-if="!lawd" class="tip">먼저 주소를 선택하세요.</small>
@@ -21,20 +27,16 @@
       <!-- 아파트명 선택(옵션) -->
       <div class="row">
         <label>아파트명 (선택)</label>
-        <input class="inp apt-inp" v-model="aptName" placeholder=" 예: 은마, 래미안…" />
+        <input
+            class="inp apt-inp"
+            v-model="aptName"
+            placeholder=" 예: 은마, 래미안…"
+        />
       </div>
     </div>
 
-    <!-- 조회 / 차트 유형 -->
+    <!-- 🔹 차트 유형 선택 (compact에서도 계속 보이도록) -->
     <div class="row controls">
-      <button
-          class="btn primary"
-          :disabled="loading || !lawd"
-          @click="onQuery"
-      >
-        {{ loading ? '조회 중...' : '최근 전세가율 보기' }}
-      </button>
-
       <div class="chart-type">
         <span class="tip">차트 유형:</span>
         <button
@@ -54,21 +56,34 @@
       </div>
     </div>
 
-    <!-- 에러 / 요약 -->
-    <p v-if="error" class="err">{{ error }}</p>
-    <div v-if="items.length" class="tip">
+    <!-- 로딩 / 에러 / 데이터 없음 상태 -->
+    <!-- 로딩은 모드 상관없이 공통으로 보여주기 -->
+    <p v-if="loading" class="tip">전세가율 데이터를 불러오는 중이에요…</p>
+
+    <!-- 에러는 compact에선 안 보여줘도 됨(필요하면 조건 빼도 됨) -->
+    <p v-else-if="!compact && error" class="err">{{ error }}</p>
+
+    <!-- 데이터 없음: 일반 모드에서만 문구 표시 -->
+    <p
+        v-else-if="!compact && queried && !error && !items.length"
+        class="tip"
+    >
+      데이터가 없습니다.
+    </p>
+
+    <!-- 일반 모드에서만 요약 문구 -->
+    <div v-if="!compact && items.length" class="tip">
       포인트: <b>{{ items.length }}</b>개 /
       평균 전세가율: <b>{{ avgRatio.toFixed(1) }}%</b>
     </div>
-    <p v-else-if="queried && !error" class="tip">데이터가 없습니다.</p>
 
     <!-- 차트 -->
-    <div v-if="items.length" class="chartWrap">
-      <canvas ref="canvasEl" height="360"></canvas>
+    <div v-if="items.length" :class="['chartWrap', { compact }]">
+      <canvas ref="canvasEl"></canvas>
     </div>
 
-    <!-- 표 (선택 확인용) -->
-    <div v-if="items.length" class="overflow">
+    <!-- 표 (compact에서는 숨김) -->
+    <div v-if="!compact && items.length" class="overflow">
       <table class="tbl">
         <thead>
         <tr>
@@ -79,7 +94,9 @@
         <tbody>
         <tr v-for="(r, i) in items" :key="i">
           <td>{{ r.ymd }}</td>
-          <td class="r">{{ r.ratio != null ? r.ratio.toFixed(2) : '-' }}</td>
+          <td class="r">
+            {{ r.ratio != null ? r.ratio.toFixed(2) : '-' }}
+          </td>
         </tr>
         </tbody>
       </table>
@@ -91,24 +108,21 @@
 import { ref, computed, onMounted } from 'vue'
 import { Chart } from 'chart.js/auto'
 
-// ✅ 부모(페이지3)에서 넘겨줄 값들
+// ✅ 부모(페이지3 등)에서 넘겨줄 값들
 const props = defineProps({
-  initialAddr:   { type: String, default: '' },
-  initialBcode:  { type: String, default: '' },
-  initialBname:  { type: String, default: '' },
-  autoFetch:     { type: Boolean, default: false },   // true면 자동 조회
-  hideAddressSearch: { type: Boolean, default: false } // true면 주소/아파트 입력 UI 숨김
+  initialAddr: { type: String, default: '' },
+  initialBcode: { type: String, default: '' },
+  initialBname: { type: String, default: '' },
+  autoFetch: { type: Boolean, default: false }, // true면 자동 조회
+  hideAddressSearch: { type: Boolean, default: false }, // true면 주소/아파트 입력 UI 숨김
+  // 🔹 FinalReport 같은 “내부 삽입용” 모드
+  compact: { type: Boolean, default: false }
 })
 
 // ✅ 백엔드 기본 URL
 const API_BASE = import.meta.env.VITE_BACKEND ?? 'http://localhost:8080'
 
 // 상태
-// const selectedAddr = ref('')
-// const bname = ref('') // 동 이름
-// const bcode = ref('') // 법정동 코드(10자리)
-// const aptName = ref('') // 아파트명(필터용)
-
 const selectedAddr = ref(props.initialAddr || '')
 const bname = ref(props.initialBname || '')
 const bcode = ref(props.initialBcode || '')
@@ -121,9 +135,7 @@ const error = ref('')
 const queried = ref(false)
 
 // 법정동 코드 앞 5자리 -> LAWD_CD
-const lawd = computed(() =>
-    bcode.value ? bcode.value.slice(0, 5) : ''
-)
+const lawd = computed(() => (bcode.value ? bcode.value.slice(0, 5) : ''))
 
 // 평균 전세가율
 const avgRatio = computed(() => {
@@ -161,7 +173,7 @@ function openPostcode() {
   }).open()
 }
 
-// 조회 버튼 클릭
+// 조회 (autoFetch용 + 주소 변경 후 수동으로도 호출 가능)
 async function onQuery() {
   if (!lawd.value) return
   error.value = ''
@@ -259,16 +271,17 @@ function destroyChart() {
   }
 }
 
-// 카카오 우편번호 스크립트 로드
+// 카카오 우편번호 스크립트 로드 + autoFetch
 onMounted(() => {
-  // 1) 주소 검색 UI를 사용하는 경우에만 카카오 우편번호 스크립트 로드
-  if (!props.hideAddressSearch && !window.daum?.Postcode) {
+  // 주소 검색 UI를 사용하는 경우에만 카카오 우편번호 스크립트 로드
+  if (!props.hideAddressSearch && !props.compact && !window.daum?.Postcode) {
     const s = document.createElement('script')
-    s.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'
+    s.src =
+        'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'
     document.body.appendChild(s)
   }
 
-  // 2) 페이지3처럼 initial 값이 들어오고 autoFetch=true이면, 자동으로 조회 실행
+  // initial 값 + autoFetch=true이면 자동 조회
   if (props.autoFetch && lawd.value) {
     onQuery()
   }
@@ -278,15 +291,29 @@ onMounted(() => {
 <style scoped>
 .wrap {
   max-width: 900px;
-  margin: 25px auto;
-  padding: 40px;
+  margin: 0px auto;
+  padding: 0px 20px;
   text-align: center;
+}
+
+/* 🔹 FinalReport에 끼워 넣을 때 더 컴팩트하게 */
+.wrap.compact {
+  max-width: 100%;
+  margin: 8px 0;
+  padding: 0;
+  text-align: left;
 }
 
 .ttl {
   font-size: 24px;
   font-weight: 800;
-  margin-bottom: 45px;
+  margin-bottom: 40px;
+}
+
+/* compact에서는 제목/여백만 살짝 줄이기 */
+.wrap.compact .ttl {
+  font-size: 16px;
+  margin-bottom: 2px;
 }
 
 /* 한 줄(주소, 아파트명, 버튼들) 공통 */
@@ -333,15 +360,6 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-/* 주소 검색 버튼 */
-.address .btn {
-  height: 55px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* 공통 버튼 */
 .btn {
   padding: 10px 14px;
@@ -356,18 +374,6 @@ onMounted(() => {
   background: rgba(100, 116, 139, 0.82);
 }
 
-/* 조회 버튼 */
-.btn.primary {
-  background: #1a80e5;
-  margin-top: 8px;
-  width: 100%;
-  max-width: 600px;
-}
-
-.btn.primary:hover {
-  background: rgba(26, 128, 229, 0.88);
-}
-
 /* 안내 텍스트 / 에러 */
 .tip {
   color: #6b7280;
@@ -379,7 +385,7 @@ onMounted(() => {
   font-size: 14px;
 }
 
-/* 조회 버튼 + 차트 유형 */
+/* 차트 유형 토글 컨테이너 */
 .controls {
   display: flex;
   flex-direction: column;
@@ -418,6 +424,13 @@ onMounted(() => {
   max-width: 900px;
   height: 420px;
   margin: 16px auto;
+}
+
+/* 🔹 FinalReport에 들어갈 때는 높이/여백 줄이기 */
+.chartWrap.compact {
+  max-width: 100%;
+  height: 240px;
+  margin: 8px 0 0 0;
 }
 
 /* 표 */

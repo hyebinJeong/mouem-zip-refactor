@@ -140,6 +140,9 @@ const registerIdRef = ref(null);
 
 const isDragOver = ref(false);
 
+const bcode = ref('');   // 법정동 코드 10자리
+const bname = ref('');   // 동 이름
+
 const onDragOver = (e) => {
   isDragOver.value = true;
 };
@@ -192,6 +195,8 @@ const openPostcode = () => {
       } else {
         selectedAddress.value = '';
       }
+      bcode.value = data.bcode || '';  // 예: "4113510900"
+      bname.value = data.bname || '';  // 예: "갈매동"
     },
   }).open();
 };
@@ -257,6 +262,7 @@ const submitForm = async () => {
     if (!auth.token) {
       await auth.tryRefresh();
     }
+
     const response = await fetch('http://localhost:8080/api/safety-check', {
       method: 'POST',
       headers: {
@@ -265,12 +271,36 @@ const submitForm = async () => {
       body: formData,
     });
 
+    // ✅ 항상 일단 text로 먼저 받기
+    const text = await response.text();
+
+    // 상태 코드가 200이 아니면 그대로 에러 처리
     if (!response.ok) {
-      const err = await response.text();
-      throw new Error(err);
+      console.error('서버 에러 응답:', text);
+      throw new Error(text || '등기부등본 분석 서버 오류');
     }
 
-    const data = await response.json();
+    let data;
+    if (text.trim().startsWith('<')) {
+      console.log('XML 형식 응답 감지:', text);
+
+      const areaMatch = text.match(/<area>(.*?)<\/area>/);
+      const regMatch = text.match(/<registerId>(.*?)<\/registerId>/);
+
+      data = {
+        area: areaMatch ? parseFloat(areaMatch[1]) : null,
+        registerId: regMatch ? regMatch[1] : null,
+      };
+    } else {
+      // ✅ 2) 평소처럼 JSON일 때 처리
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('서버가 보낸 원본 응답(JSON 아님):', text);
+        throw new Error('서버 응답이 JSON 형식이 아니라서 분석 결과를 읽을 수 없어요.');
+      }
+    }
+
     registerIdRef.value = data.registerId;
     const area = data.area;
     if (!area) {
@@ -313,7 +343,15 @@ const proceedToLeaseAnalysis = async (registerId) => {
     }
 
     // 3단계: 모든 분석 완료 후 결과 페이지로 이동
-    router.push(`/safety-check/${registerId}`);
+    router.push({
+      path: `/safety-check/${registerId}`,
+      query: {
+        addr: selectedAddress.value, // 전체 주소
+        bcode: bcode.value,          // 법정동 코드
+        bname: bname.value,          // 동 이름
+        // apt: ''  // 아파트명 따로 받으면 여기 추가
+      }
+    });
   } catch (e) {
     alert('전세가율 분석 실패: ' + e.message);
   }

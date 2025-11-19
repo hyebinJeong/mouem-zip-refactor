@@ -30,7 +30,7 @@ tasks.withType(JavaCompile) {
 dependencies {
   
   // AWS SDK v2 - S3 전용
-  implementation platform("software.amazon.awssdk:bom:2.25.79")
+  implementation platform("software.amazon.awssdk:bom:2.27.21")
   implementation "software.amazon.awssdk:s3"
 
   // Tabula

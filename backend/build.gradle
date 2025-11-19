@@ -28,12 +28,10 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-  // AWS S3
-  implementation('org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE') {
-    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-    exclude group: 'ch.qos.logback', module: 'logback-classic'
-    exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-  }
+  
+  // AWS SDK v2 - S3 전용
+  implementation platform("software.amazon.awssdk:bom:2.25.79")
+  implementation "software.amazon.awssdk:s3"
 
   // Tabula
   implementation 'technology.tabula:tabula:1.0.5'
@@ -114,7 +112,7 @@ dependencies {
 
   // Test
   testImplementation "org.springframework:spring-test:${springVersion}"
-  testCompileOnly"org.projectlombok:lombok:${lombokVersion}"
+  testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
   testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
   testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
@@ -131,8 +129,4 @@ tasks.withType(War).configureEach {
   // 중복 파일이 있으면 하나만 포함
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-  // 문제의 starter JAR만 WAR classpath에서 제외
-  classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
 }
-
-

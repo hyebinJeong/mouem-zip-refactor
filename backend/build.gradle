@@ -29,9 +29,8 @@ tasks.withType(JavaCompile) {
 
 dependencies {
   
-  // AWS SDK v2 - S3 전용
-  implementation platform("software.amazon.awssdk:bom:2.27.21")
-  implementation "software.amazon.awssdk:s3"
+  // AWS SDK v1 - S3 (현재 AwsS3Config / AwsS3Service 코드에 맞춤)
+  implementation "com.amazonaws:aws-java-sdk-s3:1.12.772"
 
   // Tabula
   implementation 'technology.tabula:tabula:1.0.5'

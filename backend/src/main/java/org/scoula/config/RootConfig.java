@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 
 @Configuration
-@PropertySource({"classpath:/application.properties"})
+@PropertySource({"classpath:/application-local.properties"})
 @MapperScan(basePackages = {
         "org.scoula.register.mapper",
         "org.scoula.term.mapper",

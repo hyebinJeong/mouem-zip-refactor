@@ -43,6 +43,7 @@ bin/
 .DS_Store
 
 application.properties
+applicaion-local.properties
 
 # Vite build output
 src/main/webapp/resources/

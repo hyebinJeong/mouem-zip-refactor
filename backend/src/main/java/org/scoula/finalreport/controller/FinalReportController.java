@@ -70,6 +70,7 @@ public class FinalReportController {
             value = "Get Final Report List by userId",
             notes = "Retrieves a list of final reports created by the given userId."
     )
+
     @GetMapping("/list")
     public ResponseEntity<List<FinalReportSummaryDTO>> getReportList(@RequestParam Long userId) {
         return ResponseEntity.ok(finalReportService.getReportListByUserId(userId));

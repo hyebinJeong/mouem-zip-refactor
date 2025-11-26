@@ -9,10 +9,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -20,7 +17,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 
 @Configuration
-@PropertySource({"classpath:/application-local.properties"})
+@PropertySources({
+        // 1) 배포/공통 설정 (Git에 올라가는 놈)
+        @PropertySource("classpath:/application.properties"),
+        // 2) 로컬 개발자마다 다른 설정 (선택적, 없어도 됨)
+        @PropertySource(
+                value = "classpath:/application-local.properties",
+                ignoreResourceNotFound = true   // 없으면 무시 (지금 Docker에서 필요한 부분)
+        )
+})
 @MapperScan(basePackages = {
         "org.scoula.register.mapper",
         "org.scoula.term.mapper",

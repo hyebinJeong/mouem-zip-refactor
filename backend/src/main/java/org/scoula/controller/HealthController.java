@@ -1,14 +1,14 @@
-package org.scoula.health;
+package org.scoula.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController  // REST 응답(문자/JSON)을 바로 반환하는 컨트롤러
+@RestController
 public class HealthController {
 
-    // GET /api/ping 으로 매핑
+    // 헬스체크 엔드포인트: http://서버:8080/api/ping
     @GetMapping("/api/ping")
     public String ping() {
-        return "OK";   // curl로 호출하면 "OK" 문자열이 그대로 응답으로 나감
+        return "OK";
     }
 }

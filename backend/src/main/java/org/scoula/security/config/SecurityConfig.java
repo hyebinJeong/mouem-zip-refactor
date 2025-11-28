@@ -100,6 +100,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()//경로별접근권한설정
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
+                .antMatchers("/api/auth/**").permitAll() // 로그인/회원가입 등 인증 전에 열어야 하는 엔드포인트
                 .antMatchers(HttpMethod.POST, "/api/oauth/**").permitAll()    // 카카오 로그인 api는 허용
                 .antMatchers("/", "/index.html", "/oauth/callback/kakao").permitAll()
                 .antMatchers("/api/check-access/admin").hasRole("ADMIN")      // 관리자 접근 체크

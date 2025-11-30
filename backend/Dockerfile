@@ -1,14 +1,12 @@
 FROM tomcat:9.0-jdk17-temurin
 
-# 기본 웹앱 제거(선택)
+# 기본 ROOT 앱 제거
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# CI에서 만든 WAR 복사 (build context = backend)
+# backend/build/libs 안에 있는 war를 ROOT로 배포
+# (build context = backend 이기 때문에 이 경로 기준)
 COPY build/libs/*.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
-CMD ["catalina.sh", "run"]
 
-# 헬스체크는 /api/ping 준비 후 활성화 권장
-# HEALTHCHECK --interval=30s --timeout=5s --retries=5 \
-#   CMD curl -fs http://localhost:8080/api/ping || exit 1
+CMD ["catalina.sh", "run"]

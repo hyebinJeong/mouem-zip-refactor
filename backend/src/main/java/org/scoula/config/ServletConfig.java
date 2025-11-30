@@ -44,6 +44,16 @@ public class ServletConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/v2/api-docs")
                 .addResourceLocations("classpath:/META-INF/resources/");
     }
+    // 배포 CORS처리를 위한 코드 추가
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")   // 우리 API 경로 패턴
+                .allowedOrigins("*")     // 개발 중이라면 전체 허용
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(false) // '*' 쓸 때는 false 유지
+                .maxAge(3600);
+    }
 
     @Bean
     public MultipartResolver multipartResolver() {

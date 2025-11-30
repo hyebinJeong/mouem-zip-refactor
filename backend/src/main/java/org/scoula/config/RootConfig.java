@@ -58,6 +58,12 @@ public class RootConfig {
         config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
+
+        //  핵심: DB가 지금 안 떠 있어도 애플리케이션은 먼저 올라가게 함
+        //  - 기본값: DB 연결 안 되면 풀 초기화 시 예외 터뜨리고 컨텍스트 죽임
+        //  - -1로 설정: 초기 연결 실패해도 예외 던지지 않고, 나중에 getConnection() 할 때 에러 남
+        config.setInitializationFailTimeout(-1L);
+
         HikariDataSource dataSource = new HikariDataSource(config);
         return dataSource;
     }

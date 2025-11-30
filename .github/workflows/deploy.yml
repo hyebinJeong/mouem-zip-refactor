@@ -66,6 +66,15 @@ jobs:
         working-directory: backend
         run: ls -al build/libs
 
+      - name: Inspect WAR contents (debug)
+        working-directory: backend
+        run: |
+          echo "======= WAR 파일 목록 ======="
+          ls -al build/libs
+          echo "======= resources/index.html 검색 ======="
+          jar tf build/libs/*.war | grep "resources/index.html" || echo "NOT FOUND"
+
+
       # ---- AWS / ECR ----
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4

@@ -35,6 +35,18 @@ jobs:
           unzip -q gradle.zip
           echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
+            # ---- 프론트엔드 빌드 추가 ----
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend deps and build
+        working-directory: frontend 
+        run: |
+          npm ci
+          npm run build
+          
       # ---- 핵심: CI 전용 init 스크립트로 war 태스크에 중복전략/필터 주입 ----
       - name: Create CI init script for WAR
         working-directory: backend

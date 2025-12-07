@@ -3,7 +3,7 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin   # 필요시 main/develop 추가
+      - feat/refactor-hyebin   # 나중에 main/develop 추가하면 여기만 수정
   workflow_dispatch:
 
 permissions:
@@ -19,35 +19,39 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
+      # 1) 코드 체크아웃
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2) JDK 17 설치
       - name: Setup Temurin JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
+      # 3) Gradle 8.10.2 CLI 설치
       - name: Install Gradle 8.10.2 (CLI)
         run: |
           curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o gradle.zip
           unzip -q gradle.zip
           echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
-            # ---- 프론트엔드 빌드 추가 ----
+      # 4) 프론트엔드 빌드
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Install frontend deps and build
-        working-directory: frontend 
+        working-directory: frontend
         run: |
           npm ci
           npm run build
-          
-      # ---- 핵심: CI 전용 init 스크립트로 war 태스크에 중복전략/필터 주입 ----
+
+      # 5) WAR 빌드시 중복 JAR 정리용 init 스크립트 생성
       - name: Create CI init script for WAR
         working-directory: backend
         shell: bash
@@ -56,19 +60,17 @@ jobs:
           import org.gradle.api.file.DuplicatesStrategy
           import org.gradle.api.tasks.bundling.War
 
-          // 모든 프로젝트/태스크가 구성된 뒤에 war 태스크를 안전하게 수정
           gradle.projectsEvaluated {
-            allprojects {
-              tasks.withType(War).configureEach {
-                // 중복 파일은 하나만 포함
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                // 문제의 starter JAR만 classpath에서 제외 (전이 의존성 모듈은 그대로 포함됨)
-                classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
+              allprojects {
+                  tasks.withType(War).configureEach {
+                      duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                      classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
+                  }
               }
-            }
           }
           EOF
 
+      # 6) 백엔드 WAR 빌드
       - name: Build WAR with Gradle (using CI init script)
         working-directory: backend
         run: |
@@ -86,18 +88,19 @@ jobs:
           echo "======= resources/index.html 검색 ======="
           jar tf build/libs/*.war | grep "resources/index.html" || echo "NOT FOUND"
 
-
-      # ---- AWS / ECR ----
+      # 7) AWS 인증 (OIDC + AssumeRole)
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # 8) ECR 로그인
       - name: Login to Amazon ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # 9) 도커 이미지 빌드 (context = backend 디렉토리)
       - name: Docker build (context=backend)
         working-directory: backend
         env:
@@ -108,6 +111,7 @@ jobs:
             -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
             .
 
+      # 10) 도커 이미지 ECR에 push
       - name: Push to ECR
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
@@ -122,12 +126,14 @@ jobs:
           echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}"
           echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}"
 
+      # 11) EC2로 SSH 접속해서 배포
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}      # 예: 13.124.xxx.xxx
           username: ${{ secrets.EC2_USER }}  # 예: ubuntu
           key: ${{ secrets.EC2_KEY }}        # pem 내용 전체
+          port: 22
           script: |
             set -e
 
@@ -151,4 +157,3 @@ jobs:
             docker run -d --name homebuddy-app -p 8080:8080 \
               --env-file /home/ubuntu/homebuddy.env \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-              

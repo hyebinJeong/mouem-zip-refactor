@@ -151,3 +151,4 @@ jobs:
             docker run -d --name homebuddy-app -p 8080:8080 \
               --env-file /home/ubuntu/homebuddy.env \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              

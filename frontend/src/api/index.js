@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import router from '@/router';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: '', // 배포, 로컬 환경에서 잘 돌아가도록 수정
   withCredentials: true, // 쿠키 포함 필수
 });
 

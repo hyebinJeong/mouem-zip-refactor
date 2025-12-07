@@ -121,3 +121,33 @@ jobs:
         run: |
           echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}"
           echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}      # 예: 13.124.xxx.xxx
+          username: ${{ secrets.EC2_USER }}  # 예: ubuntu
+          key: ${{ secrets.EC2_KEY }}        # pem 내용 전체
+          script: |
+            set -e
+
+            AWS_REGION="ap-northeast-2"
+            ECR_REGISTRY="${{ steps.ecr.outputs.registry }}"
+            ECR_REPOSITORY="${{ env.ECR_REPOSITORY }}"
+            IMAGE_TAG="${{ env.IMAGE_TAG_LATEST }}"
+
+            echo "[Deploy] ECR 로그인"
+            aws ecr get-login-password --region $AWS_REGION | \
+              docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            echo "[Deploy] 기존 컨테이너 정지/삭제"
+            docker stop homebuddy-app || true
+            docker rm homebuddy-app || true
+
+            echo "[Deploy] 최신 이미지 pull"
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+            echo "[Deploy] 새 컨테이너 실행"
+            docker run -d --name homebuddy-app -p 8080:8080 \
+              --env-file /home/ubuntu/homebuddy.env \
+              $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

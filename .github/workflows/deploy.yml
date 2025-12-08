@@ -3,7 +3,7 @@ name: Build WAR (Gradle) & Push Docker to ECR
 on:
   push:
     branches:
-      - feat/refactor-hyebin   # 나중에 main/develop 추가하면 여기만 수정
+      - feat/refactor-hyebin
   workflow_dispatch:
 
 permissions:
@@ -15,145 +15,74 @@ env:
   ECR_REPOSITORY: homebuddy
   IMAGE_TAG_LATEST: latest
   IMAGE_TAG_SHA: sha-${{ github.sha }}
- 
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) 코드 체크아웃
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2) JDK 17 설치
-      - name: Setup Temurin JDK 17
-        uses: actions/setup-java@v4
+      # === Backend Build ===
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # 3) Gradle 8.10.2 CLI 설치
-      - name: Install Gradle 8.10.2 (CLI)
+      - name: Install Gradle
         run: |
           curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o gradle.zip
           unzip -q gradle.zip
           echo "$PWD/gradle-8.10.2/bin" >> $GITHUB_PATH
 
-      # 4) 프론트엔드 빌드
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # === Frontend Build ===
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install frontend deps and build
+      - name: Build Frontend
         working-directory: frontend
         run: |
           npm ci
           npm run build
 
-      # 5) WAR 빌드시 중복 JAR 정리용 init 스크립트 생성
-      - name: Create CI init script for WAR
-        working-directory: backend
-        shell: bash
-        run: |
-          cat > ci-war-fix.gradle <<'EOF'
-          import org.gradle.api.file.DuplicatesStrategy
-          import org.gradle.api.tasks.bundling.War
-
-          gradle.projectsEvaluated {
-              allprojects {
-                  tasks.withType(War).configureEach {
-                      duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                      classpath = classpath.filter { it.name != 'spring-cloud-starter-aws-2.2.6.RELEASE.jar' }
-                  }
-              }
-          }
-          EOF
-
-      # 6) 백엔드 WAR 빌드
-      - name: Build WAR with Gradle (using CI init script)
+      # === WAR Build ===
+      - name: Build WAR
         working-directory: backend
         run: |
-          gradle --no-daemon -I ci-war-fix.gradle clean war -x test
+          gradle clean war -x test --no-daemon
 
-      - name: Assert WAR exists
-        working-directory: backend
-        run: ls -al build/libs
-
-      - name: Inspect WAR contents (debug)
-        working-directory: backend
-        run: |
-          echo "======= WAR 파일 목록 ======="
-          ls -al build/libs
-          echo "======= resources/index.html 검색 ======="
-          jar tf build/libs/*.war | grep "resources/index.html" || echo "NOT FOUND"
-
-      # 7) AWS 인증 (OIDC + AssumeRole)
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+      # === AWS Auth ===
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 8) ECR 로그인
-      - name: Login to Amazon ECR
-        id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: login-ecr
 
-      # 9) 도커 이미지 빌드 (context = backend 디렉토리)
-      - name: Docker build (context=backend)
+      # === Docker Build & Push ===
+      - name: Docker Build & Push
         working-directory: backend
         env:
-          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker build --progress=plain \
-            -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }} \
-            -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }} \
-            .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      # 10) 도커 이미지 ECR에 push
-      - name: Push to ECR
-        env:
-          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
-        run: |
-          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}
-          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}
-
-      - name: Print image URIs
-        env:
-          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
-        run: |
-          echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_SHA }}"
-          echo "$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG_LATEST }}"
-
-      # 11) EC2로 SSH 접속해서 배포
+      # === Deploy ===
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}      # 예: 13.124.xxx.xxx
-          username: ${{ secrets.EC2_USER }}  # 예: ubuntu
-          key: ${{ secrets.EC2_KEY }}        # pem 내용 전체
-          port: 22
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
           script: |
-            set -e
-
-            AWS_REGION="ap-northeast-2"
-            ECR_REGISTRY="${{ steps.ecr.outputs.registry }}"
-            ECR_REPOSITORY="${{ env.ECR_REPOSITORY }}"
-            IMAGE_TAG="${{ env.IMAGE_TAG_LATEST }}"
-
-            echo "[Deploy] ECR 로그인"
-            aws ecr get-login-password --region $AWS_REGION | \
-              docker login --username AWS --password-stdin $ECR_REGISTRY
-
-            echo "[Deploy] 기존 컨테이너 정지/삭제"
             docker stop homebuddy-app || true
             docker rm homebuddy-app || true
 
-            echo "[Deploy] 최신 이미지 pull"
-            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            docker pull 875636132220.dkr.ecr.ap-northeast-2.amazonaws.com/homebuddy:latest
 
-            echo "[Deploy] 새 컨테이너 실행"
             docker run -d --name homebuddy-app -p 8080:8080 \
               --env-file /home/ubuntu/homebuddy.env \
-              $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              875636132220.dkr.ecr.ap-northeast-2.amazonaws.com/homebuddy:latest

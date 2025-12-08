@@ -43,4 +43,6 @@ public class FinalReportDTO {
 
     @ApiModelProperty(value = "Checklist final grade", example = "안전")
     private String checklistRating;
+
+    // auto deploy test
 }

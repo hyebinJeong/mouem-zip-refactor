@@ -15,7 +15,7 @@ env:
   ECR_REPOSITORY: homebuddy
   IMAGE_TAG_LATEST: latest
   IMAGE_TAG_SHA: sha-${{ github.sha }}
-
+ 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest

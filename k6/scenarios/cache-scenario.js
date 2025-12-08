@@ -77,9 +77,9 @@ export function setup() {
 
     // 1) 리포트 리스트
     const rReports = getWithAuth(`${BASE}/api/reports/list?userId=${USER_ID}`, { tags: { name: 'reports_list' } });
-    console.log('[DEBUG] reports_list 응답 코드:', rReports.status);
-    console.log('[DEBUG] reports_list 응답 헤더:', rReports.headers['Content-Type']);
-    console.log('[DEBUG] reports_list 응답 바디 (앞 200자):', String(rReports.body).slice(0, 200));
+    //console.log('[DEBUG] reports_list 응답 코드:', rReports.status);
+    //console.log('[DEBUG] reports_list 응답 헤더:', rReports.headers['Content-Type']);
+    //console.log('[DEBUG] reports_list 응답 바디 (앞 200자):', String(rReports.body).slice(0, 200));
     if (rReports.headers['Content-Type']?.includes('application/json') && rReports.status === 200) {
         try {
             const arr = JSON.parse(rReports.body);
@@ -91,7 +91,7 @@ export function setup() {
 
     //  2) 내 등기부등본 분석 목록
     const rRegs = getWithAuth(`${BASE}/api/registry/user/${USER_ID}`);
-    console.log('[DEBUG] registry 응답:', rRegs.status, rRegs.body);
+    //console.log('[DEBUG] registry 응답:', rRegs.status, rRegs.body);
     if (rRegs.headers['Content-Type']?.includes('application/json') && rRegs.status === 200) {
         try {
             const arr   = JSON.parse(rRegs.body);
@@ -114,11 +114,30 @@ export function setup() {
         }
     }
 
-    const hotRegistryIds = MODE === "hot" ? [registryIds[0]] : registryIds.slice(0, 50);
-    const hotReportIds   = MODE === "hot" ? [reportIds[0]]   : reportIds.slice(0, 50);
-    const hotContractIds = MODE === "hot" ? [contractIds[0]] : contractIds.slice(0, 50);
+    let hotRegistryIds, hotReportIds, hotContractIds;
 
+    // const hotRegistryIds = MODE === "hot" ? registryIds.slice(0, 30) : registryIds.slice(0, 200);
+    // const hotReportIds   = MODE === "hot" ? reportIds.slice(0, 30)   : reportIds.slice(0, 200);
+    // const hotContractIds = MODE === "hot" ? contractIds.slice(0, 30) : contractIds.slice(0, 200);
 
+    if (MODE === "hot") {
+        // Hot: 캐시 hit 극대화를 위해 ID 좁게 사용
+        hotRegistryIds = registryIds.slice(0, 30);
+        hotReportIds   = reportIds.slice(0, 30);
+        hotContractIds = contractIds.slice(0, 30);
+
+    } else if (MODE === "warm") {
+        // 🌡 Warm: 캐시를 넓게 채워야 함
+        hotRegistryIds = registryIds.slice(0, 200);
+        hotReportIds   = reportIds.slice(0, 200);
+        hotContractIds = contractIds.slice(0, 200);
+
+    } else {
+        // ❄ Cold: 캐시 OFF이거나 Redis 비워진 상태 → 넓게 호출
+        hotRegistryIds = registryIds.slice(0, 200);
+        hotReportIds   = reportIds.slice(0, 200);
+        hotContractIds = contractIds.slice(0, 200);
+    }
     return { hotRegistryIds, hotReportIds, hotContractIds, registryIds, reportIds, contractIds };
 }
 
@@ -143,8 +162,8 @@ function getReportDetail(data) {
             : (data.reportIds.length > 0 ? data.reportIds.slice(0, 50) : []);
 
     if (ids.length === 0) return;
-    console.log('[DEBUG] 리포트 대상 ID 개수:', ids.length);
-    console.log('[DEBUG] 리포트 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
+    //console.log('[DEBUG] 리포트 대상 ID 개수:', ids.length);
+    //console.log('[DEBUG] 리포트 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
     const id = pick(ids);
     const res = getWithAuth(`${BASE}/api/reports/${id}`, { tags: { name: 'reports_detail' } });
     check(res, { 'GET /api/reports/{id} 200': r => r.status === 200 });
@@ -158,8 +177,8 @@ function getDiagnosisResult(data) {
             : (data.registryIds.length > 0 ? data.registryIds.slice(0, 50) : []);
 
     if (ids.length === 0) return;
-    console.log('[DEBUG] 전세가율 대상 ID 개수:', ids.length);
-    console.log('[DEBUG] 전세가율 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
+    //console.log('[DEBUG] 전세가율 대상 ID 개수:', ids.length);
+    //console.log('[DEBUG] 전세가율 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
     const id = pick(ids);
     const res = getWithAuth(`${BASE}/api/diagnosis/result?registerId=${id}`, { tags: { name: 'diagnosis_result' } });
     check(res, { 'GET /api/diagnosis/result 200|404|400': r => r.status === 200 || r.status === 404 || r.status === 400 });
@@ -178,8 +197,8 @@ function getSafetyResult(data) {
         console.warn("[WARN] safety-check: 사용할 registryId가 없습니다.");
         return;
     }
-    console.log('[DEBUG] 등기부 안전도 대상 ID 개수:', ids.length);
-    console.log('[DEBUG] 등기부 안전도 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
+    //console.log('[DEBUG] 등기부 안전도 대상 ID 개수:', ids.length);
+    //console.log('[DEBUG] 등기부 안전도 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
     const id = pick(ids);
 
     const res = getWithAuth(`${BASE}/api/safety-check/${id}`, { tags: { name: 'safety_result' } });
@@ -199,8 +218,8 @@ function getContractDetail(data) {
             : (data.contractIds.length > 0 ? data.contractIds.slice(0, 50) : []);
 
     if (ids.length === 0) return;
-    console.log('[DEBUG] 계약서 대상 ID 개수:', ids.length);
-    console.log('[DEBUG] 계약서 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
+    //console.log('[DEBUG] 계약서 대상 ID 개수:', ids.length);
+    //console.log('[DEBUG] 계약서 대상 ID 샘플 (앞 5개):', ids.slice(0, 5));
     const id = pick(ids);
     const res = getWithAuth(`${BASE}/api/contract/${id}`, { tags: { name: 'contract_detail' } });
     check(res, { 'GET /api/contract/{id} 200|404': r => r.status === 200 || r.status === 404 });
@@ -235,15 +254,25 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 export default function (data) {
     ensureToken();
 
-    // 매 iteration마다 전부 실행
-    getRegistryList();
-    getReportsList();
-    getReportDetail(data);
-    getDiagnosisResult(data);
-    getSafetyResult(data);
+    const actions = [
+        () => getRegistryList(),
+        () => getReportsList(),
+        () => getReportDetail(data),
+        () => getDiagnosisResult(data),
+        () => getSafetyResult(data),
+        () => getcontractList(),
+        () => getContractDetail(data),
+    ];
+
+    // 현실적 유저 행동 시뮬레이션: 랜덤 2~3개 API 호출
+    const callCount = Math.floor(Math.random() * 3) + 3; // 3~5회 호출
+
+    for (let i = 0; i < callCount; i++) {
+        pick(actions)();
+    }
+
+    // POST는 별도 확률로 동작하도록 유지
     saveChecklist(data);
-    getcontractList();
-    getContractDetail(data);
 
     // arrival-rate 시나리오에서는 sleep을 짧게
     sleep(0.01);

@@ -75,6 +75,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         config.addAllowedOrigin("http://localhost:5173"); // 실제 배포시에는 도메인
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
+
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
@@ -108,7 +109,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/check-access/category/**").hasRole("ADMIN")
                 .antMatchers("/api/check-access/**").hasRole("USER")          // 유저 전용 API 보호
                 .antMatchers("/api/**").authenticated()                       // api 요청은 인증필요
-                .anyRequest().permitAll();
+                .anyRequest().permitAll()
+                .antMatchers(HttpMethod.GET, "/api/glossary/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/terms/**").permitAll();
 
         http.cors();
 

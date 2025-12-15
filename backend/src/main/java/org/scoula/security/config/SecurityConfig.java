@@ -101,6 +101,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()//경로별접근권한설정
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
+                .antMatchers(HttpMethod.GET, "/api/glossary/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/terms/**").permitAll()
                 .antMatchers("/api/auth/**").permitAll() // 로그인/회원가입 등 인증 전에 열어야 하는 엔드포인트
                 .antMatchers("/api/ping").permitAll() // 배포 헬스체크용
                 .antMatchers(HttpMethod.POST, "/api/oauth/**").permitAll()    // 카카오 로그인 api는 허용
@@ -108,10 +110,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/check-access/admin").hasRole("ADMIN")      // 관리자 접근 체크
                 .antMatchers("/api/check-access/category/**").hasRole("ADMIN")
                 .antMatchers("/api/check-access/**").hasRole("USER")          // 유저 전용 API 보호
-                .antMatchers("/api/**").authenticated()                       // api 요청은 인증필요
-                .anyRequest().permitAll()
-                .antMatchers(HttpMethod.GET, "/api/glossary/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/terms/**").permitAll();
+//                .antMatchers("/api/**").authenticated()                       // api 요청은 인증필요
+                .anyRequest().permitAll();
 
         http.cors();
 

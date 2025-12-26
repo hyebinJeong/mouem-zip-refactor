@@ -105,7 +105,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Chart } from 'chart.js/auto'
 
 // ✅ 부모(페이지3 등)에서 넘겨줄 값들
@@ -209,9 +209,8 @@ async function onQuery() {
         ratio: r.ratio // %
       }))
 
-      await nextTick()
       if (items.value.length) {
-      drawChart(items.value)
+        drawChart(items.value)
       }
     } catch (e) {
       console.error('서버 응답:', text)

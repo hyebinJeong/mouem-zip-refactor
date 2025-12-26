@@ -32,6 +32,16 @@
         <Logger name="jdbc.resultsettable" level="INFO" additivity="false">
             <AppenderRef ref="console"/>
         </Logger>
+
+        <!-- Spring Cache 디버그 -->
+        <Logger name="org.springframework.cache" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Spring Data Redis 디버그 -->
+        <Logger name="org.springframework.data.redis" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
     </Loggers>
 
 </Configuration>

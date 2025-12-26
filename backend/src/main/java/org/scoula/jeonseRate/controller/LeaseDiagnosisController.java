@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Api(tags = "jeonse-rate-analysis-controller")
 @RestController
 @RequestMapping("/api/diagnosis")
@@ -43,6 +45,13 @@ public class LeaseDiagnosisController {
     })
     @GetMapping("/result")
     public ResponseEntity<?> getJeonseAnalysisResult(@RequestParam("registerId") int registerId) {
-        return leaseDiagnosisService.getJeonseAnalysisResult(registerId);
+        log.info("[시작] 전세가율 컨트롤러 조회 요청: 등기부ID={}", registerId);
+        Map<String, Object> result = leaseDiagnosisService.getJeonseAnalysisResult(registerId);
+
+        if (result.containsKey("error")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+        }
+        log.info("[완료] 전세가율 컨트롤러 조회 성공: 등기부ID={}", registerId);
+        return ResponseEntity.ok(result);
     }
 }

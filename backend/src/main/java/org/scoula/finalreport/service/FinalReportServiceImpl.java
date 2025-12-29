@@ -11,6 +11,7 @@ import org.scoula.finalreport.dto.FinalReportSummaryDTO;
 import org.scoula.finalreport.mapper.FinalReportMapper;
 import org.scoula.register.domain.dto.RegisterAnalysisResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ public class FinalReportServiceImpl implements FinalReportService {
     private final ObjectMapper objectMapper;
 
     @Override
+    @Cacheable(value = "reports:detail", key = "#reportId")
     public FinalReportDTO getFinalReport(Long reportId) {
         FinalReportRawDTO rawDto = finalReportMapper.getFinalReport(reportId);
 
@@ -128,6 +130,7 @@ public class FinalReportServiceImpl implements FinalReportService {
     }
 
     @Override
+    @Cacheable(value = "reports:list", key = "#userId")
     public List<FinalReportSummaryDTO> getReportListByUserId(Long userId) {
         return finalReportMapper.getReportListByUserId(userId);
     }

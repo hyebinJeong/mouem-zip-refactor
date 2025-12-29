@@ -16,6 +16,7 @@ import java.util.Date;
 @Component
 public class JwtProcessor {
     static private final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 10; // 10 분
+//    static private final long ACCESS_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 7; // k6 테스트 시 사용
     private static final long REFRESH_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 14; // 14일
     @Value("${jwt.secret}")
     private String secretKey;

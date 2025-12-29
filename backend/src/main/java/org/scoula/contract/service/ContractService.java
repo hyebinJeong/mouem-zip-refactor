@@ -3,6 +3,7 @@ package org.scoula.contract.service;
 import lombok.RequiredArgsConstructor;
 import org.scoula.contract.domain.ContractDTO;
 import org.scoula.contract.mapper.ContractMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +21,12 @@ public class ContractService {
         contractMapper.insertContract(contractDTO);
     }
 
+    @Cacheable(value = "contracts:list", key = "#userId")
     public List<ContractDTO> getContractListByUserId(int userId) {
         return contractMapper.selectContractsByUserId(userId);
     }
 
+    @Cacheable(value = "contracts:detail", key = "#contractId")
     public ContractDTO getContractById(int contractId) {
         return contractMapper.selectContractById(contractId);
     }

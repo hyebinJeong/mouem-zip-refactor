@@ -12,28 +12,30 @@
         <p class="text-muted mb-4">
           모든 등급은
           <span
-            class="text-primary text-decoration-underline"
-            role="button"
-            style="cursor: pointer"
-            @click="openInfoModal"
-            aria-label="등급 판정 기준 안내 모달 열기"
-            aria-haspopup="dialog"
-            aria-controls="diagnosis-grade-info-modal"
-            >판정기준</span
-          >에 의해 설정된 등급입니다.
+              class="text-primary text-decoration-underline"
+              role="button"
+              style="cursor: pointer"
+              @click="openInfoModal"
+              aria-label="등급 판정 기준 안내 모달 열기"
+              aria-haspopup="dialog"
+              aria-controls="diagnosis-grade-info-modal"
+          >
+            판정기준
+          </span>
+          에 의해 설정된 등급입니다.
         </p>
         <DiagnosisGradeInfoModal
-          :show="showInfoModal"
-          @close="closeInfoModal"
+            :show="showInfoModal"
+            @close="closeInfoModal"
         />
       </div>
+
       <!-- 등급 표시 원형 -->
       <div
-        class="rounded-circle d-flex align-items-center justify-content-center fw-bold mb-5"
-        :style="{
+          class="rounded-circle d-flex align-items-center justify-content-center fw-bold mb-5"
+          :style="{
           border: `12px solid ${gradeColor[result.rating] || '#6c757d'}`,
           color: gradeColor[result.rating] || '#6c757d',
-          // borderWidth: '12px',
           width: '13rem',
           height: '13rem',
           fontSize: '2.2rem',
@@ -41,12 +43,14 @@
       >
         {{ result.rating }}
       </div>
+
       <BuddyHelper @open-dictionary="openDictionaryModal" />
       <TermViewModal v-if="showDictionaryModal" @close="closeDictionaryModal" />
+
       <!-- 등급 설명 -->
       <div
-        class="text-center px-4 py-3 mb-4"
-        style="background-color: #f0f6ff; border-radius: 1rem; max-width: 640px"
+          class="text-center px-4 py-3 mb-4"
+          style="background-color: #f0f6ff; border-radius: 1rem; max-width: 640px"
       >
         <span v-html="getGradeMessage(result.rating)"></span>
       </div>
@@ -71,21 +75,42 @@
               <p class="address-info">주소: {{ result.address }}</p>
               <p class="jeonse-rate-info">
                 예상 전세가율:
-                <span v-if="result.jeonseRate !== -1"
-                  >{{ result.jeonseRate }} %</span
-                >
+                <span v-if="result.jeonseRate !== -1">
+                  {{ result.jeonseRate }} %
+                </span>
                 <span v-else style="color: gray">판단 불가</span>
               </p>
               <p class="prior-info">
                 선순위 채권총액: {{ formatCurrency(result.totalPriorAmount) }}원
               </p>
+
+              <hr class="my-3" />
+
+              <!-- 🔹 최근 4년 전세가율 추이 + 차트 (추가된 부분) -->
+              <div
+                  v-if="addrFromQuery"
+                  class="mt-4 mb-3"
+                  style="border-radius: 12px; padding: 2px 2px;"
+              >
+                <p class="fw-bold fs-5 mb-0" style="color: #1a80e5">
+                  최근 4년 전세가율 추이
+                </p>
+                <JeonseTrendChart
+                    :initial-addr="addrFromQuery"
+                    :initial-bcode="bcodeFromQuery"
+                    :initial-bname="bnameFromQuery"
+                    :auto-fetch="true"
+                    :hide-address-search="true"
+                />
+              </div>
+
               <hr class="my-3" />
               <p class="fw-bold fs-5 mb-1" style="color: #1a80e5">주의 사항</p>
               <div class="analysis-cards-wrapper">
                 <AnalysisCards
-                  v-if="result && result.analysis"
-                  :analysis="result.analysis"
-                  :analysisItems="analysisItems"
+                    v-if="result && result.analysis"
+                    :analysis="result.analysis"
+                    :analysisItems="analysisItems"
                 />
               </div>
             </div>
@@ -119,27 +144,33 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import api from '@/api/index.js';
-import PDFView from '@/components/PDFView.vue';
-import AnalysisCards from '@/components/AnalysisCards.vue';
-import BuddyHelper from '@/components/BuddyHelper.vue';
-import TermViewModal from '@/components/TermViewModal.vue';
-import { useAuthStore } from '@/stores/auth';
-import DiagnosisGradeInfoModal from '@/components/final-report/DiagnosisGradeInfoModal.vue';
+import { onMounted, ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import api from '@/api/index.js'
+import PDFView from '@/components/PDFView.vue'
+import AnalysisCards from '@/components/AnalysisCards.vue'
+import BuddyHelper from '@/components/BuddyHelper.vue'
+import TermViewModal from '@/components/TermViewModal.vue'
+import { useAuthStore } from '@/stores/auth'
+import DiagnosisGradeInfoModal from '@/components/final-report/DiagnosisGradeInfoModal.vue'
+import JeonseTrendChart from '@/components/JeonseTrendChart.vue'
 
-const route = useRoute();
-const router = useRouter();
-const result = ref(null);
-const auth = useAuthStore();
-const user = ref(null);
+const route = useRoute()
+const router = useRouter()
+const result = ref(null)
+const auth = useAuthStore()
+const user = ref(null)
+
+// 🔹 쿼리에서 주소/법정동코드/동 이름 가져오기
+const addrFromQuery = computed(() => route.query.addr || '')
+const bcodeFromQuery = computed(() => route.query.bcode || '')
+const bnameFromQuery = computed(() => route.query.bname || '')
 
 // 금액 쉼표 표시
-const formatCurrency = (value) => {
-  if (!value && value !== 0) return '';
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
+const formatCurrency = value => {
+  if (!value && value !== 0) return ''
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
 
 const analysisItems = [
   { label: '경매', key: 'auctionInfos' },
@@ -149,124 +180,123 @@ const analysisItems = [
   { label: '근저당권', key: 'mortgageInfos' },
   { label: '신탁등기', key: 'trustInfos' },
   { label: '전세권설정', key: 'jeonseRightInfos' },
-  { label: '가등기', key: 'provisionalRegistrationInfos' },
-];
+  { label: '가등기', key: 'provisionalRegistrationInfos' }
+]
 
 // 등급별 색상
 const gradeColor = {
   안전: '#00AEEF',
   보통: '#39B54A',
   주의: '#F7941D',
-  위험: '#ED1C24',
-};
+  위험: '#ED1C24'
+}
 
 // 등급별 메시지 반환 함수
-const getGradeMessage = (rating) => {
-  const userName = user.value?.name || '사용자';
+const getGradeMessage = rating => {
+  const userName = user.value?.name || '사용자'
   const colors = {
     안전: '#31BDF9',
     보통: '#1ABE5F',
     주의: '#FF8400',
     위험: '#FF3838',
-    '판단 보류': '#FFCF64',
-  };
+    '판단 보류': '#FFCF64'
+  }
   const endings = {
     안전: '안전합니다.',
     보통: '보통입니다.',
     주의: '주의가 필요합니다.',
     위험: '위험합니다.',
-    '판단 보류': '판단 보류입니다.',
-  };
+    '판단 보류': '판단 보류입니다.'
+  }
   if (['안전', '보통', '주의', '위험'].includes(rating)) {
-    // 등급 키워드만 색상 span으로 감싸기
     const coloredEnding = endings[rating].replace(
-      rating,
-      `<span style="color:${colors[rating]}; font-weight:800;">${rating}</span>`
-    );
+        rating,
+        `<span style="color:${colors[rating]}; font-weight:800;">${rating}</span>`
+    )
 
     return `<span style="font-size:1.3rem; font-weight:800;">
       ${userName}님이 올려주신 등기부등본은 ${coloredEnding}
-    </span>`;
+    </span>`
   }
-  return '등기부등본을 분석 중입니다...';
-};
+  return '등기부등본을 분석 중입니다...'
+}
 
 // 판정기준 모달 표시 상태
-const showInfoModal = ref(false);
+const showInfoModal = ref(false)
 
 // 용어 모달 표시 상태
-const showDictionaryModal = ref(false);
+const showDictionaryModal = ref(false)
 
 // 체크리스트 모달 표시 상태
-const showModal = ref(false);
+const showModal = ref(false)
 
 // 판정 기준 모달
 const openInfoModal = () => {
-  showInfoModal.value = true;
-};
+  showInfoModal.value = true
+}
 const closeInfoModal = () => {
-  showInfoModal.value = false;
-};
+  showInfoModal.value = false
+}
 
 // 용어모달 열기/닫기 함수
 const openDictionaryModal = () => {
-  showDictionaryModal.value = true;
-};
+  showDictionaryModal.value = true
+}
 const closeDictionaryModal = () => {
-  showDictionaryModal.value = false;
-};
+  showDictionaryModal.value = false
+}
 
 // 체크리스트 모달 관련 함수
 const closeModal = () => {
-  showModal.value = false;
-};
+  showModal.value = false
+}
 
 // 체크리스트 모달창 예 클릭시 이벤트 함수
 const goToChecklist = () => {
-  showModal.value = false;
+  showModal.value = false
   router.push({
     path: '/checklist/checklist',
     query: {
       userId: auth.userId,
-      registryId: route.params.registerId,
-    },
-  });
-};
+      registryId: route.params.registerId
+    }
+  })
+}
 
 // 체크리스트 모달창 아니오 클릭시 이벤트 함수
 const goToHome = () => {
-  showModal.value = false;
-  router.push('/');
-};
+  showModal.value = false
+  router.push('/')
+}
 
 onMounted(async () => {
-  const registerId = route.params.registerId;
+  const registerId = route.params.registerId
   try {
     // 사용자 정보 가져오기
     if (auth.token) {
       const userRes = await api.get('/api/user/me', {
         headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-      });
-      user.value = userRes.data;
+          Authorization: `Bearer ${auth.token}`
+        }
+      })
+      user.value = userRes.data
     }
 
     // 두 개의 API 요청을 병렬로 처리
     const [safetyRes, jeonseRes] = await Promise.all([
       api.get(`/api/safety-check/${registerId}`),
-      api.get(`/api/diagnosis/result?registerId=${registerId}`),
-    ]);
+      api.get(`/api/diagnosis/result?registerId=${registerId}`)
+    ])
 
     // jeonseRate를 기존 결과에 병합
     result.value = {
       ...safetyRes.data,
-      jeonseRate: jeonseRes.data.jeonseRate,
-    };
+      jeonseRate: jeonseRes.data.jeonseRate
+    }
   } catch (e) {
-    console.error('데이터 가져오기 실패:', e);
+    console.error('데이터 가져오기 실패:', e)
   }
-});
+})
 </script>
 
 <style scoped>
@@ -290,30 +320,36 @@ onMounted(async () => {
 
 /* 데스크톱 (lg 이상) - 992px 이상 */
 @media (min-width: 992px) {
+  .analysis-container {
+    min-height: auto;
+  }
+
+  /* 왼쪽 PDF 영역 */
   .pdf-section {
     padding: 1rem;
-    height: 80vh;
   }
 
   .pdf-wrapper {
     position: sticky;
-    top: 1rem;
-    max-height: calc(80vh - 2rem);
+    top: 12px;
+    max-height: 74vh;
     overflow-y: auto;
   }
 
+  /* 오른쪽 분석 영역: 여기만 스크롤 */
   .analysis-section {
-    height: 80vh;
-    overflow-y: auto;
+    max-height: 74vh;      /* 🔹 오른쪽 컬럼 전체 높이 제한 */
+    overflow-y: auto;      /* 🔹 오른쪽 컬럼만 스크롤 */
     padding: 1rem;
     display: flex;
     flex-direction: column;
   }
 
+  /* 분석 카드 영역: 스크롤 X, flex: 자동 높이 */
   .analysis-cards-wrapper {
-    flex: 1;
-    overflow-y: auto;
+    flex: 0 0 auto;        /* 🔹 내용만큼만 차지 */
     margin-top: 1rem;
+    /* overflow: visible;  // 기본값이라 안 적어도 됨 */
   }
 }
 
@@ -602,53 +638,22 @@ onMounted(async () => {
   justify-content: center;
   padding: 0 1rem;
 }
+
 .two-col-card {
   width: 100%;
-  max-width: 1440px; /* 🔹 데스크톱에서 두 칼럼이 한눈에 */
+  max-width: 1440px;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 12px 14px; /* 얇은 카드 느낌 */
+  padding: 12px 14px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
 }
 
 /* 상단 원 주변 여백 살짝 축소 */
 .mb-5 {
   margin-bottom: 2rem !important;
-} /* 원 아래 간격 줄이기 */
-
-/* 데스크톱 레이아웃 높이 통일 + 스크롤 */
-@media (min-width: 992px) {
-  .analysis-container {
-    min-height: auto;
-  }
-
-  /* 기존 80vh 높이 무효화 */
-  .pdf-section,
-  .analysis-section {
-    height: auto !important;
-    padding: 0.5rem 0.75rem;
-  }
-
-  /* 내부만 스크롤(두 칼럼 같은 높이) */
-  .pdf-wrapper {
-    position: sticky;
-    top: 12px;
-    max-height: 74vh;
-    overflow: auto;
-  }
-  .analysis-section {
-    max-height: 74vh;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-  }
-  .analysis-cards-wrapper {
-    flex: 1;
-    overflow: auto;
-    margin-top: 0.75rem;
-  }
 }
+
 
 /* 텍스트 살짝 컴팩트하게 */
 .address-info,

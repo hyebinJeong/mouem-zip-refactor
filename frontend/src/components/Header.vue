@@ -36,6 +36,10 @@
           </ul>
         </div>
 
+        <div class="menu-item" @click="goJeonseRatio">
+          전세가율 확인
+        </div>
+
         <div class="menu-item" @click="goGlossary">용어해설집</div>
 
         <button
@@ -137,6 +141,7 @@ const goReferenceGuidebook = () => router.push('/reference-guidebook');
 const goGlossary = () => router.push('/glossary');
 const goMyPage = () => router.push('/my');
 const goLogin = () => router.push('/login');
+const goJeonseRatio = () => router.push('/jeonse-simple');
 </script>
 
 <style scoped>

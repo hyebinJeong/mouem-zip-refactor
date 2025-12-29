@@ -13,6 +13,7 @@ import CheckList from '@/pages/checklist/Checklist.vue';
 import FinalReportPage from '@/pages/FinalReportPage.vue';
 import AgreementPage from '@/pages/AgreementPage.vue';
 import LoginPage from '@/pages/login/LoginPage.vue';
+import JeonseSimple from '@/pages/JeonseSimple.vue';
 import ContractListPage from '@/pages/listpages/ContractListPage.vue';
 import ReportListPage from '@/pages/listpages/ReportListPage.vue';
 
@@ -33,6 +34,7 @@ import KakaoCallback from '@/pages/login/KakaoCallback.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
+  { path: '/jeonse-simple', name: 'jeonseSimple', component: JeonseSimple },
   {
     path: '/safety-check', // 매물 안전성 진단 페이지
     name: 'safety-check',

@@ -86,7 +86,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { Chart } from 'chart.js/auto'
 
 // ✅ 백엔드 기본 URL (8081에서 돌고 있으면 그대로 사용)
@@ -183,6 +183,7 @@ async function onQuery () {
       }))
 
       if (items.value.length) {
+        await nextTick()
         drawChart(items.value)
       }
     } catch (e) {

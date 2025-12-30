@@ -2,6 +2,7 @@ package org.scoula.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.scoula.security.config.SecurityConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -19,7 +20,16 @@ import java.util.List;
 @Slf4j
 @Configuration
 public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer implements WebMvcConfigurer {
-    final String LOCATION = "/Users/leegaeun/Desktop/upload_tmp";
+
+    @Value("${file.upload.dir.windows}")
+    private String windowsDir;
+
+    @Value("${file.upload.dir.mac}")
+    private String macDir;
+
+    private String LOCATION;
+
+
     final long MAX_FILE_SIZE = 1024 * 1024 * 10L;
     final long MAX_REQUEST_SIZE = 1024 * 1024 * 20L;
     final int FILE_SIZE_THRESHOLD = 1024 * 1024 * 5;
@@ -42,6 +52,13 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
     @Override
     protected void customizeRegistration(ServletRegistration.Dynamic registration) {
         registration.setInitParameter("throwExceptionIfNoHandlerFound", "true");
+
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            LOCATION = windowsDir;
+        } else {
+            LOCATION = macDir;
+        }
 
         MultipartConfigElement multipartConfig = new MultipartConfigElement(
                 LOCATION,
